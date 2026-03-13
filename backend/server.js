@@ -9,19 +9,30 @@ const PORT = Number(process.env.PORT) || 3000;
 
 // ==================== FIREBASE INITIALIZATION ====================
 try {
-    // For Railway deployment, use environment variables
-    // For local development, use serviceAccount.json
-    const firebaseConfig = {
-        credential: admin.credential.applicationDefault(),
-        databaseURL: "https://cricketsix26-default-rtdb.firebaseio.com"
-    };
+    // For Railway deployment, use environment credentials
+    // For local development, use serviceAccount.json if available
+    let credential;
     
-    // Check if running on Railway (has specific environment variables)
-    if (process.env.RAILWAY_ENVIRONMENT) {
-        console.log("✓ Running on Railway - using environment credentials");
+    if (process.env.RAILWAY_ENVIRONMENT || process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        // Railway or environment-based credentials
+        credential = admin.credential.applicationDefault();
+        console.log("✓ Using environment credentials for Firebase");
+    } else {
+        // Try serviceAccount.json for local development
+        try {
+            credential = admin.credential.cert(require("./serviceAccount.json"));
+            console.log("✓ Using serviceAccount.json for Firebase");
+        } catch (e) {
+            // Fallback to application default
+            credential = admin.credential.applicationDefault();
+            console.log("✓ Using application default credentials");
+        }
     }
     
-    admin.initializeApp(firebaseConfig);
+    admin.initializeApp({
+        credential: credential,
+        databaseURL: "https://cricketsix26-default-rtdb.firebaseio.com"
+    });
     console.log("✓ Firebase Admin initialized");
 } catch (error) {
     console.log("⚠ Firebase initialization failed:", error.message);
