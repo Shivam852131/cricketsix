@@ -2,7 +2,11 @@
   "build": {
     "builder": "nixpacks",
     "buildCommand": "npm install",
-    "startCommand": "node server.js"
+    "startCommand": "node server.js",
+    "nixpacksConfig": {
+      "pkgs": ["nodejs", "npm"],
+      "cmd": "node server.js"
+    }
   },
   "deploy": {
     "startCommand": "node server.js"
