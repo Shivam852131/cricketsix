@@ -91,9 +91,8 @@
         // Backend API Configuration
         const backendConfig = {
             // Local development: http://localhost:3000
-            // Production: Replace with your Render/Railway URL (e.g., https://cricketlive-pro-backend.onrender.com)
-            // TODO: Update this URL after deploying backend to production
-            apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://YOUR_BACKEND_URL_HERE'
+            // Production: Railway backend URL
+            apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://cricketlive-pro-backend-production.up.railway.app'
         };
     </script>
 </head>
