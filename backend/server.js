@@ -9,10 +9,19 @@ const PORT = Number(process.env.PORT) || 3000;
 
 // ==================== FIREBASE INITIALIZATION ====================
 try {
-    admin.initializeApp({
+    // For Railway deployment, use environment variables
+    // For local development, use serviceAccount.json
+    const firebaseConfig = {
         credential: admin.credential.applicationDefault(),
         databaseURL: "https://cricketsix26-default-rtdb.firebaseio.com"
-    });
+    };
+    
+    // Check if running on Railway (has specific environment variables)
+    if (process.env.RAILWAY_ENVIRONMENT) {
+        console.log("✓ Running on Railway - using environment credentials");
+    }
+    
+    admin.initializeApp(firebaseConfig);
     console.log("✓ Firebase Admin initialized");
 } catch (error) {
     console.log("⚠ Firebase initialization failed:", error.message);
