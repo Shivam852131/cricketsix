@@ -63,84 +63,87 @@ function sendToWsClient(ws, eventType, data) {
   }
 }
 
-wss.on("connection", (ws, req) => {
-  const clientId = uuidv4();
-  const ip = req.socket.remoteAddress;
-  wsClients.set(ws, { id: clientId, ip, type: "viewer", authenticated: false, connectedAt: Date.now() });
-  analytics.wsConnections++;
-  console.log(`WebSocket client connected: ${clientId} from ${ip}`);
 
-  sendToWsClient(ws, "connected", { ok: true, clientId, timestamp: new Date().toISOString() });
-
-  // Send current state on connect
-  readState().then(state => {
-    sendToWsClient(ws, "state-update", createStatePayload(state));
-    sendToWsClient(ws, "chat-snapshot", { messages: state.chatMessages.slice(-50) });
-    sendToWsClient(ws, "notification-snapshot", { notifications: state.notifications.slice(-20) });
-  }).catch(() => {});
-
-  ws.on("message", async (message) => {
-    try {
-      analytics.wsMessages++;
-      const data = JSON.parse(message);
-      
-      // Handle different message types
-      switch (data.type) {
-        case "auth":
-          if (data.key === ADMIN_KEY) {
-            wsClients.set(ws, { ...wsClients.get(ws), authenticated: true, type: "admin" });
-            sendToWsClient(ws, "auth-success", { ok: true, type: "admin" });
-          }
-          break;
-          
-        case "chat":
-          if (data.content) {
-            const username = String(data.username || "Fan").trim().slice(0, 24) || "Fan";
-            const content = String(data.content).trim().slice(0, 400);
-            if (content) {
-              const msg = { id: uuidv4(), username, content, timestamp: new Date().toISOString() };
-              const state = await readState();
-              const nextState = { ...state, chatMessages: [...state.chatMessages, msg].slice(-500), updatedAt: new Date().toISOString() };
-              await writeState(nextState);
-              broadcastWsEvent("chat-message", { message: msg });
-            }
-          }
-          break;
-          
-        case "poll-vote":
-          if (data.team === "team1" || data.team === "team2") {
-            const state = await readState();
-            const nextVotes = { ...state.poll.votes, [data.team]: (Number(state.poll.votes[data.team]) || 0) + 1 };
-            const nextState = { ...state, poll: normalizePoll({ ...state.poll, votes: nextVotes }), updatedAt: new Date().toISOString() };
-            const savedState = await writeState(nextState);
-            broadcastWsEvent("state-update", createStatePayload(savedState));
-          }
-          break;
-          
-        case "ping":
-          sendToWsClient(ws, "pong", { timestamp: new Date().toISOString() });
-          break;
-          
-        case "subscribe":
-          // Allow client to subscribe to specific event types
-          break;
-      }
-    } catch (e) {
-      console.error("WS message error:", e);
-    }
-  });
-});
 
 // Heartbeat for WebSocket connections
 setInterval(() => {
-  wsClients.forEach((clientInfo, ws) => {
-    if (ws.readyState === WebSocket.OPEN) {
-      try {
-        ws.ping();
-      } catch (e) {}
-    }
-  });
+   wsClients.forEach((clientInfo, ws) => {
+     if (ws.readyState === WebSocket.OPEN) {
+       try {
+         ws.ping();
+       } catch (e) {}
+     }
+   });
 }, SSE_HEARTBEAT_MS);
+
+// WebSocket connection handler
+wss.on("connection", (ws, req) => {
+   const clientId = uuidv4();
+   const ip = req.socket.remoteAddress;
+   wsClients.set(ws, { id: clientId, ip, type: "viewer", authenticated: false, connectedAt: Date.now() });
+   analytics.wsConnections++;
+   console.log(`WebSocket client connected: ${clientId} from ${ip}`);
+
+   sendToWsClient(ws, "connected", { ok: true, clientId, timestamp: new Date().toISOString() });
+
+   // Send current state on connect
+   readState().then(state => {
+     sendToWsClient(ws, "state-update", createStatePayload(state));
+     sendToWsClient(ws, "chat-snapshot", { messages: state.chatMessages.slice(-50) });
+     sendToWsClient(ws, "notification-snapshot", { notifications: state.notifications.slice(-20) });
+   }).catch(() => {});
+
+   ws.on("message", async (message) => {
+     try {
+       analytics.wsMessages++;
+       const data = JSON.parse(message);
+       
+       // Handle different message types
+       switch (data.type) {
+         case "auth":
+           if (data.key === ADMIN_KEY) {
+             wsClients.set(ws, { ...wsClients.get(ws), authenticated: true, type: "admin" });
+             sendToWsClient(ws, "auth-success", { ok: true, type: "admin" });
+           }
+           break;
+           
+         case "chat":
+           if (data.content) {
+             const username = String(data.username || "Fan").trim().slice(0, 24) || "Fan";
+             const content = String(data.content).trim().slice(0, 400);
+             if (content) {
+               const msg = { id: uuidv4(), username, content, timestamp: new Date().toISOString() };
+               const state = await readState();
+               const nextState = { ...state, chatMessages: [...state.chatMessages, msg].slice(-500), updatedAt: new Date().toISOString() };
+               await writeState(nextState);
+               broadcastWsEvent("chat-message", { message: msg });
+             }
+           }
+           break;
+           
+         case "poll-vote":
+           if (data.team === "team1" || data.team === "team2") {
+             const state = await readState();
+             const nextVotes = { ...state.poll.votes, [data.team]: (Number(state.poll.votes[data.team]) || 0) + 1 };
+             const nextState = { ...state, poll: normalizePoll({ ...state.poll, votes: nextVotes }), updatedAt: new Date().toISOString() };
+             const savedState = await writeState(nextState);
+             broadcastWsEvent("state-update", createStatePayload(savedState));
+           }
+           break;
+           
+         case "ping":
+           sendToWsClient(ws, "pong", { timestamp: new Date().toISOString() });
+           break;
+           
+         case "subscribe":
+           // Allow client to subscribe to specific event types
+           break;
+       }
+     } catch (e) {
+       console.error("WS message error:", e);
+     }
+   });
+});
 
 // WebRTC Signaling Server
 const webrtcRooms = new Map();
@@ -1778,12 +1781,13 @@ function extractTopics(messages) {
     .map(([word, count]) => ({ word, count }));
 }
 
-app.get("*", (_req, res) => {
-  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
-  res.setHeader("Surrogate-Control", "no-store");
-  res.sendFile(INDEX_FILE);
+// Fallback to index.html for SPA routing - must be last route
+app.get("/*path", (_req, res) => {
+   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+   res.setHeader("Pragma", "no-cache");
+   res.setHeader("Expires", "0");
+   res.setHeader("Surrogate-Control", "no-store");
+   res.sendFile(INDEX_FILE);
 });
 
 // Graceful shutdown
