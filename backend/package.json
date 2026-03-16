@@ -4,17 +4,13 @@
   "private": true,
   "description": "Full-stack backend for CricketLive Pro",
   "main": "server.js",
-  "engines": {
-    "node": "20.x"
-  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
     "express": "^4.21.2",
-    "openai": "^6.27.0",
-    "firebase-admin": "^13.7.0"
+    "uuid": "^9.0.1",
+    "ws": "^8.19.0"
   }
 }

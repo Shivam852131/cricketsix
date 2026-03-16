@@ -1,31 +1,5 @@
 (function() {
-  // Firebase initialization
   window.firebase = window.firebase || null;
-  
-  // Initialize Firebase if on Firebase Hosting
-  if (typeof firebase !== 'undefined' && window.location.hostname.includes('web.app')) {
-    try {
-      const firebaseConfig = {
-        apiKey: "AIzaSyDQkuUYyoBH1M6RnmaMhehWG7xInO2SvRw",
-        authDomain: "cricketsix26.firebaseapp.com",
-        databaseURL: "https://cricketsix26-default-rtdb.firebaseio.com",
-        projectId: "cricketsix26",
-        storageBucket: "cricketsix26.firebasestorage.app",
-        messagingSenderId: "429796170500",
-        appId: "1:429796170500:web:d9d1b7d2a4b920bb18ce51",
-        measurementId: "G-RDZ9WBVBXG"
-      };
-      
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      
-      window.firebaseDatabase = firebase.database();
-      console.log("✓ Firebase initialized for real-time data");
-    } catch (error) {
-      console.log("⚠ Firebase initialization failed:", error.message);
-    }
-  }
   
   function safeLocalStorage() {
     try {
@@ -44,10 +18,131 @@
   }
   const localStorage = safeLocalStorage();
   
-  // Backend API Configuration
-  // Use backendConfig from HTML if available, otherwise fallback to local development
-  const backendConfig = window.backendConfig || { apiBaseUrl: 'http://localhost:3000' };
-  const API_BASE = (backendConfig.apiBaseUrl || '') + '/api';
+  // Enhanced API connection with fallback detection
+  const detectApiBaseUrl = function() {
+    // If running from file://, use localhost:3000
+    if (window.location.protocol === "file:") {
+      return "http://localhost:3000";
+    }
+    // If running from localhost with specific port, use that
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return window.location.origin;
+    }
+    // Otherwise use relative path (same origin)
+    return "";
+  };
+  
+  const APP_BASE_URL = detectApiBaseUrl();
+  const API_BASE = APP_BASE_URL + "/api";
+  const WS_BASE = APP_BASE_URL.replace(/^http/, "ws") + "/ws";
+  
+  // WebSocket support
+  let wsConnection = null;
+  let wsReconnectTimer = null;
+  let wsConnected = false;
+  
+  function initWebSocket() {
+    if (wsConnection) {
+      wsConnection.close();
+    }
+    
+    try {
+      wsConnection = new WebSocket(WS_BASE);
+      
+      wsConnection.onopen = function() {
+        console.log("WebSocket connected");
+        wsConnected = true;
+        clearTimeout(wsReconnectTimer);
+      };
+      
+      wsConnection.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          handleWsMessage(data);
+        } catch (e) {
+          console.error("WS message parse error:", e);
+        }
+      };
+      
+      wsConnection.onclose = function() {
+        console.log("WebSocket disconnected");
+        wsConnected = false;
+        // Attempt to reconnect
+        wsReconnectTimer = setTimeout(initWebSocket, 3000);
+      };
+      
+      wsConnection.onerror = function(error) {
+        console.error("WebSocket error:", error);
+      };
+    } catch (e) {
+      console.error("WebSocket initialization failed:", e);
+    }
+  }
+  
+  function handleWsMessage(data) {
+    const { type, payload } = data;
+    
+    switch (type) {
+      case "connected":
+        console.log("WS: Server acknowledged connection");
+        break;
+      case "state-update":
+        if (payload) {
+          applyFullState(Object.assign({}, appState, payload, {
+            chatMessages: appState.chatMessages,
+            notifications: appState.notifications
+          }));
+          scheduleAiRefresh();
+        }
+        break;
+      case "chat-message":
+        if (payload && payload.message) {
+          appState.chatMessages = appendUniqueItem(appState.chatMessages, payload.message, 50);
+          renderChats();
+        }
+        break;
+      case "notification":
+        if (payload && payload.notification) {
+          appState.notifications = appendUniqueItem(appState.notifications, payload.notification, 20);
+          clearSystemNotice();
+          renderNotifications();
+        }
+        break;
+      case "announcement":
+        if (payload && payload.message) {
+          showSystemNotice("📢 " + payload.message);
+        }
+        break;
+      case "mobile-stream-frame":
+        if (payload && payload.frame) {
+          updateMobileStreamFrame(payload);
+        }
+        break;
+    }
+  }
+  
+  function sendWsMessage(type, data) {
+    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+      wsConnection.send(JSON.stringify({ type, ...data }));
+      return true;
+    }
+    return false;
+  }
+  
+  // Send chat via WebSocket
+  window.sendWsChat = function(content) {
+    return sendWsMessage("chat", { content, username: fanAlias });
+  };
+  
+  // Vote via WebSocket
+  window.sendWsVote = function(team) {
+    return sendWsMessage("poll-vote", { team });
+  };
+  
+  // Connection status tracking
+  let connectionStatus = "disconnected";
+  let retryCount = 0;
+  const MAX_RETRIES = 5;
   const PAGE_NAMES = new Set([
     "getstarted",
     "home",
@@ -178,6 +273,100 @@
   window.addEventListener("beforeunload", function() {
     if (realtime) realtime.close();
   });
+  
+  // Voice Control Setup
+  let recognition = null;
+  let voiceEnabled = false;
+  
+  function setupVoiceControl() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.log("Voice control not supported in this browser");
+      return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    
+    recognition.onresult = function(event) {
+      const last = event.results.length - 1;
+      const command = event.results[last][0].transcript.toLowerCase().trim();
+      processVoiceCommand(command);
+    };
+    
+    recognition.onerror = function(event) {
+      console.log("Voice recognition error:", event.error);
+      if (event.error === 'no-speech') {
+        // Restart recognition
+        if (voiceEnabled) recognition.start();
+      }
+    };
+    
+    recognition.onend = function() {
+      if (voiceEnabled) {
+        try { recognition.start(); } catch(e) {}
+      }
+    };
+  }
+  
+  function processVoiceCommand(command) {
+    console.log("Voice command:", command);
+    
+    // Navigation commands
+    if (command.includes("go home") || command.includes("show home")) showPage('home');
+    else if (command.includes("go live") || command.includes("watch live")) showPage('live');
+    else if (command.includes("stats") || command.includes("statistics")) showPage('stats');
+    else if (command.includes("predictions")) showPage('predictions');
+    else if (command.includes("highlights")) showPage('highlights');
+    else if (command.includes("analytics")) showPage('analytics');
+    else if (command.includes("refresh") || command.includes("reload")) location.reload();
+    
+    // Chat commands
+    else if (command.includes("send message") || command.includes("chat")) {
+      const input = document.getElementById("chat-input");
+      if (input) {
+        input.focus();
+        const message = command.replace(/send message|chat|say/gi, '').trim();
+        if (message) {
+          input.value = message;
+          sendChatMessage();
+        }
+      }
+    }
+    
+    // Voice control toggle
+    else if (command.includes("stop voice") || command.includes("disable voice")) {
+      toggleVoiceControl(false);
+    }
+  }
+  
+  window.toggleVoiceControl = function(forceState) {
+    if (!recognition) {
+      setupVoiceControl();
+      if (!recognition) {
+        showSystemNotice("Voice control not supported in this browser");
+        return;
+      }
+    }
+    
+    voiceEnabled = typeof forceState === 'boolean' ? forceState : !voiceEnabled;
+    
+    try {
+      if (voiceEnabled) {
+        recognition.start();
+        showSystemNotice("Voice control enabled - try saying 'go live' or 'show stats'");
+      } else {
+        recognition.stop();
+        showSystemNotice("Voice control disabled");
+      }
+    } catch(e) {
+      console.log("Voice control error:", e);
+    }
+    
+    return voiceEnabled;
+  };
 
   window.showPage = function(page, options) {
     showPage(page, options);
@@ -218,7 +407,12 @@
     initCharts();
     await loadInitialData();
     connectRealtime();
+    initWebSocket(); // Initialize WebSocket connection
     showPage(getRequestedPage(), { syncHash: false });
+    
+    // Initialize voice control setup
+    setupVoiceControl();
+    updateConnectionStatus();
     
     // Auto-refresh AI insights every 30 seconds
     setInterval(function() {
@@ -227,21 +421,25 @@
     
     // Auto-refresh state every 10 seconds as backup
     setInterval(function() {
-      fetchJson("/api/state").then(function(state) {
+      fetchJson("/state").then(function(state) {
         if (state) {
           applyFullState(state);
         }
       }).catch(function() {});
     }, 10000);
     
-    console.log("Auto-refresh enabled: AI insights every 30s, state every 10s");
+    // Update connection status periodically
+    setInterval(updateConnectionStatus, 5000);
+    
+    console.log("Auto-refresh enabled: AI insights every 30s, state every 10s, WebSocket ready");
+    console.log("Voice control ready - say 'go live' or 'show stats'");
   }
 
   async function loadInitialData() {
     try {
       const results = await Promise.all([
-        fetchJson("/api/state"),
-        fetchJson("/api/ai/insights").catch(function() {
+        fetchJson("/state"),
+        fetchJson("/ai/insights").catch(function() {
           return null;
         })
       ]);
@@ -264,48 +462,45 @@
   function connectRealtime() {
     if (realtime) realtime.close();
 
-    // Use Firebase Realtime Database for live updates when on Firebase Hosting
-    if (USE_FIREBASE && window.firebaseDatabase) {
-      try {
-        // Listen for state updates
-        window.firebaseDatabase.ref('state').on('value', function(snapshot) {
-          const data = snapshot.val();
-          if (data) {
-            applyFullState(Object.assign({}, appState, data, {
-              timestamp: Date.now()
-            }));
-          }
-        });
-        
-        // Listen for chat messages
-        window.firebaseDatabase.ref('chat').limitToLast(50).on('child_added', function(snapshot) {
-          const message = snapshot.val();
-          if (message && !appState.chatMessages.find(m => m.id === message.id)) {
-            appState.chatMessages.push(message);
-            renderChatMessages();
-          }
-        });
-        
+    try {
+      connectionStatus = "connecting";
+      updateConnectionStatus();
+      
+      realtime = new EventSource(API_BASE + "/events");
+      realtime.onopen = function() {
         clearSystemNotice();
-      } catch (error) {
-        console.log("Firebase realtime error:", error.message);
-        showSystemNotice("Realtime feed unavailable. Using local data.");
-      }
-    } else {
-      // Original EventSource logic for non-Firebase deployments
-      try {
-        realtime = new EventSource(API_BASE + "/events");
-        realtime.onopen = function() {
-          clearSystemNotice();
-        };
-        realtime.onerror = function() {
-          showSystemNotice("Realtime feed interrupted. Reconnecting...");
-        };
+        connectionStatus = "connected";
+        retryCount = 0;
+        updateConnectionStatus();
+        console.log("Realtime connected to server");
+      };
+      realtime.onerror = function() {
+        connectionStatus = "retrying";
+        updateConnectionStatus();
+        showSystemNotice("Realtime feed interrupted. Reconnecting...");
+        console.warn("Realtime connection error, retrying...");
+      };
+      
+      // Handle different event types from admin
+      realtime.addEventListener("announcement", function(event) {
+        const payload = safeJsonParse(event.data);
+        if (payload && payload.message) {
+          showSystemNotice("📢 " + payload.message);
+        }
+      });
+      
+      // Handle mobile stream frame updates
+      realtime.addEventListener("mobile-stream-frame", function(event) {
+        const payload = safeJsonParse(event.data);
+        if (payload && payload.frame) {
+          updateMobileStreamFrame(payload);
+        }
+      });
 
-        realtime.addEventListener("state-update", function(event) {
-          const payload = safeJsonParse(event.data);
-          if (!payload) return;
-          applyFullState(Object.assign({}, appState, payload, {
+      realtime.addEventListener("state-update", function(event) {
+        const payload = safeJsonParse(event.data);
+        if (!payload) return;
+        applyFullState(Object.assign({}, appState, payload, {
           chatMessages: appState.chatMessages,
           notifications: appState.notifications
         }));
@@ -360,12 +555,37 @@
       indicator.textContent = "Updated: " + lastUpdateTime.toLocaleTimeString();
     }
   }
+  
+  // Update connection status indicator
+  function updateConnectionStatus() {
+    const dot = document.getElementById("connection-dot");
+    const text = document.getElementById("connection-text");
+    
+    if (!dot || !text) return;
+    
+    const statusColors = {
+      "connected": "bg-green-500",
+      "connecting": "bg-yellow-500",
+      "retrying": "bg-orange-500",
+      "failed": "bg-red-500",
+      "disconnected": "bg-slate-500"
+    };
+    
+    const statusTexts = {
+      "connected": "Connected",
+      "connecting": "Connecting...",
+      "retrying": "Reconnecting...",
+      "failed": "Disconnected",
+      "disconnected": "Offline"
+    };
+    
+    dot.className = "w-2 h-2 rounded-full " + (statusColors[connectionStatus] || statusColors["disconnected"]);
+    text.textContent = statusTexts[connectionStatus] || statusTexts["disconnected"];
+  }
 
   async function refreshAiInsights() {
     try {
-      // Use correct path based on deployment mode
-      const path = USE_FIREBASE ? "/api/ai/insights" : "/ai/insights";
-      const payload = await fetchJson(path);
+      const payload = await fetchJson("/ai/insights");
       if (!payload || !payload.insights) return;
       aiInsights = payload.insights;
       renderPredictions();
@@ -715,7 +935,7 @@
 
     input.disabled = true;
     try {
-      await fetchJson("/api/chat", {
+      await fetchJson("/chat", {
         method: "POST",
         body: JSON.stringify({ username: fanAlias, content: content })
       });
@@ -736,7 +956,7 @@
     togglePollButtons(true);
     setText("poll-feedback", "Submitting your vote...");
     try {
-      const payload = await fetchJson("/api/poll/vote", {
+      const payload = await fetchJson("/poll/vote", {
         method: "POST",
         body: JSON.stringify({ team: teamKey })
       });
@@ -1004,6 +1224,20 @@
     // Start polling
     pollForFrames();
     setInterval(pollForFrames, 100);
+  }
+
+  // Update mobile stream frame from SSE event
+  function updateMobileStreamFrame(payload) {
+    const img = document.getElementById("mobile-stream-img");
+    const waiting = document.getElementById("mobile-stream-waiting");
+    const statusEl = document.getElementById("mobile-stream-status");
+    
+    if (payload.frame && img) {
+      img.src = payload.frame;
+      img.classList.remove("hidden");
+      if (waiting) waiting.classList.add("hidden");
+      if (statusEl) statusEl.textContent = "Live";
+    }
   }
 
   // Stream control functions
@@ -1607,41 +1841,6 @@
   }
 
   async function fetchJson(path, options) {
-    // For Firebase deployment, use Firebase Realtime Database
-    if (USE_FIREBASE && window.firebaseDatabase) {
-      try {
-        if (path === '/state' || path === '/api/state') {
-          const snapshot = await window.firebaseDatabase.ref('state').once('value');
-          return snapshot.val() || {};
-        } else if (path === '/api/ai/insights' || path === '/ai/insights') {
-          // Return mock AI insights for Firebase mode
-          return {
-            insights: {
-              summary: "Match in progress",
-              narrative: "Both teams are performing well in this exciting match.",
-              phase: "Middle Overs",
-              momentum: "Balanced",
-              projected: "280-300",
-              chaseable: "Yes",
-              requiredRR: "6.5"
-            }
-          };
-        } else if (path === '/api/events' || path === '/events') {
-          // Events are handled by Firebase listeners, return empty
-          return {};
-        } else {
-          // For other paths, try to fetch from Firebase
-          const dataPath = path.replace('/api/', '').replace('/', '');
-          const snapshot = await window.firebaseDatabase.ref(dataPath).once('value');
-          return snapshot.val() || {};
-        }
-      } catch (error) {
-        console.log("Firebase fetch error:", error.message);
-        return {};
-      }
-    }
-    
-    // Original fetch logic for non-Firebase deployments
     const requestOptions = Object.assign({}, options || {});
     const headers = Object.assign({}, requestOptions.headers || {});
     if (requestOptions.method && requestOptions.method !== "GET" && !headers["Content-Type"]) {
@@ -1649,14 +1848,30 @@
     }
     requestOptions.headers = headers;
 
-    const response = await fetch(API_BASE + path, requestOptions);
-    const payload = await response.json().catch(function() {
-      return {};
-    });
-    if (!response.ok) {
-      throw new Error(payload.error || "Request failed");
+    const url = API_BASE + path;
+    
+    try {
+      const response = await fetch(url, requestOptions);
+      const payload = await response.json().catch(function() {
+        return {};
+      });
+      if (!response.ok) {
+        throw new Error(payload.error || "Request failed");
+      }
+      connectionStatus = "connected";
+      retryCount = 0;
+      return payload;
+    } catch (error) {
+      retryCount++;
+      if (retryCount >= MAX_RETRIES) {
+        connectionStatus = "failed";
+        console.error("API connection failed after", MAX_RETRIES, "retries:", error);
+        showSystemNotice("Unable to connect to server at " + API_BASE + ". Please ensure the backend is running.");
+      } else {
+        connectionStatus = "retrying";
+      }
+      throw error;
     }
-    return payload;
   }
 
   function togglePollButtons(disabled) {
@@ -2136,16 +2351,8 @@
   // Register service worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      // Only register service worker on Firebase Hosting (not localhost)
-      if (USE_FIREBASE) {
-        navigator.serviceWorker.register('/sw.js').then(function(registration) {
-          console.log('ServiceWorker registered:', registration.scope);
-        }).catch(function(err) {
-          console.log('ServiceWorker registration failed:', err);
-        });
-      } else {
-        console.log('ServiceWorker skipped on localhost');
-      }
+      navigator.serviceWorker.register('/sw.js').then(function(registration) {
+        console.log('ServiceWorker registered:', registration.scope);
         
         // Check for updates
         registration.addEventListener('updatefound', function() {
@@ -2164,6 +2371,41 @@
       });
     });
   }
+
+  // ==================== ADVANCED SYNC FROM ADMIN ====================
+  
+  // Listen for admin announcements
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'admin_announcement') {
+      try {
+        const announcement = JSON.parse(e.newValue);
+        if (announcement && announcement.message) {
+          showSystemNotice('📢 ' + announcement.message);
+        }
+      } catch (err) {
+        console.log('Storage event error:', err);
+      }
+    }
+  });
+
+  // Enhanced sync from admin
+  window.syncFromAdmin = function() {
+    fetchJson('/state').then(function(state) {
+      if (state) {
+        applyFullState(state);
+        console.log('Synced from admin');
+      }
+    }).catch(function(err) {
+      console.error('Sync failed:', err);
+    });
+  };
+
+  // Listen for page visibility changes to sync when tab becomes active
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      window.syncFromAdmin();
+    }
+  });
 
   // Handle online/offline status
   window.addEventListener('online', function() {

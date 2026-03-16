@@ -9,10 +9,7 @@
     <title>CricketLive Pro - Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth-compat.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
@@ -20,11 +17,7 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         * { font-family: 'Inter', sans-serif; }
-        body { 
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-        }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; }
         .glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(148, 163, 184, 0.1); }
         .glow { box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); }
         .accent-gradient { background: linear-gradient(90deg, #ef4444 0%, #f97316 100%); }
@@ -32,69 +25,7 @@
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .pulse-live { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
-        /* Mobile adjustments */
-        @media (max-width: 768px) {
-            .admin-nav { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            .tab-btn { white-space: nowrap; flex-shrink: 0; }
-            .form-grid { grid-template-columns: 1fr !important; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-        
-        /* Responsive table */
-        .responsive-table {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Better touch targets for mobile */
-        @media (max-width: 768px) {
-            button, .btn, input, select, textarea {
-                min-height: 44px;
-            }
-            input, select {
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-        }
-        
-        /* Mobile bottom sheet for modals */
-        @media (max-width: 768px) {
-            .modal-content {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                max-height: 80vh;
-                border-radius: 1rem 1rem 0 0;
-                overflow-y: auto;
-            }
-        }
     </style>
-    <script>
-        // Firebase Configuration for Admin
-        const firebaseConfig = {
-            apiKey: "AIzaSyDQkuUYyoBH1M6RnmaMhehWG7xInO2SvRw",
-            authDomain: "cricketsix26.firebaseapp.com",
-            databaseURL: "https://cricketsix26-default-rtdb.firebaseio.com",
-            projectId: "cricketsix26",
-            storageBucket: "cricketsix26.firebasestorage.app",
-            messagingSenderId: "429796170500",
-            appId: "1:429796170500:web:d9d1b7d2a4b920bb18ce51",
-            measurementId: "G-RDZ9WBVBXG"
-        };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const auth = firebase.auth();
-        
-        // Backend API Configuration
-        const backendConfig = {
-            // Local development: http://localhost:3000
-            // Production: Railway backend URL
-            apiBaseUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://cricketlive-pro-backend-production.up.railway.app'
-        };
-    </script>
 </head>
 <body class="text-white">
     <!-- Login Screen -->
@@ -139,21 +70,17 @@
         </header>
 
         <!-- Navigation Tabs -->
-        <nav class="glass border-b border-slate-700 admin-nav">
-            <div class="max-w-7xl mx-auto px-2 sm:px-4">
-                <div class="flex gap-1 sm:gap-2 overflow-x-auto py-2 text-xs sm:text-sm" id="admin-tabs">
-                    <button onclick="switchTab('dashboard')" class="tab-btn active px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="dashboard">📊 <span class="mobile-hide">Dashboard</span><span class="desktop-hide">Dash</span></button>
-                    <button onclick="switchTab('ai')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="ai">🤖 <span class="mobile-hide">AI</span><span class="desktop-hide">AI</span></button>
-                    <button onclick="switchTab('analytics')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="analytics">📈 <span class="mobile-hide">Analytics</span><span class="desktop-hide">Stats</span></button>
-                    <button onclick="switchTab('stream')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="stream">📡 <span class="mobile-hide">Stream</span><span class="desktop-hide">Live</span></button>
-                    <button onclick="switchTab('match')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="match">🏏 <span class="mobile-hide">Match</span><span class="desktop-hide">Match</span></button>
-                    <button onclick="switchTab('score')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="score">⚡ <span class="mobile-hide">Score</span><span class="desktop-hide">Score</span></button>
-                    <button onclick="switchTab('poll')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="poll">📊 <span class="mobile-hide">Poll</span><span class="desktop-hide">Poll</span></button>
-                    <button onclick="switchTab('chat')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="chat">💬 <span class="mobile-hide">Chat</span><span class="desktop-hide">Chat</span></button>
-                    <button onclick="switchTab('scheduling')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="scheduling">📅 <span class="mobile-hide">Scheduling</span><span class="desktop-hide">Schedule</span></button>
-                    <button onclick="switchTab('languages')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="languages">🌐 <span class="mobile-hide">Languages</span><span class="desktop-hide">Lang</span></button>
-                    <button onclick="switchTab('content')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="content">🧩 <span class="mobile-hide">Page Studio</span><span class="desktop-hide">Studio</span></button>
-                    <button onclick="switchTab('highlights')" class="tab-btn px-2 sm:px-3 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="highlights">🎬 <span class="mobile-hide">Highlights</span><span class="desktop-hide">Media</span></button>
+        <nav class="glass border-b border-slate-700">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex gap-2 overflow-x-auto py-2" id="admin-tabs">
+                    <button onclick="switchTab('dashboard')" class="tab-btn active px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="dashboard">📊 Dashboard</button>
+                    <button onclick="switchTab('ai')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="ai">🤖 AI</button>
+                    <button onclick="switchTab('stream')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="stream">📡 Stream</button>
+                    <button onclick="switchTab('match')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="match">🏏 Match</button>
+                    <button onclick="switchTab('score')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="score">⚡ Live Score</button>
+                    <button onclick="switchTab('poll')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="poll">📊 Poll</button>
+                    <button onclick="switchTab('chat')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="chat">💬 Chat</button>
+                    <button onclick="switchTab('content')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="content">🧩 Page Studio</button>
                 </div>
             </div>
         </nav>
@@ -162,6 +89,27 @@
         <main class="max-w-7xl mx-auto px-4 py-8">
             <!-- Dashboard Tab -->
             <div id="tab-dashboard" class="tab-content space-y-6">
+                <!-- Connection Status -->
+                <div class="glass rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span id="connection-indicator" class="w-3 h-3 rounded-full bg-green-500"></span>
+                            <span class="font-semibold">Connection Status</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="syncToUser()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                                🔄 Sync to User
+                            </button>
+                            <button onclick="syncStreamUrl()" class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                                📡 Sync Stream
+                            </button>
+                            <button onclick="resetMatchData()" class="bg-red-600/20 border border-red-600 text-red-400 hover:bg-red-600/30 px-4 py-2 rounded-lg text-sm">
+                                🗑️ Reset Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="grid md:grid-cols-4 gap-4">
                     <div class="glass rounded-xl p-6">
                         <div class="text-3xl font-bold text-orange-400" id="dash-viewers">0</div>
@@ -210,8 +158,9 @@
                     <!-- AI Status -->
                     <div class="flex items-center gap-2 mb-4 p-3 bg-slate-900 rounded-lg">
                         <span id="ai-source-badge" class="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300">Source: Loading...</span>
-                        <span id="ai-version-badge" class="text-xs px-2 py-1 rounded bg-purple-600/30 text-purple-300">Advanced</span>
+                        <span id="ai-version-badge" class="text-xs px-2 py-1 rounded bg-purple-600/30 text-purple-300">Advanced v3.0</span>
                         <span id="ai-timestamp" class="text-xs text-slate-500 ml-auto"></span>
+                        <button onclick="refreshAiBriefing()" class="bg-purple-600 hover:bg-purple-500 px-3 py-1 rounded text-xs ml-2">🔄 Refresh</button>
                     </div>
 
                     <p id="admin-ai-summary" class="text-lg text-slate-200 mb-4 font-medium">AI briefing not loaded yet.</p>
@@ -306,106 +255,6 @@
                         <button onclick="publishAiBulletin('both')" class="accent-gradient px-4 py-2 rounded-lg font-semibold">📢 Push Both</button>
                     </div>
                     <p id="admin-ai-status" class="text-sm text-slate-400 mt-3"></p>
-                </div>
-            </div>
-
-            <!-- Analytics Tab -->
-            <div id="tab-analytics" class="tab-content hidden space-y-6">
-                <div class="glass rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="font-bold text-xl flex items-center gap-2">📈 Analytics Dashboard</h3>
-                            <p class="text-sm text-slate-400">Viewer trends, engagement metrics, and performance data</p>
-                        </div>
-                        <button onclick="updateAnalytics()" class="bg-orange-600 hover:bg-orange-500 px-4 py-2 rounded-lg text-sm font-semibold">🔄 Refresh</button>
-                    </div>
-                    
-                    <!-- Key Metrics -->
-                    <div class="grid md:grid-cols-4 gap-4 mb-6">
-                        <div class="bg-gradient-to-br from-orange-900/50 to-red-900/50 rounded-xl p-4 border border-orange-500/30">
-                            <div class="text-xs text-orange-400 uppercase tracking-wider mb-1">Total Viewers</div>
-                            <div id="analytics-total-viewers" class="text-2xl font-bold text-orange-300">0</div>
-                        </div>
-                        <div class="bg-gradient-to-br from-green-900/50 to-emerald-900/50 rounded-xl p-4 border border-green-500/30">
-                            <div class="text-xs text-green-400 uppercase tracking-wider mb-1">Engagement Rate</div>
-                            <div id="analytics-engagement" class="text-2xl font-bold text-green-300">0%</div>
-                        </div>
-                        <div class="bg-gradient-to-br from-blue-900/50 to-cyan-900/50 rounded-xl p-4 border border-blue-500/30">
-                            <div class="text-xs text-blue-400 uppercase tracking-wider mb-1">Avg. Watch Time</div>
-                            <div id="analytics-watch-time" class="text-2xl font-bold text-blue-300">0m</div>
-                        </div>
-                        <div class="bg-gradient-to-br from-purple-900/50 to-indigo-900/50 rounded-xl p-4 border border-purple-500/30">
-                            <div class="text-xs text-purple-400 uppercase tracking-wider mb-1">Peak Concurrent</div>
-                            <div id="analytics-peak" class="text-2xl font-bold text-purple-300">0</div>
-                        </div>
-                    </div>
-
-                    <!-- Charts Grid -->
-                    <div class="grid md:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-slate-900 rounded-xl p-4">
-                            <h4 class="font-semibold mb-3">📊 Viewer Trends (24h)</h4>
-                            <canvas id="analytics-viewer-chart" height="200"></canvas>
-                        </div>
-                        <div class="bg-slate-900 rounded-xl p-4">
-                            <h4 class="font-semibold mb-3">🎯 Engagement by Section</h4>
-                            <canvas id="analytics-engagement-chart" height="200"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Geographic Distribution -->
-                    <div class="bg-slate-900 rounded-xl p-4 mb-6">
-                        <h4 class="font-semibold mb-3">🌍 Geographic Distribution</h4>
-                        <div id="analytics-geo-distribution" class="space-y-2">
-                            <!-- Geographic data will be rendered here -->
-                            <div class="flex items-center gap-3">
-                                <div class="w-32 text-sm text-slate-400">India</div>
-                                <div class="flex-1 bg-slate-800 rounded-full h-3">
-                                    <div class="bg-orange-500 h-3 rounded-full" style="width: 65%"></div>
-                                </div>
-                                <div class="text-sm text-orange-400">65%</div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-32 text-sm text-slate-400">USA</div>
-                                <div class="flex-1 bg-slate-800 rounded-full h-3">
-                                    <div class="bg-blue-500 h-3 rounded-full" style="width: 20%"></div>
-                                </div>
-                                <div class="text-sm text-blue-400">20%</div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-32 text-sm text-slate-400">UK</div>
-                                <div class="flex-1 bg-slate-800 rounded-full h-3">
-                                    <div class="bg-green-500 h-3 rounded-full" style="width: 10%"></div>
-                                </div>
-                                <div class="text-sm text-green-400">10%</div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-32 text-sm text-slate-400">Other</div>
-                                <div class="flex-1 bg-slate-800 rounded-full h-3">
-                                    <div class="bg-purple-500 h-3 rounded-full" style="width: 5%"></div>
-                                </div>
-                                <div class="text-sm text-purple-400">5%</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="bg-slate-900 rounded-xl p-4">
-                        <h4 class="font-semibold mb-3">📋 Recent Activity</h4>
-                        <div id="analytics-activity-log" class="space-y-2 max-h-40 overflow-y-auto">
-                            <div class="flex items-center justify-between text-sm p-2 bg-slate-800 rounded">
-                                <span class="text-slate-300">New viewer joined</span>
-                                <span class="text-slate-500">Just now</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm p-2 bg-slate-800 rounded">
-                                <span class="text-slate-300">Chat message sent</span>
-                                <span class="text-slate-500">1m ago</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm p-2 bg-slate-800 rounded">
-                                <span class="text-slate-300">Poll vote recorded</span>
-                                <span class="text-slate-500">2m ago</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -702,7 +551,7 @@
                     <div class="grid md:grid-cols-2 gap-4 mb-4">
                         <div class="bg-slate-900 rounded-lg p-3">
                             <label class="block text-xs text-slate-400 mb-2">🎞️ Frame Rate: <span id="fps-value">30</span> FPS</label>
-                            <input type="range" id="stream-fps" min="15" max="60" value="30" onchange="updateStreamSettings()" class="w-full accent-red-500">
+                            <input type="range" id="stream-fps" min="5" max="30" value="15" onchange="updateStreamSettings()" class="w-full accent-red-500">
                         </div>
                         <div class="bg-slate-900 rounded-lg p-3">
                             <label class="block text-xs text-slate-400 mb-2">📊 Bitrate: <span id="bitrate-value">2500</span> kbps</label>
@@ -958,11 +807,26 @@
 
                 <!-- External Stream URLs -->
                 <div class="glass rounded-xl p-6">
-                    <h3 class="font-bold text-xl mb-4">📡 External Stream URLs</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-xl">📡 External Stream URLs</h3>
+                        <div id="stream-status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-400">OFFLINE</div>
+                    </div>
+                    
+                    <!-- Stream Preview -->
+                    <div id="stream-preview-container" class="hidden mb-4">
+                        <div class="relative rounded-lg overflow-hidden bg-black aspect-video">
+                            <iframe id="stream-preview-frame" class="w-full h-full" allowfullscreen></iframe>
+                            <button onclick="closeStreamPreview()" class="absolute top-2 right-2 bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white text-sm">✕ Close</button>
+                        </div>
+                    </div>
+                    
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm text-slate-400 mb-2">Stream URL</label>
-                            <input type="text" id="stream-url" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2" placeholder="https://...">
+                            <div class="flex gap-2">
+                                <input type="text" id="stream-url" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2" placeholder="https://...">
+                                <button onclick="previewStream()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm">👁 Preview</button>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm text-slate-400 mb-2">Platform</label>
@@ -978,6 +842,33 @@
                                 <option value="vidplay">VidPlay</option>
                                 <option value="mobile">📱 Mobile Camera</option>
                             </select>
+                        </div>
+                        
+                        <!-- Auto-Reconnect & Quality Options -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="flex items-center gap-2 text-sm text-slate-400 mb-2">
+                                    <input type="checkbox" id="auto-reconnect" class="w-4 h-4 accent-green-500" checked>
+                                    Auto Reconnect
+                                </label>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Quality</label>
+                                <select id="stream-quality-select" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                                    <option value="auto">Auto</option>
+                                    <option value="high">High (1080p)</option>
+                                    <option value="medium">Medium (720p)</option>
+                                    <option value="low">Low (480p)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Stream History -->
+                        <div class="mt-4">
+                            <label class="block text-sm text-slate-400 mb-2">📜 Recent Streams</label>
+                            <div id="stream-history" class="max-h-32 overflow-y-auto space-y-1">
+                                <!-- Populated by JS -->
+                            </div>
                         </div>
                         
                         <!-- Free Cricket Streams -->
@@ -1590,229 +1481,12 @@
                     <button onclick="addRecentResult()" class="mt-3 bg-blue-600/20 border border-blue-600 text-blue-400 hover:bg-blue-600/30 px-4 py-2 rounded-lg text-sm">+ Add Result</button>
                 </div>
 
-                 <button onclick="saveContent()" class="accent-gradient w-full py-3 rounded-lg font-bold">💾 Save All Content</button>
-             </div>
-             
-             <!-- Scheduling Tab -->
-             <div id="tab-scheduling" class="tab-content hidden space-y-6">
-                 <div class="glass rounded-xl p-6">
-                     <h3 class="font-bold text-xl mb-4">📅 Content Scheduling Calendar</h3>
-                     <div class="grid md:grid-cols-2 gap-6">
-                         <div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Schedule Type</label>
-                                 <select id="schedule-type" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
-                                     <option value="match">Match Preview/Review</option>
-                                     <option value="highlight">Highlight Reel</option>
-                                     <option value="analysis">Analysis Video</option>
-                                     <option value="promo">Promotional Content</option>
-                                     <option value="news">News Update</option>
-                                 </select>
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Title</label>
-                                 <input type="text" id="schedule-title" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" placeholder="Enter content title">
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Description</label>
-                                 <textarea id="schedule-description" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" placeholder="Enter content description"></textarea>
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Associated Match/Team</label>
-                                 <input type="text" id="schedule-association" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" placeholder="Match ID or Team name">
-                             </div>
-                         </div>
-                         <div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Schedule Time</label>
-                                 <input type="datetime-local" id="schedule-datetime" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Duration</label>
-                                 <input type="number" id="schedule-duration" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" placeholder="Duration in minutes">
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Priority</label>
-                                 <select id="schedule-priority" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
-                                     <option value="low">Low</option>
-                                     <option value="medium">Medium</option>
-                                     <option value="high">High</option>
-                                     <option value="urgent">Urgent</option>
-                                 </select>
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Status</label>
-                                 <select id="schedule-status" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
-                                     <option value="draft">Draft</option>
-                                     <option value="scheduled">Scheduled</option>
-                                     <option value="published">Published</option>
-                                     <option value="completed">Completed</option>
-                                 </select>
-                             </div>
-                         </div>
-                     </div>
-                     <div class="mt-6">
-                         <h3 class="font-bold text-xl mb-4">📅 Scheduled Content Calendar</h3>
-                         <div id="schedule-calendar" class="bg-slate-900 rounded-xl p-6">
-                             <!-- Calendar will be rendered here -->
-                             <div class="text-slate-400 text-center py-8">Calendar view coming soon...</div>
-                         </div>
-                     </div>
-                     <div class="flex justify-end mt-6">
-                         <button onclick="saveSchedule()" class="accent-gradient px-6 py-3 rounded-lg font-bold">💾 Save Schedule</button>
-                     </div>
-                 </div>
-             </div>
-             
-             <!-- Languages Tab -->
-             <div id="tab-languages" class="tab-content hidden space-y-6">
-                 <div class="glass rounded-xl p-6">
-                     <h3 class="font-bold text-xl mb-4">🌐 Multi-Language Content Management</h3>
-                     <div class="grid md:grid-cols-2 gap-6">
-                         <div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Content Type</label>
-                                 <select id="language-content-type" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
-                                     <option value="hero">Hero Section</option>
-                                     <option value="matchCentre">Match Centre</option>
-                                     <option value="predictions">Predictions</option>
-                                     <option value="highlights">Highlights</option>
-                                     <option value="stats">Stats</option>
-                                     <option value="poll">Poll Question</option>
-                                 </select>
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Base Language</label>
-                                 <input type="text" id="base-language" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" value="English" readonly>
-                             </div>
-                         </div>
-                         <div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Target Languages</label>
-                                 <div class="space-y-2">
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="lang-hindi" checked>
-                                         <span>Hindi (हिंदी)</span>
-                                     </label>
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="lang-tamil">
-                                         <span>Tamil (தமிழ்)</span>
-                                     </label>
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="lang-bengali">
-                                         <span>Bengali (বাংলা)</span>
-                                     </label>
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="lang-telugu">
-                                         <span>Telugu (తెలుగు)</span>
-                                     </label>
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="lang-marathi">
-                                         <span>Marathi (मराठी)</span>
-                                     </label>
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="lang-kannada">
-                                         <span>Kannada (ಕನ್ನಡ)</span>
-                                     </label>
-                                 </div>
-                             </div>
-                         </div>
-                     </div>
-                     <div class="mt-6">
-                         <h3 class="font-bold text-xl mb-4">📝 Language Translations</h3>
-                         <div id="language-translations-editor" class="bg-slate-900 rounded-xl p-6">
-                             <!-- Translation editor will be rendered here -->
-                             <div class="text-slate-400 text-center py-8">Translation interface coming soon...</div>
-                         </div>
-                     </div>
-                     <div class="flex justify-end mt-6">
-                         <button onclick="saveTranslations()" class="accent-gradient px-6 py-3 rounded-lg font-bold">💾 Save Translations</button>
-                     </div>
-                 </div>
-             </div>
-             
-             <!-- Highlights Tab -->
-             <div id="tab-highlights" class="tab-content hidden space-y-6">
-                 <div class="glass rounded-xl p-6">
-                     <h3 class="font-bold text-xl mb-4">🎬 Automated Highlight Generation</h3>
-                     <div class="grid md:grid-cols-2 gap-6">
-                         <div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Highlight Type</label>
-                                 <select id="highlight-type" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
-                                     <option value="wickets">Wickets</option>
-                                     <option value="boundaries">Boundaries (4s/6s)</option>
-                                     <option value="milestones">Milestones (50, 100, 150+)</option>
-                                     <option value="turning-points">Turning Points</option>
-                                     <option value="player-performance">Player Performance</option>
-                                 </select>
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Match Selection</label>
-                                 <select id="highlight-match-select" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
-                                     <option value="">Select Match...</option>
-                                     <option value="match1">IND vs PAK - T20 World Cup 2026 Final</option>
-                                     <option value="match2">AUS vs ENG - Ashes 2nd Test</option>
-                                     <option value="match3">SA vs NZ - ODI Series 3rd Match</option>
-                                 </select>
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Duration (seconds)</label>
-                                 <input type="number" id="highlight-duration" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" value="60" min="15" max="300">
-                             </div>
-                         </div>
-                         <div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Include Elements</label>
-                                 <div class="space-y-2">
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="hl-commentary" checked>
-                                         <span>Commentary Audio</span>
-                                     </label>
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="hl-graphics" checked>
-                                         <span>On-screen Graphics</span>
-                                     </label>
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="hl-replays" checked>
-                                         <span>Slow Motion Replays</span>
-                                     </label>
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="hl-stats" checked>
-                                         <span>Statistical Overlays</span>
-                                     </label>
-                                     <label class="flex items-center gap-2">
-                                         <input type="checkbox" id="hl-crowd" checked>
-                                         <span>Candid Crowd Reactions</span>
-                                     </label>
-                                 </div>
-                             </div>
-                             <div class="space-y-4">
-                                 <label class="block text-sm text-slate-400 mb-2">Quality</label>
-                                 <select id="highlight-quality" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2">
-                                     <option value="480p">480p (Standard)</option>
-                                     <option value="720p" selected>720p (HD)</option>
-                                     <option value="1080p">1080p (Full HD)</option>
-                                     <option value="4k">4K (Ultra HD)</option>
-                                 </select>
-                             </div>
-                         </div>
-                     </div>
-                     <div class="mt-6">
-                         <h3 class="font-bold text-xl mb-4">🤖 AI-Powered Highlight Suggestions</h3>
-                         <div id="ai-highlight-suggestions" class="bg-slate-900 rounded-xl p-6">
-                             <!-- AI suggestions will be rendered here -->
-                             <div class="text-slate-400 text-center py-8">AI-powered highlight suggestions will appear here based on match events...</div>
-                         </div>
-                     </div>
-                     <div class="flex justify-end mt-6">
-                         <button onclick="generateHighlights()" class="accent-gradient px-6 py-3 rounded-lg font-bold">🎬 Generate Highlights</button>
-                     </div>
-                 </div>
-             </div>
-         </main>
-     </div>
+                <button onclick="saveContent()" class="accent-gradient w-full py-3 rounded-lg font-bold">💾 Save All Content</button>
+            </div>
+        </main>
+    </div>
 
+    <script src="/admin-sync.js"></script>
     <script>
         const API_BASE = '/api';
         let adminKey = '';
@@ -1820,35 +1494,29 @@
         let viewerHistory = [];
         let currentAiBriefing = null;
 
-        // Firebase References
-        let stateRef, chatRef, scoreRef, streamRef, matchesRef;
-        
-        // Login with Firebase - validates admin key
+        // Login
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const key = document.getElementById('admin-key').value;
             
-            // Validate admin key (from backend server.js)
-            // Default key is "cricketlive2026"
-            const VALID_ADMIN_KEY = 'cricketlive2026';
-            
-            if (key && key === VALID_ADMIN_KEY) {
-                adminKey = key;
+            try {
+                const res = await fetch(`${API_BASE}/admin/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key })
+                });
                 
-                // Initialize Firebase references
-                stateRef = firebase.database().ref('state');
-                chatRef = firebase.database().ref('chat');
-                scoreRef = firebase.database().ref('score');
-                streamRef = firebase.database().ref('stream');
-                matchesRef = firebase.database().ref('matches');
-                
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('admin-dashboard').classList.remove('hidden');
-                initDashboard();
-                setupRealtimeListeners();
-            } else {
+                if (res.ok) {
+                    adminKey = key;
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('admin-dashboard').classList.remove('hidden');
+                    initDashboard();
+                } else {
+                    document.getElementById('login-error').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
                 document.getElementById('login-error').classList.remove('hidden');
-                document.getElementById('login-error').innerText = 'Invalid admin key. Use: cricketlive2026';
             }
         });
 
@@ -1859,7 +1527,7 @@
 
         function getRequestedAdminTab() {
             const value = window.location.hash.replace('#', '').trim().toLowerCase();
-            const allowedTabs = new Set(['dashboard', 'ai', 'analytics', 'stream', 'match', 'score', 'poll', 'chat', 'content', 'scheduling', 'languages', 'highlights']);
+            const allowedTabs = new Set(['dashboard', 'ai', 'stream', 'match', 'score', 'poll', 'chat', 'content']);
             return allowedTabs.has(value) ? value : 'dashboard';
         }
 
@@ -1875,26 +1543,6 @@
             }
             if (tab === 'ai') {
                 void refreshAiBriefing();
-            }
-            if (tab === 'analytics') {
-                void updateAnalytics();
-                setTimeout(() => {
-                    initAnalyticsCharts();
-                }, 100);
-            }
-            if (tab === 'scheduling') {
-                void renderScheduleCalendar();
-            }
-            if (tab === 'languages') {
-                renderLanguageTranslations();
-            }
-            if (tab === 'highlights') {
-                void renderAISuggestionHighlights();
-            }
-            
-            // Scroll to top on mobile when switching tabs
-            if (window.innerWidth < 768) {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
@@ -2133,10 +1781,8 @@
             // Source badge
             const sourceBadge = document.getElementById('ai-source-badge');
             if (sourceBadge) {
-                sourceBadge.textContent = `Source: ${currentAiBriefing?.source === 'openai' ? '🤖 OpenAI' : '📊 Rule-based'}`;
-                sourceBadge.className = currentAiBriefing?.source === 'openai' 
-                    ? 'text-xs px-2 py-1 rounded bg-purple-600/30 text-purple-300'
-                    : 'text-xs px-2 py-1 rounded bg-slate-700 text-slate-300';
+                sourceBadge.textContent = '📊 Rule-based';
+                sourceBadge.className = 'text-xs px-2 py-1 rounded bg-slate-700 text-slate-300';
             }
 
             // Timestamp
@@ -2203,57 +1849,27 @@
             }
         });
 
-        // Setup Firebase real-time listeners
-        function setupRealtimeListeners() {
-            if (!stateRef) return;
-            
-            // Listen for state updates
-            stateRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    window.currentState = data;
-                    updateDashboard();
-                }
-            });
-            
-            // Listen for chat messages
-            if (chatRef) {
-                chatRef.limitToLast(50).on('child_added', (snapshot) => {
-                    const message = snapshot.val();
-                    if (message) {
-                        if (!window.currentState) window.currentState = {};
-                        if (!window.currentState.chatMessages) window.currentState.chatMessages = [];
-                        window.currentState.chatMessages.push(message);
-                        renderChat(window.currentState.chatMessages);
-                    }
-                });
-            }
-            
-            // Listen for timeline events
-            if (stateRef) {
-                stateRef.child('timelineEvents').on('value', (snapshot) => {
-                    const events = snapshot.val();
-                    if (events) {
-                        renderTimeline(events);
-                    }
-                });
-            }
-        }
-
         // Initialize dashboard
         async function initDashboard() {
             await loadState();
-            setupRealtimeListeners();
+            connectRealtime();
             initCharts();
             updateDashboard();
             await refreshAiBriefing();
             switchTab(getRequestedAdminTab(), { syncHash: false });
             setInterval(updateDashboard, 3000);
+            
+            // Initialize connection monitor
+            if (window.startConnectionMonitor) {
+                window.startConnectionMonitor();
+            }
+            
+            // Fire custom event for other modules
+            window.dispatchEvent(new CustomEvent('adminDashboardLoaded'));
         }
 
         async function loadState() {
-            const snapshot = await stateRef.once('value');
-            const state = snapshot.val() || {};
+            const state = await apiCall('/state');
             
             // Stream
             document.getElementById('stream-url').value = state.stream?.url || '';
@@ -2444,6 +2060,7 @@
         async function setStream(url, platform) {
             document.getElementById('stream-url').value = url;
             document.getElementById('stream-platform').value = platform;
+            addToStreamHistory(url, platform);
         }
 
         function onPlatformChange() {
@@ -2454,18 +2071,128 @@
             }
         }
 
+        // Stream History
+        let streamHistory = JSON.parse(localStorage.getItem('streamHistory') || '[]');
+        
+        function updateStreamHistory() {
+            const historyEl = document.getElementById('stream-history');
+            if (!historyEl) return;
+            if (streamHistory.length === 0) {
+                historyEl.innerHTML = '<p class="text-slate-500 text-sm">No recent streams</p>';
+                return;
+            }
+            historyEl.innerHTML = streamHistory.slice(0, 10).map((s, i) => 
+                `<div class="flex justify-between items-center bg-slate-800/50 px-3 py-2 rounded text-xs">
+                    <span class="text-slate-300 truncate flex-1">${s.url.substring(0, 40)}...</span>
+                    <span class="text-slate-500 ml-2">${s.platform}</span>
+                    <button onclick="setStream('${s.url}', '${s.platform}')" class="ml-2 text-blue-400 hover:text-blue-300">▶</button>
+                </div>`
+            ).join('');
+        }
+        
+        function addToStreamHistory(url, platform) {
+            streamHistory = streamHistory.filter(s => s.url !== url);
+            streamHistory.unshift({ url, platform, time: Date.now() });
+            streamHistory = streamHistory.slice(0, 20);
+            localStorage.setItem('streamHistory', JSON.stringify(streamHistory));
+            updateStreamHistory();
+        }
+        
+        // Initialize stream history
+        updateStreamHistory();
+
+        // Preview Stream
+        function previewStream() {
+            const url = document.getElementById('stream-url').value;
+            const platform = document.getElementById('stream-platform').value;
+            if (!url) {
+                alert('Please enter a stream URL');
+                return;
+            }
+            
+            const previewContainer = document.getElementById('stream-preview-container');
+            const previewFrame = document.getElementById('stream-preview-frame');
+            let embedUrl = getEmbedUrl(url, platform);
+            
+            if (!embedUrl) {
+                alert('Cannot preview this URL. Please go live to test.');
+                return;
+            }
+            
+            previewFrame.src = embedUrl;
+            previewContainer.classList.remove('hidden');
+        }
+        
+        function closeStreamPreview() {
+            const previewContainer = document.getElementById('stream-preview-container');
+            const previewFrame = document.getElementById('stream-preview-frame');
+            previewFrame.src = '';
+            previewContainer.classList.add('hidden');
+        }
+        
+        function getEmbedUrl(url, platform) {
+            if (!url) return null;
+            
+            // YouTube
+            if (platform === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) {
+                const videoId = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+                return videoId ? `https://www.youtube.com/embed/${videoId[1]}?autoplay=1` : null;
+            }
+            
+            // Kick
+            if (platform === 'kick' || url.includes('kick.com')) {
+                const username = url.replace('https://kick.com/', '').replace('http://kick.com/', '');
+                return `https://kick.com/embed/${username}`;
+            }
+            
+            // Twitch
+            if (platform === 'twitch' || url.includes('twitch.tv')) {
+                const channel = url.replace('https://twitch.tv/', '').replace('http://twitch.tv/', '');
+                return `https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}`;
+            }
+            
+            // Mobile camera
+            if (platform === 'mobile' || url === '/stream/mobile') {
+                return '/stream/mobile';
+            }
+            
+            // Other platforms - cannot preview directly
+            return null;
+        }
+
+        // Update stream status badge
+        function updateStreamStatusBadge(status) {
+            const badge = document.getElementById('stream-status-badge');
+            if (!badge) return;
+            
+            if (status === 'live') {
+                badge.textContent = '🔴 LIVE';
+                badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-red-600 text-white animate-pulse';
+            } else if (status === 'paused') {
+                badge.textContent = '⏸️ PAUSED';
+                badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-yellow-600 text-white';
+            } else {
+                badge.textContent = 'OFFLINE';
+                badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-400';
+            }
+        }
+
         // Mobile Camera Streaming
         let mobileStream = null;
         let mediaRecorder = null;
         let recordedChunks = [];
         let isStreaming = false;
-        let streamQuality = 'medium';
+        let streamQuality = 'low';
+        
+        // WebSocket for real-time streaming
+        let streamSocket = null;
+        let wsConnected = false;
 
         const qualitySettings = {
-            low: { width: 640, height: 360, bitrate: 500000 },
-            medium: { width: 854, height: 480, bitrate: 1000000 },
-            high: { width: 1280, height: 720, bitrate: 2500000 },
-            fullhd: { width: 1920, height: 1080, bitrate: 5000000 }
+            low: { width: 480, height: 270, bitrate: 500000 },
+            medium: { width: 640, height: 360, bitrate: 1000000 },
+            high: { width: 854, height: 480, bitrate: 2500000 },
+            fullhd: { width: 1280, height: 720, bitrate: 5000000 }
         };
 
         let currentCameraFacing = 'user';
@@ -2495,6 +2222,41 @@
         
         // Call init on load
         initCameraList();
+
+        // Initialize WebSocket for real-time streaming
+        function initStreamSocket() {
+            if (streamSocket && streamSocket.connected) return;
+            
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            streamSocket = io(wsProtocol + '//' + window.location.host, {
+                transports: ['websocket', 'polling'],
+                reconnection: true,
+                reconnectionAttempts: 10,
+                reconnectionDelay: 1000
+            });
+            
+            streamSocket.on('connect', () => {
+                console.log('Stream WebSocket connected');
+                wsConnected = true;
+                streamSocket.emit('join_stream');
+            });
+            
+            streamSocket.on('disconnect', () => {
+                console.log('Stream WebSocket disconnected');
+                wsConnected = false;
+            });
+            
+            streamSocket.on('stream_viewers', (data) => {
+                document.getElementById('stream-stat-viewers').textContent = data.count || 0;
+            });
+            
+            streamSocket.on('stream_frame', (data) => {
+                // Not needed for admin, but kept for reference
+            });
+        }
+        
+        // Auto-init socket on page load
+        initStreamSocket();
 
         async function startMobileCamera() {
             try {
@@ -2676,56 +2438,29 @@
         let aiProcessingInterval = null;
 
         function toggleAITracking() {
-            const checkbox = document.getElementById('ai-auto-tracking');
+            aiTrackingEnabled = document.getElementById('ai-auto-tracking').checked;
             const statusEl = document.getElementById('tracking-status');
-            
-            if (!checkbox) {
-                console.error('AI Auto Tracking checkbox not found');
-                return;
-            }
-            
-            aiTrackingEnabled = checkbox.checked;
-            
             if (aiTrackingEnabled) {
-                if (statusEl) {
-                    statusEl.classList.remove('hidden');
-                    statusEl.textContent = 'Tracking: Active';
-                }
-                logActivity('🎯 AI Auto Tracking enabled');
-                showToast('🎯 AI Auto Tracking enabled');
+                statusEl.classList.remove('hidden');
+                statusEl.textContent = 'Tracking: Active';
+                logActivity('AI Auto Tracking enabled');
             } else {
-                if (statusEl) {
-                    statusEl.classList.add('hidden');
-                }
-                logActivity('🎯 AI Auto Tracking disabled');
-                showToast('🎯 AI Auto Tracking disabled');
+                statusEl.classList.add('hidden');
+                logActivity('AI Auto Tracking disabled');
             }
         }
 
         function toggleAIOverlay() {
-            const checkbox = document.getElementById('ai-smart-overlay');
-            if (!checkbox) {
-                console.error('AI Smart Overlay checkbox not found');
-                return;
-            }
-            const enabled = checkbox.checked;
-            logActivity('🌟 AI Smart Overlay: ' + (enabled ? 'enabled' : 'disabled'));
-            showToast('🌟 AI Smart Overlay: ' + (enabled ? 'enabled' : 'disabled'));
+            const enabled = document.getElementById('ai-smart-overlay').checked;
+            logActivity('AI Smart Overlay: ' + (enabled ? 'enabled' : 'disabled'));
         }
 
         function toggleAINoiseReduction() {
-            const checkbox = document.getElementById('ai-noise-reduction');
-            if (!checkbox) {
-                console.error('AI Noise Reduction checkbox not found');
-                return;
-            }
-            const enabled = checkbox.checked;
+            const enabled = document.getElementById('ai-noise-reduction').checked;
             if (enabled) {
-                logActivity('🔊 AI Noise Reduction enabled');
-                showToast('🔊 AI Noise Reduction enabled');
+                logActivity('AI Noise Reduction enabled');
             } else {
-                logActivity('🔊 AI Noise Reduction disabled');
-                showToast('🔊 AI Noise Reduction disabled');
+                logActivity('AI Noise Reduction disabled');
             }
         }
 
@@ -2749,11 +2484,7 @@
 
         function applyAIFilter() {
             const video = document.getElementById('mobile-camera-preview');
-            if (!video) {
-                // Log that video element is not available
-                console.log('Mobile camera preview not available for applying filter');
-                return;
-            }
+            if (!video) return;
             
             let filter = '';
             let backdropFilter = '';
@@ -2789,8 +2520,6 @@
             
             video.style.filter = filter;
             video.style.backdropFilter = backdropFilter;
-            
-            logActivity('AI filter applied: ' + currentAIEffect);
         }
 
         function updateAIBrightness() {
@@ -2988,20 +2717,32 @@
                         return;
                     }
                     
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
                     frameCount++;
                     
-                    await fetch('/api/admin/stream/frame', {
-                        method: 'POST',
-                        headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            frame: dataUrl, 
-                            quality: streamQuality, 
+                    // Send via WebSocket for real-time streaming
+                    if (streamSocket && wsConnected) {
+                        streamSocket.emit('stream_frame', {
+                            frame: dataUrl,
+                            quality: streamQuality,
                             timestamp: Date.now(),
                             fps: fps,
                             useScreenShare: useScreenShare
-                        })
-                    });
+                        });
+                    } else {
+                        // Fallback to HTTP if WebSocket not connected
+                        await fetch('/api/admin/stream/frame', {
+                            method: 'POST',
+                            headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                frame: dataUrl, 
+                                quality: streamQuality, 
+                                timestamp: Date.now(),
+                                fps: fps,
+                                useScreenShare: useScreenShare
+                            })
+                        });
+                    }
                 } catch (err) {
                     console.error('Stream frame error:', err);
                 }
@@ -3017,13 +2758,13 @@
             
             document.getElementById('mobile-stream-url').value = window.location.origin + '/stream/mobile';
             
-            await stateRef.update({
-                stream: {
-                    url: '/stream/mobile',
-                    platform: 'mobile',
-                    status: 'live'
-                },
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    streamUrl: '/stream/mobile',
+                    streamPlatform: 'mobile',
+                    streamStatus: 'live'
+                })
             });
             
             logActivity('Mobile streaming started');
@@ -3031,6 +2772,11 @@
 
         async function stopMobileStream() {
             isStreaming = false;
+            
+            // Notify via WebSocket
+            if (streamSocket && wsConnected) {
+                streamSocket.emit('stream_stop');
+            }
             
             // Stop uptime counter
             if (uptimeInterval) {
@@ -3062,9 +2808,9 @@
             document.getElementById('stream-stat-status').className = 'text-sm font-bold text-slate-500';
             document.getElementById('stream-stat-uptime').textContent = '00:00:00';
             
-            await stateRef.update({
-                stream: { status: 'offline' },
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({ streamStatus: 'offline' })
             });
             
             logActivity('Mobile streaming stopped');
@@ -3325,34 +3071,36 @@
             const totalOvers = document.getElementById('live-total-overs').value;
             const reqRR = document.getElementById('live-req-rr').value;
             
-            await stateRef.update({
-                score: {
-                    team1Score: team1Score,
-                    overs: overs,
-                    runRate: runRate,
-                    batsman: batsman,
-                    bowler: bowler,
-                    target: target,
-                    partnership: partnership,
-                    fow: fow,
-                    pp: pp,
-                    death: death,
-                    extras: extras,
-                    wickets: wickets,
-                    totalOvers: totalOvers,
-                    reqRR: reqRR
-                },
-                ballFeed: ballHistory.slice(-20).map((b, i) => ({
-                    id: Date.now() + '-' + i,
-                    type: b.wicket ? 'wicket' : (b.runs === 6 ? 'six' : b.runs === 4 ? 'four' : 'run'),
-                    label: b.wicket ? 'W' : String(b.runs),
-                    runs: b.runs,
-                    wickets: b.wicket ? 1 : 0,
-                    legal: !b.extra,
-                    over: b.over,
-                    timestamp: new Date().toISOString()
-                })),
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    currentScore: {
+                        team1Score: team1Score,
+                        overs: overs,
+                        runRate: runRate,
+                        batsman: batsman,
+                        bowler: bowler,
+                        target: target,
+                        partnership: partnership,
+                        fow: fow,
+                        pp: pp,
+                        death: death,
+                        extras: extras,
+                        wickets: wickets,
+                        totalOvers: totalOvers,
+                        reqRR: reqRR
+                    },
+                    ballFeed: ballHistory.slice(-20).map((b, i) => ({
+                        id: Date.now() + '-' + i,
+                        type: b.wicket ? 'wicket' : (b.runs === 6 ? 'six' : b.runs === 4 ? 'four' : 'run'),
+                        label: b.wicket ? 'W' : String(b.runs),
+                        runs: b.runs,
+                        wickets: b.wicket ? 1 : 0,
+                        legal: !b.extra,
+                        over: b.over,
+                        timestamp: new Date().toISOString()
+                    }))
+                })
             });
             
             logActivity('Live score updated: ' + team1Score + ' in ' + overs + ' overs');
@@ -3362,50 +3110,65 @@
             let url = document.getElementById('stream-url').value;
             const platform = document.getElementById('stream-platform').value;
             
+            if (!url) {
+                alert('Please enter a stream URL or select a platform');
+                return;
+            }
+            
             // Auto-set URL for mobile platform
             if (platform === 'mobile') {
                 url = '/stream/mobile';
                 document.getElementById('stream-url').value = url;
             }
             
-            await stateRef.update({
-                stream: {
-                    url: url,
-                    platform: platform,
-                    status: 'live'
-                },
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            // Add to history
+            addToStreamHistory(url, platform);
+            
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    streamUrl: url,
+                    streamPlatform: platform,
+                    streamStatus: 'live'
+                })
             });
-            logActivity('Stream started');
+            
+            updateStreamStatusBadge('live');
+            closeStreamPreview();
+            logActivity('Stream started: ' + url);
         }
 
         async function stopStream() {
-            await stateRef.update({
-                stream: { status: 'offline' },
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({ streamStatus: 'offline' })
             });
+            updateStreamStatusBadge('offline');
             logActivity('Stream stopped');
         }
 
         async function pauseStream() {
-            await stateRef.update({
-                stream: { status: 'paused' },
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({ streamStatus: 'paused' })
             });
+            updateStreamStatusBadge('paused');
             logActivity('Stream paused');
         }
 
         // Match
         async function saveMatch() {
-            await stateRef.update({
-                score: {
-                    team1: document.getElementById('match-team1').value,
-                    team2: document.getElementById('match-team2').value,
-                    team1Flag: document.getElementById('match-team1-flag').value,
-                    team2Flag: document.getElementById('match-team2-flag').value,
-                    matchTitle: document.getElementById('match-title').value
-                },
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    currentScore: {
+                        team1: document.getElementById('match-team1').value,
+                        team2: document.getElementById('match-team2').value,
+                        team1Flag: document.getElementById('match-team1-flag').value,
+                        team2Flag: document.getElementById('match-team2-flag').value,
+                        matchTitle: document.getElementById('match-title').value
+                    }
+                })
             });
             logActivity('Match settings updated');
         }
@@ -3509,17 +3272,19 @@
         }
 
         async function commitScoreUpdate(activityLabel, statusMessage) {
-            await stateRef.update({
-                score: {
-                    team1Score: document.getElementById('score-team1').value,
-                    overs: document.getElementById('score-overs').value,
-                    runRate: document.getElementById('score-runrate').value,
-                    batsman: document.getElementById('score-batsman').value,
-                    bowler: document.getElementById('score-bowler').value,
-                    target: document.getElementById('score-target').value
-                },
-                ballFeed: window.ballFeedData || [],
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    currentScore: {
+                        team1Score: document.getElementById('score-team1').value,
+                        overs: document.getElementById('score-overs').value,
+                        runRate: document.getElementById('score-runrate').value,
+                        batsman: document.getElementById('score-batsman').value,
+                        bowler: document.getElementById('score-bowler').value,
+                        target: document.getElementById('score-target').value
+                    },
+                    ballFeed: window.ballFeedData || []
+                })
             });
             if (activityLabel) logActivity(activityLabel);
             const statusEl = document.getElementById('quick-score-status');
@@ -3604,37 +3369,26 @@
 
         async function pushAlert() {
             const msg = `${document.getElementById('score-team1').value} - ${document.getElementById('score-overs').value} overs`;
-            const notification = {
-                id: Date.now().toString(),
-                message: msg,
-                timestamp: new Date().toISOString()
-            };
-            
-            // Push to notifications in state
-            const snapshot = await stateRef.once('value');
-            const currentState = snapshot.val() || {};
-            const notifications = currentState.notifications || [];
-            notifications.push(notification);
-            
-            await stateRef.update({
-                notifications: notifications.slice(-50), // Keep last 50
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            await apiCall('/notifications', {
+                method: 'POST',
+                body: JSON.stringify({ message: msg })
             });
-            
             logActivity('Alert pushed');
         }
 
         // Poll
         async function savePoll() {
-            await stateRef.update({
-                poll: {
-                    question: document.getElementById('poll-question').value,
-                    votes: {
-                        team1: parseInt(document.getElementById('poll-team1-votes').value) || 0,
-                        team2: parseInt(document.getElementById('poll-team2-votes').value) || 0
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    poll: {
+                        question: document.getElementById('poll-question').value,
+                        votes: {
+                            team1: parseInt(document.getElementById('poll-team1-votes').value) || 0,
+                            team2: parseInt(document.getElementById('poll-team2-votes').value) || 0
+                        }
                     }
-                },
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+                })
             });
             logActivity('Poll updated');
         }
@@ -3642,12 +3396,14 @@
         async function resetPoll() {
             if (!confirm('Reset all votes?')) return;
             
-            await stateRef.update({
-                poll: {
-                    question: document.getElementById('poll-question').value,
-                    votes: { team1: 0, team2: 0 }
-                },
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    poll: {
+                        question: document.getElementById('poll-question').value,
+                        votes: { team1: 0, team2: 0 }
+                    }
+                })
             });
             document.getElementById('poll-team1-votes').value = 0;
             document.getElementById('poll-team2-votes').value = 0;
@@ -3680,14 +3436,10 @@
             const msg = document.getElementById('chat-msg').value.trim();
             if (!msg) return;
             
-            const chatMessage = {
-                id: Date.now().toString(),
-                username: 'Admin',
-                content: msg,
-                timestamp: new Date().toISOString()
-            };
-            
-            await chatRef.push().set(chatMessage);
+            await apiCall('/chat', {
+                method: 'POST',
+                body: JSON.stringify({ username: 'Admin', content: msg })
+            });
             
             document.getElementById('chat-msg').value = '';
             logActivity('Chat message sent');
@@ -4109,9 +3861,7 @@
         function logActivity(msg) {
             const log = document.getElementById('activity-log');
             const time = new Date().toLocaleTimeString();
-            if (log) {
-                log.innerHTML = `<div class="p-2 bg-slate-800 rounded text-sm">🕐 ${time} - ${msg}</div>` + log.innerHTML;
-            }
+            log.innerHTML = `<div class="p-2 bg-slate-800 rounded text-sm">🕐 ${time} - ${msg}</div>` + log.innerHTML;
         }
 
         // Charts
@@ -4150,62 +3900,6 @@
                 });
             }
         }
-        
-        // Analytics Charts
-        let analyticsViewerChart, analyticsEngagementChart;
-        
-        function initAnalyticsCharts() {
-            // Viewer trends chart
-            const viewerCtx = document.getElementById('analytics-viewer-chart')?.getContext('2d');
-            if (viewerCtx && !analyticsViewerChart) {
-                analyticsViewerChart = new Chart(viewerCtx, {
-                    type: 'line',
-                    data: {
-                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
-                        datasets: [{
-                            label: 'Viewers',
-                            data: [1200, 800, 1500, 2200, 3500, 4200, 3800],
-                            borderColor: '#f97316',
-                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } }
-                    }
-                });
-            }
-            
-            // Engagement chart
-            const engagementCtx = document.getElementById('analytics-engagement-chart')?.getContext('2d');
-            if (engagementCtx && !analyticsEngagementChart) {
-                analyticsEngagementChart = new Chart(engagementCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Live', 'Stats', 'Predict', 'Highlights', 'Chat'],
-                        datasets: [{
-                            label: 'Engagement %',
-                            data: [85, 72, 68, 65, 78],
-                            backgroundColor: ['#f97316', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } }
-                    }
-                });
-            }
-            
-            // Update metrics
-            document.getElementById('analytics-total-viewers').innerText = '12.4K';
-            document.getElementById('analytics-engagement').innerText = '72%';
-            document.getElementById('analytics-watch-time').innerText = '24m';
-            document.getElementById('analytics-peak').innerText = '4,521';
-        }
 
         // Realtime
         function connectRealtime() {
@@ -4217,6 +3911,11 @@
                 updateDashboard();
                 if (data.score || data.ballFeed) {
                     void refreshAiBriefing();
+                }
+                
+                // Update stream status badge
+                if (data.stream && data.stream.status) {
+                    updateStreamStatusBadge(data.stream.status);
                 }
                 
                 // Update charts
@@ -4233,199 +3932,14 @@
                 }
             });
             
-             realtimeEvents.addEventListener('chat-message', (e) => {
-                 const data = JSON.parse(e.data);
-                 if (data.message && window.currentState) {
-                     window.currentState.chatMessages = [...(window.currentState.chatMessages || []), data.message];
-                     renderChat(window.currentState.chatMessages);
-                 }
-             });
-         }
-         
-         // Analytics update function
-         function updateAnalytics() {
-             // Update analytics charts and data
-             if (viewerChart) {
-                 viewerChart.update();
-             }
-             if (pollChart) {
-                 pollChart.update();
-             }
-             
-             // Refresh analytics data from backend if needed
-             console.log('Analytics updated');
-         }
-         
-         // Schedule calendar rendering
-         function renderScheduleCalendar() {
-             const calendarDiv = document.getElementById('schedule-calendar');
-             if (calendarDiv) {
-                 calendarDiv.innerHTML = `
-                     <div class="space-y-4">
-                         <div class="flex justify-between items-center mb-4">
-                             <h3 class="text-xl font-bold">Scheduled Content</h3>
-                             <button onclick="showAddScheduleModal()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg">+ Add Schedule</button>
-                         </div>
-                         <div id="schedule-list" class="space-y-4">
-                             <!-- Schedule items will be rendered here -->
-                             <div class="text-slate-500 text-center py-8">No scheduled content yet.</div>
-                         </div>
-                     </div>
-                 `;
-                 
-                 // Initialize with some sample data for demo
-                 renderScheduleList();
-             }
-         }
-         
-         function renderScheduleList() {
-             const scheduleList = document.getElementById('schedule-list');
-             if (scheduleList) {
-                 // Sample schedule data
-                 const sampleSchedules = [
-                     { id: 1, title: 'Match Preview: IND vs PAK', time: 'Today 2:00 PM', status: 'scheduled' },
-                     { id: 2, title: 'Post-Match Analysis', time: 'Today 8:30 PM', status: 'scheduled' },
-                     { id: 3, title: 'Player Interview: Kohli', time: 'Tomorrow 11:00 AM', status: 'draft' }
-                 ];
-                 
-                 scheduleList.innerHTML = sampleSchedules.map(schedule => `
-                     <div class="bg-slate-800 rounded-lg p-4 flex justify-between items-center">
-                         <div class="flex-1">
-                             <h4 class="font-semibold">${schedule.title}</h4>
-                             <p class="text-sm text-slate-400">${schedule.time}</p>
-                         </div>
-                         <span class="px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(schedule.status)}">
-                             ${schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
-                         </span>
-                     </div>
-                 `).join('');
-             }
-         }
-         
-         function getStatusClass(status) {
-             switch(status) {
-                 case 'scheduled': return 'bg-blue-500/20 text-blue-400';
-                 case 'published': return 'bg-green-500/20 text-green-400';
-                 case 'draft': return 'bg-yellow-500/20 text-yellow-400';
-                 case 'completed': return 'bg-gray-500/20 text-gray-400';
-                 default: return 'bg-slate-500/20 text-slate-400';
-             }
-         }
-         
-        function showAddScheduleModal() {
-            alert('Add schedule modal would open here - feature coming soon!');
+            realtimeEvents.addEventListener('chat-message', (e) => {
+                const data = JSON.parse(e.data);
+                if (data.message && window.currentState) {
+                    window.currentState.chatMessages = [...(window.currentState.chatMessages || []), data.message];
+                    renderChat(window.currentState.chatMessages);
+                }
+            });
         }
-        
-        // ==================== MULTI-LANGUAGE MANAGEMENT ====================
-        function saveTranslations() {
-            const contentType = document.getElementById('language-content-type').value;
-            const baseLanguage = document.getElementById('base-language').value;
-            const targetLanguages = [];
-            
-            // Collect selected target languages
-            if (document.getElementById('lang-hindi')?.checked) targetLanguages.push('Hindi');
-            if (document.getElementById('lang-tamil')?.checked) targetLanguages.push('Tamil');
-            if (document.getElementById('lang-bengali')?.checked) targetLanguages.push('Bengali');
-            if (document.getElementById('lang-telugu')?.checked) targetLanguages.push('Telugu');
-            if (document.getElementById('lang-marathi')?.checked) targetLanguages.push('Marathi');
-            if (document.getElementById('lang-kannada')?.checked) targetLanguages.push('Kannada');
-            
-            if (targetLanguages.length === 0) {
-                alert('Please select at least one target language!');
-                return;
-            }
-            
-            // Save to backend or localStorage
-            const translationData = {
-                contentType,
-                baseLanguage,
-                targetLanguages,
-                timestamp: new Date().toISOString()
-            };
-            
-            // Store in localStorage for demo purposes
-            localStorage.setItem('translationSettings', JSON.stringify(translationData));
-            
-            // Show success message
-            showToast('✓ Translations saved for: ' + targetLanguages.join(', '));
-            
-            console.log('Translation settings saved:', translationData);
-        }
-        
-        function renderLanguageTranslations() {
-            const translationsDiv = document.getElementById('language-translations-editor');
-            if (translationsDiv) {
-                translationsDiv.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold">Language Translations</h3>
-                            <button onclick="showAddTranslationModal()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg">+ Add Translation</button>
-                        </div>
-                        <div class="space-y-4">
-                            <!-- Sample translation items -->
-                            <div class="bg-slate-800 rounded-lg p-4 flex justify-between items-center">
-                                <div>
-                                    <div class="font-semibold">Welcome Message</div>
-                                    <div class="text-sm text-slate-400">English → Hindi</div>
-                                </div>
-                                <div class="text-sm text-green-400">✓ Saved</div>
-                            </div>
-                            <div class="bg-slate-800 rounded-lg p-4 flex justify-between items-center">
-                                <div>
-                                    <div class="font-semibold">Match Title</div>
-                                    <div class="text-sm text-slate-400">English → Tamil</div>
-                                </div>
-                                <div class="text-sm text-green-400">✓ Saved</div>
-                            </div>
-                            <div class="bg-slate-800 rounded-lg p-4 flex justify-between items-center">
-                                <div>
-                                    <div class="font-semibold">Call to Action</div>
-                                    <div class="text-sm text-slate-400">English → Bengali</div>
-                                </div>
-                                <div class="text-sm text-yellow-400">● Pending</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-        
-        function showAddTranslationModal() {
-            alert('Add translation modal would open here - feature coming soon!');
-        }
-         
-         // AI suggestions for highlights
-         function renderAISuggestionHighlights() {
-             const suggestionsDiv = document.getElementById('ai-highlight-suggestions');
-             if (suggestionsDiv) {
-                 suggestionsDiv.innerHTML = `
-                     <div class="space-y-4">
-                         <div class="flex justify-between items-center mb-4">
-                             <h3 class="text-xl font-bold">AI-Powered Suggestions</h3>
-                             <button onclick="refreshAISuggestions()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg">🔄 Refresh Suggestions</button>
-                         </div>
-                         <div class="space-y-4">
-                             <!-- AI suggestions will be rendered here -->
-                             <div class="bg-slate-800 rounded-lg p-6">
-                                 <p class="text-slate-400 text-center py-4">🤖 AI will analyze match events and suggest highlight moments based on:</p>
-                                 <ul class="space-y-2 pl-5">
-                                     <li>• Wickets and bowling performances</li>
-                                     <li>• Boundaries and scoring shots</li>
-                                     <li>• Milestones (50s, 100s, etc.)</li>
-                                     <li>• Game-changing partnerships</li>
-                                     <li>• Turning points in the match</li>
-                                 </ul>
-                             </div>
-                         </div>
-                     </div>
-                 `;
-             }
-         }
-         
-         function refreshAISuggestions() {
-             // In a real implementation, this would call an AI service
-             alert('Refreshing AI suggestions... Feature coming soon!');
-         }
-     </script>
- </body>
- </html>
+    </script>
+</body>
+</html>

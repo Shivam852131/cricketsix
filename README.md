@@ -1,108 +1,229 @@
-# CricketLive Pro
+# CricketLive Pro - Advanced Live Cricket Streaming
 
-A comprehensive cricket streaming platform with real-time analytics, AI-powered insights, and multi-language support.
+A full-stack cricket streaming platform with real-time updates, AI insights, and advanced analytics.
 
-## Features
+## 🚀 Quick Start
 
-### User Website (index.html)
-- Live cricket streaming with video player
-- Real-time scores and AI match briefing
-- Multi-page navigation (Home, Live, Stats, Predictions, Highlights)
-- Personalized watchlists and favorite teams
-- Live chat and fan engagement
-- Mobile-responsive design with bottom navigation
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
 
-### Admin Panel (admin.html)
-- **Dashboard**: Real-time viewer analytics and charts
-- **AI Match Briefing**: AI-powered tactical analysis and predictions
-- **Analytics**: Viewer trends, engagement metrics, and geographic distribution
-- **Stream Control**: Live streaming management with AI camera features
-- **Match Management**: Score updates, team configurations, and timeline events
-- **Poll Management**: Create and manage fan polls
-- **Chat Moderation**: Real-time chat monitoring
-- **Content Scheduling**: Calendar-based content planning
-- **Multi-Language**: Translation management for 6+ languages
-- **Highlights**: Automated highlight generation
+### Installation & Running
 
-### Firebase Integration
-- Real-time database synchronization between admin and user websites
-- Live updates without page refresh
-- Persistent data storage
-- Cross-device synchronization
-
-## Deployment
-
-### Quick Deploy (Windows)
-```powershell
-.\deploy.ps1
-```
-
-### Manual Deploy
-```bash
-firebase deploy --only hosting,database
-```
-
-### Access After Deployment
-- **Main Site**: https://cricketsix26.web.app
-- **Admin Panel**: https://cricketsix26.web.app/admin.html
-- **Admin Key**: `cricketlive2026`
-
-## Local Development
-
-### Start Backend Server
+1. **Install dependencies:**
 ```bash
 cd backend
-npm start
+npm install
 ```
 
-### Access Locally
-- **Main Site**: http://localhost:3000
-- **Admin Panel**: http://localhost:3000/admin.html
+2. **Start the server:**
+```bash
+cd backend
+node server.js
+```
 
-## Technology Stack
+3. **Access the websites:**
+- User Website: http://localhost:3000
+- Admin Panel: http://localhost:3000/admin
+- Admin Key: `admin`
 
-- **Frontend**: HTML5, Tailwind CSS, Vanilla JavaScript
-- **Backend**: Node.js, Express
-- **Database**: Firebase Realtime Database
-- **AI**: OpenAI Integration
-- **Charts**: Chart.js
-- **PWA**: Service Worker for offline support
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-project-root/
-├── public/
-│   ├── index.html      # Main website
-│   ├── admin.html      # Admin panel
-│   ├── app.js          # Main JavaScript
-│   └── styles.css      # Custom styles
 ├── backend/
-│   ├── server.js       # Express server
-│   └── data/           # Data storage
-├── firebase.json       # Firebase config
-├── .firebaserc         # Project config
-├── database.rules.json # DB rules
-└── DEPLOYMENT.md       # Deployment guide
+│   ├── server.js           # Node.js Express server
+│   ├── server.py           # Python Flask server (optional)
+│   ├── advanced-endpoints.js # Additional API endpoints
+│   └── data/
+│       └── app-state.json  # Application state storage
+├── public/
+│   ├── index.html          # User-facing website
+│   ├── admin.html          # Admin dashboard
+│   ├── app.js              # User website JavaScript
+│   ├── admin-sync.js       # Admin sync functions
+│   ├── styles.css          # Common styles
+│   └── sw.js               # Service worker for PWA
+├── test-connection.js      # Connection test script
+└── README.md               # This file
 ```
 
-## Configuration
+## 🔧 Features
 
-Firebase configuration is embedded in both `index.html` and `admin.html`:
+### User Website (index.html)
+- **Live Streaming**: Multi-platform support (YouTube, Kick, Twitch, etc.)
+- **Real-time Stats**: Live score updates with ball-by-ball feed
+- **AI Insights**: Machine learning predictions and analytics
+- **Fan Chat**: Real-time chat with viewers
+- **Poll System**: Interactive voting on match outcomes
+- **Highlights**: Video highlights and trending moments
 
-```javascript
-const firebaseConfig = {
-    apiKey: "AIzaSyDQkuUYyoBH1M6RnmaMhehWG7xInO2SvRw",
-    authDomain: "cricketsix26.firebaseapp.com",
-    databaseURL: "https://cricketsix26-default-rtdb.firebaseio.com",
-    projectId: "cricketsix26",
-    storageBucket: "cricketsix26.firebasestorage.app",
-    messagingSenderId: "429796170500",
-    appId: "1:429796170500:web:d9d1b7d2a4b920bb18ce51",
-    measurementId: "G-RDZ9WBVBXG"
-};
+### Admin Dashboard (admin.html)
+- **Stream Management**: Control live stream URLs and quality
+- **Score Updates**: Quick score editing with ball-by-ball control
+- **AI Control**: Generate and publish AI insights
+- **Content Management**: Edit hero section, stats, predictions
+- **Real-time Sync**: Instant updates to user website
+
+### Backend Features
+- **Real-time Updates**: Server-Sent Events (SSE) for live data
+- **AI Insights**: Rule-based match analysis and predictions
+- **State Management**: Persistent application state
+- **Rate Limiting**: Protection against excessive requests
+
+## 🔗 API Endpoints
+
+### User Endpoints
+- `GET /api/state` - Current application state
+- `GET /api/events` - Real-time event stream (SSE)
+- `GET /api/poll` - Current poll status
+- `GET /api/ai/insights` - AI-generated match insights
+- `POST /api/chat` - Send chat message
+- `POST /api/poll/vote` - Cast vote in poll
+
+### Admin Endpoints
+- `POST /api/admin/verify` - Verify admin key
+- `PUT /api/state` - Update application state
+- `POST /api/ai/bulletin` - Publish AI bulletin
+- `POST /api/timeline` - Add timeline event
+- `POST /api/quick-score` - Quick score update
+
+### Advanced Endpoints
+- `GET /api/match/timeline` - Combined timeline and ball feed
+- `GET /api/match/win-probability` - Win probability over time
+- `GET /api/match/summary` - Match summary
+- `GET /api/connection/status` - Connection status
+
+## 🔐 Admin Authentication
+
+The admin panel requires an admin key for authentication. The default key is `admin` (configurable via environment variable `ADMIN_KEY`).
+
+## 📊 Data Structure
+
+The application state is stored in `backend/data/app-state.json` with the following structure:
+
+```json
+{
+  "stream": {
+    "url": "stream-url",
+    "platform": "custom",
+    "status": "live",
+    "viewerCount": 0
+  },
+  "score": {
+    "team1": "Team 1",
+    "team2": "Team 2",
+    "team1Score": "287/6",
+    "overs": "45.3",
+    "runRate": "6.31"
+  },
+  "poll": {
+    "question": "Who will win?",
+    "votes": { "team1": 1234, "team2": 567 }
+  },
+  "content": {
+    "hero": { ... },
+    "matchCenter": { ... },
+    "predictions": { ... }
+  }
+}
 ```
 
-## License
+## 🎯 Advanced Features
 
-© 2026 CricketLive Pro. All rights reserved.
+### AI Match Analysis
+- Projected score calculations
+- Win probability predictions
+- Momentum analysis
+- Tactical recommendations
+
+### Real-time Streaming
+- Multiple platform support
+- Mobile camera streaming
+- Adaptive quality selection
+- Picture-in-picture support
+
+### Analytics Dashboard
+- Viewer trends
+- Geographic distribution
+- Performance metrics
+
+## 🚨 Troubleshooting
+
+### Server won't start
+```bash
+# Check if port 3000 is in use
+netstat -ano | findstr :3000
+
+# Kill existing process
+taskkill /F /PID <PID>
+
+# Or use a different port
+PORT=3001 node server.js
+```
+
+### Connection issues
+- Check if backend server is running
+- Verify port 3000 is not blocked
+- Check browser console for errors
+
+### Data not updating
+- Refresh the page
+- Check server logs
+- Verify SSE connection is active
+
+## 🔄 Development
+
+### Running both Node.js and Python servers
+```bash
+# Terminal 1 - Node.js server
+cd backend && node server.js
+
+# Terminal 2 - Python server (optional)
+cd backend && python server.py
+```
+
+### Testing the connection
+```bash
+node test-connection.js
+```
+
+## 📝 Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | 3000 | Server port |
+| `ADMIN_KEY` | admin | Admin authentication key |
+
+## 🔒 Security Notes
+
+- The admin key should be changed in production
+- Enable HTTPS for secure connections
+- Consider adding rate limiting for chat messages
+- Validate and sanitize all user inputs
+
+## 🎨 Customization
+
+### Changing Colors
+Edit the `styles.css` file or the Tailwind config in `index.html`:
+
+```css
+:root {
+  --primary: #ef4444;  /* Red */
+  --secondary: #f97316; /* Orange */
+}
+```
+
+### Adding New Features
+1. Add API endpoint in `server.js`
+2. Add UI component in `index.html` or `admin.html`
+3. Add JavaScript handler in `app.js` or admin scripts
+
+## 📚 License
+
+This project is provided as-is for educational and development purposes.
+
+## 🙏 Credits
+
+- Built with Node.js, Express, and vanilla JavaScript
+- Real-time updates using Server-Sent Events (SSE)
+- Streaming support for YouTube, Kick, Twitch, and more

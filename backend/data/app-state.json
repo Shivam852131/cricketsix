@@ -1,0 +1,642 @@
+{
+  "stream": {
+    "url": "/stream/mobile",
+    "platform": "mobile",
+    "status": "live",
+    "viewerCount": 6
+  },
+  "score": {
+    "team1": "India",
+    "team2": "NZ",
+    "matchTitle": "T20 World Cup 2026 - Final",
+    "team1Score": "24",
+    "team2Score": "",
+    "overs": "0.5",
+    "batsman": "",
+    "bowler": "",
+    "runRate": "0.00",
+    "team1Flag": "🇮🇳",
+    "team2Flag": "NZ",
+    "venue": "",
+    "target": "",
+    "league": "",
+    "format": "",
+    "totalOvers": "",
+    "powerplayOvers": "",
+    "matchDateTime": "",
+    "tossWinner": "",
+    "tossDecision": "",
+    "partnership": "",
+    "fow": "",
+    "pp": "",
+    "death": "",
+    "extras": "",
+    "wickets": "",
+    "reqRR": ""
+  },
+  "chatMessages": [
+    {
+      "id": "seed-1",
+      "username": "RohitFan",
+      "content": "What a six!",
+      "timestamp": "2026-03-10T11:05:20.790Z"
+    },
+    {
+      "id": "seed-2",
+      "username": "Starc_42",
+      "content": "Need 20 off 12",
+      "timestamp": "2026-03-10T11:05:20.791Z"
+    },
+    {
+      "id": "seed-3",
+      "username": "Kohli_18",
+      "content": "King Kohli",
+      "timestamp": "2026-03-10T11:05:20.791Z"
+    },
+    {
+      "id": "1773160133175-fp24k9",
+      "username": "Admin",
+      "content": "hi",
+      "timestamp": "2026-03-10T16:28:53.175Z"
+    },
+    {
+      "id": "1773164347657-w7znkb",
+      "username": "AI Analyst",
+      "content": "AI Bulletin: India 293/6 after 46.2 overs. India are in the death overs at 293/6, with a projection around 316 and steady edge momentum. Projected finish: 316. Momentum is in hand. Press the advantage by attacking the weaker side of the field for the next over.",
+      "timestamp": "2026-03-10T17:39:07.657Z"
+    },
+    {
+      "id": "1773166644438-ph58yy",
+      "username": "AI Analyst",
+      "content": "AI Bulletin: India 293/6 after 46.2 overs. India are in the death overs at 293/6, with a projection around 316 and steady edge momentum. Projected finish: 316. Momentum is in hand. Press the advantage by attacking the weaker side of the field for the next over.",
+      "timestamp": "2026-03-10T18:17:24.438Z"
+    },
+    {
+      "id": "1773166722554-qmq7rj",
+      "username": "AI Analyst",
+      "content": "AI Bulletin: India 293/6 after 46.2 overs. India are in the death overs at 293/6, with a projection around 316 and steady edge momentum. Projected finish: 316. Momentum is in hand. Press the advantage by attacking the weaker side of the field for the next over.",
+      "timestamp": "2026-03-10T18:18:42.554Z"
+    },
+    {
+      "id": "1773244096573-xb29ay",
+      "username": "Admin",
+      "content": "hi",
+      "timestamp": "2026-03-11T15:48:16.573Z"
+    },
+    {
+      "id": "1773245948413-tck198",
+      "username": "Admin",
+      "content": "hi",
+      "timestamp": "2026-03-11T16:19:08.413Z"
+    },
+    {
+      "id": "1773249153737-w2tj84",
+      "username": "Fan471",
+      "content": "hi",
+      "timestamp": "2026-03-11T17:12:33.737Z"
+    },
+    {
+      "id": "1773249164263-kg91bj",
+      "username": "Fan471",
+      "content": "djfhd",
+      "timestamp": "2026-03-11T17:12:44.263Z"
+    },
+    {
+      "id": "1773253409051-x8fpl6",
+      "username": "AI Analyst",
+      "content": "AI Bulletin: No live match data is available yet.",
+      "timestamp": "2026-03-11T18:23:29.051Z"
+    },
+    {
+      "id": "1773429148630-peozvy",
+      "username": "Fan823",
+      "content": "hi",
+      "timestamp": "2026-03-13T19:12:28.630Z"
+    },
+    {
+      "id": "1773502845200-ah1txi",
+      "username": "Fan179",
+      "content": "hi",
+      "timestamp": "2026-03-14T21:10:45.200535"
+    },
+    {
+      "id": "1773502846551-06a8sz",
+      "username": "Fan179",
+      "content": "hi",
+      "timestamp": "2026-03-14T21:10:46.551570"
+    },
+    {
+      "id": "1773502846876-sqfoec",
+      "username": "Fan179",
+      "content": "hi",
+      "timestamp": "2026-03-14T21:10:46.877020"
+    },
+    {
+      "id": "1773502847064-jfmduk",
+      "username": "Fan179",
+      "content": "hi",
+      "timestamp": "2026-03-14T21:10:47.064733"
+    },
+    {
+      "id": "1773503158062-nvj3fj",
+      "username": "Fan179",
+      "content": "hi",
+      "timestamp": "2026-03-14T21:15:58.062932"
+    },
+    {
+      "id": "1773503946533-uipnwi",
+      "username": "Fan212",
+      "content": "hi",
+      "timestamp": "2026-03-14T21:29:06.533280"
+    },
+    {
+      "id": "1773508438094-zqin6d",
+      "username": "Fan401",
+      "content": "hi",
+      "timestamp": "2026-03-14T17:13:58.094Z"
+    },
+    {
+      "id": "1773676020397-wo59vj",
+      "username": "Fan542",
+      "content": "hi",
+      "timestamp": "2026-03-16T15:47:00.398Z"
+    },
+    {
+      "id": "1773676020472-1nojid",
+      "username": "Fan542",
+      "content": "hi",
+      "timestamp": "2026-03-16T15:47:00.472Z"
+    },
+    {
+      "id": "1773676020537-98jden",
+      "username": "Fan542",
+      "content": "hi",
+      "timestamp": "2026-03-16T15:47:00.537Z"
+    },
+    {
+      "id": "1773676831602-gwbwuq",
+      "username": "Fan403",
+      "content": "hi",
+      "timestamp": "2026-03-16T16:00:31.602Z"
+    },
+    {
+      "id": "1773677067379-31emkc",
+      "username": "Fan403",
+      "content": "hi",
+      "timestamp": "2026-03-16T16:04:27.379Z"
+    },
+    {
+      "id": "1773680370864-oqr3qn",
+      "username": "Fan719",
+      "content": "hi",
+      "timestamp": "2026-03-16T16:59:30.864Z"
+    }
+  ],
+  "poll": {
+    "question": "",
+    "votes": {
+      "team1": 0,
+      "team2": 0
+    }
+  },
+  "content": {
+    "hero": {
+      "badge": "IPL 2026 FINAL",
+      "title": "CRICKET FEVER",
+      "subtitle": "Watch live matches now",
+      "ctaPrimary": "Watch Now",
+      "ctaSecondary": "Predictions",
+      "liveMatches": "",
+      "upcomingMatches": "",
+      "fansOnline": "2.4M Fans Online"
+    },
+    "matchCenter": {
+      "title": " CRICKET CENTRE",
+      "league": "IPL 2026 FINAL",
+      "team2": "NZ",
+      "team2Score": "180/1",
+      "team2Flag": "NZ",
+      "target": "target: 220",
+      "winProbabilityTeam1": 100,
+      "projectedTotal": 250
+    },
+    "quickActions": {
+      "scorecard": "Full Scorecard",
+      "analytics": "Analytics",
+      "highlights": "Highlights"
+    },
+    "sections": {
+      "liveMatchesTitle": "LIVE MATCHES",
+      "upcomingTitle": "",
+      "resultsTitle": "",
+      "performersTitle": ""
+    },
+    "promo": {
+      "title": "",
+      "subtitle": "",
+      "primaryLabel": "",
+      "secondaryLabel": ""
+    },
+    "performers": {
+      "batsmen": [
+        {
+          "rank": 1,
+          "name": "Virat Kohli",
+          "team": "IND",
+          "runs": 289
+        },
+        {
+          "rank": 2,
+          "name": "David Warner",
+          "team": "AUS",
+          "runs": 276
+        },
+        {
+          "rank": 3,
+          "name": "Jos Buttler",
+          "team": "ENG",
+          "runs": 245
+        },
+        {
+          "rank": 4,
+          "name": "Suryakumar Yadav",
+          "team": "IND",
+          "runs": 212
+        }
+      ],
+      "bowlers": [
+        {
+          "rank": 1,
+          "name": "Mitchell Starc",
+          "team": "AUS",
+          "wickets": 14
+        },
+        {
+          "rank": 2,
+          "name": "Pat Cummins",
+          "team": "AUS",
+          "wickets": 11
+        },
+        {
+          "rank": 3,
+          "name": "Jasprit Bumrah",
+          "team": "IND",
+          "wickets": 10
+        },
+        {
+          "rank": 4,
+          "name": "Adil Rashid",
+          "team": "ENG",
+          "wickets": 9
+        }
+      ]
+    },
+    "stats": {
+      "highestScore": {
+        "label": "",
+        "value": "",
+        "subtitle": ""
+      },
+      "bestBowling": {
+        "label": "",
+        "value": "",
+        "subtitle": ""
+      },
+      "keyMetrics": [],
+      "momentum": {
+        "title": "",
+        "label": "",
+        "percent": 0
+      }
+    },
+    "predictions": {
+      "expert": {
+        "title": "",
+        "winner": "",
+        "subtitle": "",
+        "note": ""
+      },
+      "playerForm": [],
+      "scoreLines": []
+    },
+    "highlights": {
+      "featured": {
+        "videoUrl": "",
+        "title": "",
+        "description": "",
+        "likes": "",
+        "comments": "",
+        "favorites": ""
+      },
+      "items": [],
+      "stats": [],
+      "trending": []
+    },
+    "analytics": {
+      "battingRows": [],
+      "bowlingRows": [],
+      "geo": []
+    }
+  },
+  "liveMatches": [
+    {
+      "id": 1,
+      "team1": "Mumbai Indians",
+      "team2": "Royal Challengers",
+      "team1Flag": "🏏",
+      "team2Flag": "⚡",
+      "tournament": "IPL 2026",
+      "league": "IPL",
+      "format": "T20",
+      "status": "live"
+    },
+    {
+      "id": 2,
+      "team1": "Chennai Super Kings",
+      "team2": "Kolkata Knight Riders",
+      "team1Flag": "🌟",
+      "team2Flag": "🦁",
+      "tournament": "IPL 2026",
+      "league": "IPL",
+      "format": "T20",
+      "status": "live"
+    },
+    {
+      "id": 3,
+      "team1": "India",
+      "team2": "Pakistan",
+      "team1Flag": "🇮🇳",
+      "team2Flag": "🇵🇰",
+      "tournament": "T20 World Cup 2026",
+      "league": "ICC",
+      "format": "T20",
+      "status": "live"
+    }
+  ],
+  "upcomingMatches": [
+    {
+      "id": 10,
+      "team1": "Delhi Capitals",
+      "team2": "Sunrisers Hyderabad",
+      "team1Flag": "🏛️",
+      "team2Flag": "🌅",
+      "date": "Jun 10, 7:00 PM",
+      "tournament": "IPL 2026",
+      "league": "IPL",
+      "format": "T20"
+    },
+    {
+      "id": 11,
+      "team1": "Rajasthan Royals",
+      "team2": "Punjab Kings",
+      "team1Flag": "👸",
+      "team2Flag": "🔱",
+      "date": "Jun 11, 3:30 PM",
+      "tournament": "IPL 2026",
+      "league": "IPL",
+      "format": "T20"
+    }
+  ],
+  "recentResults": [
+    {
+      "id": 20,
+      "team1": "Lucknow Super Giants",
+      "team2": "Gujarat Titans",
+      "team1Flag": "🦅",
+      "team2Flag": "💪",
+      "result": "Lucknow won by 5 wickets",
+      "score": "LSG 185/5 vs GT 184",
+      "league": "IPL",
+      "format": "T20"
+    },
+    {
+      "id": 21,
+      "team1": "India",
+      "team2": "England",
+      "team1Flag": "🇮🇳",
+      "team2Flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      "result": "India won by 6 runs",
+      "score": "IND 178/6 vs ENG 172/8",
+      "league": "ICC",
+      "format": "T20"
+    }
+  ],
+  "ballFeed": [
+    {
+      "id": "1773676911506-0",
+      "type": "six",
+      "label": "6",
+      "runs": 6,
+      "wickets": 0,
+      "legal": true,
+      "over": "0.0",
+      "timestamp": "2026-03-16T16:01:51.506Z"
+    },
+    {
+      "id": "1773676911506-1",
+      "type": "six",
+      "label": "6",
+      "runs": 6,
+      "wickets": 0,
+      "legal": true,
+      "over": "0.1",
+      "timestamp": "2026-03-16T16:01:51.506Z"
+    },
+    {
+      "id": "1773676911506-2",
+      "type": "six",
+      "label": "6",
+      "runs": 6,
+      "wickets": 0,
+      "legal": true,
+      "over": "0.2",
+      "timestamp": "2026-03-16T16:01:51.506Z"
+    },
+    {
+      "id": "1773676911506-3",
+      "type": "run",
+      "label": "3",
+      "runs": 3,
+      "wickets": 0,
+      "legal": true,
+      "over": "0.3",
+      "timestamp": "2026-03-16T16:01:51.506Z"
+    },
+    {
+      "id": "1773676911506-4",
+      "type": "run",
+      "label": "3",
+      "runs": 3,
+      "wickets": 0,
+      "legal": true,
+      "over": "0.4",
+      "timestamp": "2026-03-16T16:01:51.506Z"
+    }
+  ],
+  "timelineEvents": [
+    {
+      "id": "1773676880269-d09nei",
+      "title": "Wicket",
+      "detail": "India lose a wicket at 138/4. Pressure swings back to the fielding side.",
+      "type": "wicket",
+      "badge": "OUT",
+      "over": "6.5",
+      "timestamp": "2026-03-16T16:01:20.269Z"
+    },
+    {
+      "id": "1773676880104-hubolf",
+      "title": "Wicket",
+      "detail": "India lose a wicket at 138/3. Pressure swings back to the fielding side.",
+      "type": "wicket",
+      "badge": "OUT",
+      "over": "6.4",
+      "timestamp": "2026-03-16T16:01:20.104Z"
+    },
+    {
+      "id": "1773676879700-qrd397",
+      "title": "Wicket",
+      "detail": "India lose a wicket at 138/2. Pressure swings back to the fielding side.",
+      "type": "wicket",
+      "badge": "OUT",
+      "over": "6.3",
+      "timestamp": "2026-03-16T16:01:19.700Z"
+    },
+    {
+      "id": "1773676879434-plcndb",
+      "title": "Wicket",
+      "detail": "India lose a wicket at 138/1. Pressure swings back to the fielding side.",
+      "type": "wicket",
+      "badge": "OUT",
+      "over": "6.2",
+      "timestamp": "2026-03-16T16:01:19.434Z"
+    },
+    {
+      "id": "1773676857667-fgnelw",
+      "title": "Boundary",
+      "detail": "India move to 130/0 after a crisp four.",
+      "type": "boundary",
+      "badge": "FOUR",
+      "over": "5.3",
+      "timestamp": "2026-03-16T16:00:57.667Z"
+    },
+    {
+      "id": "1773676857301-v7gg4u",
+      "title": "Boundary",
+      "detail": "India move to 126/0 after a crisp four.",
+      "type": "boundary",
+      "badge": "FOUR",
+      "over": "5.2",
+      "timestamp": "2026-03-16T16:00:57.301Z"
+    },
+    {
+      "id": "1773676857066-4hxtxw",
+      "title": "Boundary",
+      "detail": "India move to 122/0 after a crisp four.",
+      "type": "boundary",
+      "badge": "FOUR",
+      "over": "5.1",
+      "timestamp": "2026-03-16T16:00:57.066Z"
+    },
+    {
+      "id": "1773675600548-znzw9e",
+      "title": "Boundary",
+      "detail": "India move to 118/0 after a crisp four.",
+      "type": "boundary",
+      "badge": "FOUR",
+      "over": "5.0",
+      "timestamp": "2026-03-16T15:40:00.548Z"
+    },
+    {
+      "id": "1773245149875-o9evty",
+      "title": "Wicket",
+      "detail": "India lose a wicket at 299/7. Pressure swings back to the fielding side.",
+      "type": "wicket",
+      "badge": "OUT",
+      "over": "51.2",
+      "timestamp": "2026-03-11T16:05:49.875Z"
+    },
+    {
+      "id": "1773245146546-5nji40",
+      "title": "Maximum",
+      "detail": "India launch a six and surge to 299/6.",
+      "type": "boundary",
+      "badge": "SIX",
+      "over": "51.1",
+      "timestamp": "2026-03-11T16:05:46.546Z"
+    },
+    {
+      "id": "1773245045309-7h9duw",
+      "title": "Over Complete",
+      "detail": "India close the over at 293/6.",
+      "type": "milestone",
+      "badge": "OVER",
+      "over": "51.0",
+      "timestamp": "2026-03-11T16:04:05.309Z"
+    },
+    {
+      "id": "1773221368574-i7vwtp",
+      "title": "Review Taken",
+      "detail": "Umpire review called for a close LBW shout.",
+      "type": "review",
+      "badge": "DRS",
+      "over": "47.1",
+      "timestamp": "2026-03-11T09:29:28.574Z"
+    },
+    {
+      "id": "seed-timeline-1",
+      "title": "Powerplay Surge",
+      "detail": "India race through the powerplay with crisp boundaries and controlled aggression.",
+      "type": "milestone",
+      "badge": "PP",
+      "over": "6.0",
+      "timestamp": "2026-03-10T11:35:20.790Z"
+    },
+    {
+      "id": "seed-timeline-2",
+      "title": "Wicket",
+      "detail": "A breakthrough arrives as the batter mistimes one to deep midwicket.",
+      "type": "wicket",
+      "badge": "OUT",
+      "over": "18.4",
+      "timestamp": "2026-03-10T12:48:20.790Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1773156813652-0wxr03",
+      "message": "287/5 - 45.3 overs",
+      "timestamp": "2026-03-10T15:33:33.655Z"
+    },
+    {
+      "id": "1773157006465-3im0qp",
+      "message": "287/4 - 45.3 overs",
+      "timestamp": "2026-03-10T15:36:46.467Z"
+    },
+    {
+      "id": "1773166644438-hqaghn",
+      "message": "AI Bulletin: India 293/6 after 46.2 overs. India are in the death overs at 293/6, with a projection around 316 and steady edge momentum. Projected finish: 316. Momentum is in hand. Press the advantage by attacking the weaker side of the field for the next over.",
+      "timestamp": "2026-03-10T18:17:24.438Z"
+    },
+    {
+      "id": "1773243975191-isfo4u",
+      "message": "AI Bulletin: India 293/6 after 50.0 overs. India are in the death overs at 293/6, with a projection around 293 and balanced momentum. Projected finish: 293. Keep collecting low-risk runs and force the field to move. Bank one calm over before a full launch.",
+      "timestamp": "2026-03-11T15:46:15.191Z"
+    },
+    {
+      "id": "1773247490153-6xqi19",
+      "message": "AI Bulletin: India 299/7 after 51.2 overs. India are in the death overs at 299/7, with a projection around 299 and balanced momentum. Projected finish: 299. Rebuild with low-risk singles for two balls before targeting a release shot. Bank one calm over before a full launch.",
+      "timestamp": "2026-03-11T16:44:50.138Z"
+    },
+    {
+      "id": "1773254921867-hwlk6z",
+      "message": "-  overs",
+      "timestamp": "2026-03-11T18:48:41.867Z"
+    },
+    {
+      "id": "1773254922204-n37olw",
+      "message": "-  overs",
+      "timestamp": "2026-03-11T18:48:42.204Z"
+    }
+  ],
+  "updatedAt": "2026-03-16T17:00:21.952Z"
+}

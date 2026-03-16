@@ -1,0 +1,9 @@
+{
+  "name": "cricketlive-pro",
+  "private": true,
+  "description": "CricketLive Pro full-stack website",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js"
+  }
+}
