@@ -5,7 +5,7 @@ const WebSocket = require("ws");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
-const PORT = Number(process.env.PORT) || 8888;
+const PORT = Number(process.env.PORT) || 3000;
 const server = app.listen(PORT, () => {
   console.log(`CricketLive Pro server running on port ${PORT}`);
 });
