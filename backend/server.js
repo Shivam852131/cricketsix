@@ -513,6 +513,14 @@ function hasLiveScore(state) {
   return Boolean(state && state.score && state.score.team1 && state.score.team1Score);
 }
 
+function isPreMatchBuildUp(state) {
+  if (!state || !state.score || !state.score.team1 || !state.score.team2) return false;
+  const score = parseScoreBreakdown(state.score.team1Score);
+  const overs = parseOversBreakdown(state.score.overs);
+  const hasFeed = Array.isArray(state.ballFeed) && state.ballFeed.length > 0;
+  return score.runs === 0 && score.wickets === 0 && overs.totalBalls === 0 && !hasFeed;
+}
+
 function summarizeBallFeed(ballFeed) {
   const feed = Array.isArray(ballFeed) ? ballFeed.slice(-12) : [];
   const recentSix = feed.slice(-6);
@@ -556,10 +564,11 @@ function summarizeBallFeed(ballFeed) {
 
 function createAiInsights(state) {
   const ballFeedSummary = summarizeBallFeed(state && state.ballFeed);
+  const generatedAt = new Date().toISOString();
 
   if (!hasLiveScore(state)) {
     return {
-      generatedAt: new Date().toISOString(),
+      generatedAt,
       summary: "No live match data is available yet.",
       prediction: { projectedTotal: 0, projectedLow: 0, projectedHigh: 0, fanConfidenceTeam1: 0, fanConfidenceTeam2: 0, pressureIndex: 0, momentumScore: 0, momentumLabel: "Awaiting data", ballsRemaining: 0, wicketsInHand: 0 },
       matchup: { phase: "Awaiting live data", batsman: "-", bowler: "-" },
@@ -579,7 +588,135 @@ function createAiInsights(state) {
         watchouts: ["No live score has been published yet."]
       },
       recommendation: "Add stream, teams, and score details from the admin panel to enable AI insights.",
-      keySignals: ["Live score: not available", "Connected viewers: " + (state.stream && state.stream.viewerCount || 0), "Chat messages: " + ((state.chatMessages || []).length || 0)]
+      keySignals: ["Live score: not available", "Connected viewers: " + (state.stream && state.stream.viewerCount || 0), "Chat messages: " + ((state.chatMessages || []).length || 0)],
+      briefing: {
+        summary: "AI briefing is waiting for match data.",
+        narrative: "Publish teams, toss, or score updates from the admin panel to unlock the full preview.",
+        phase: "Standby",
+        momentum: "-",
+        projected: "-",
+        pressure: "-",
+        projectionRange: "-",
+        chaseable: "-",
+        requiredRR: "-",
+        playerSpotlight: { name: "-", impact: "-", form: "-" },
+        turningPoint: "-",
+        battingStrategy: "-",
+        bowlingCounter: "-",
+        gameChangers: [],
+        keyInsights: ["No published fixture yet."],
+        watchouts: ["Live AI activates after match data is published."],
+        timestamp: generatedAt
+      }
+    };
+  }
+
+  if (isPreMatchBuildUp(state)) {
+    const team1Votes = Number(state.poll && state.poll.votes && state.poll.votes.team1 || 0);
+    const team2Votes = Number(state.poll && state.poll.votes && state.poll.votes.team2 || 0);
+    const matchCenter = state.content && state.content.matchCenter ? state.content.matchCenter : {};
+    const pollTotal = team1Votes + team2Votes;
+    const fanConfidence = pollTotal > 0
+      ? Math.round((team1Votes * 100) / pollTotal)
+      : clamp(Number(matchCenter.winProbabilityTeam1) || 50, 5, 95);
+    const projectedTotal = Number(matchCenter.projectedTotal) || 210;
+    const projectedLow = Math.max(180, projectedTotal - 8);
+    const projectedHigh = projectedTotal + 8;
+    const venue = state.score.venue || "the venue";
+    const topBatter = state.content && state.content.performers && state.content.performers.batsmen && state.content.performers.batsmen[0]
+      ? state.content.performers.batsmen[0]
+      : null;
+    const topBowler = state.content && state.content.performers && state.content.performers.bowlers && state.content.performers.bowlers[0]
+      ? state.content.performers.bowlers[0]
+      : null;
+    const gameChangers = (state.content && state.content.predictions && Array.isArray(state.content.predictions.playerForm)
+      ? state.content.predictions.playerForm.map((item) => item && item.name).filter(Boolean)
+      : []).slice(0, 4);
+    const momentumLabel = Math.abs(fanConfidence - 50) <= 3
+      ? "Toss sensitive"
+      : (fanConfidence > 50 ? state.score.team1 : state.score.team2) + " slight edge";
+    const battingStrategy = "Attack the shorter square boundary, but keep one anchor through the powerplay before a full launch.";
+    const bowlingCounter = "Use hard lengths, protect the shorter side, and force hitters to target the longer straight boundary.";
+    const watchouts = [
+      "Short square boundaries make missed yorkers expensive immediately.",
+      "One explosive powerplay can move the par line by 15-plus runs."
+    ];
+
+    return {
+      generatedAt,
+      summary: state.score.team1 + " and " + state.score.team2 + " are minutes away from the first ball at " + venue + ", with a projected par band around " + projectedLow + "-" + projectedHigh + " and a toss-sensitive opener on the cards.",
+      prediction: {
+        projectedTotal,
+        projectedLow,
+        projectedHigh,
+        fanConfidenceTeam1: fanConfidence,
+        fanConfidenceTeam2: 100 - fanConfidence,
+        pressureIndex: 42,
+        momentumScore: 50 + Math.abs(fanConfidence - 50),
+        momentumLabel,
+        ballsRemaining: 120,
+        wicketsInHand: 10
+      },
+      matchup: {
+        phase: "Preview",
+        batsman: topBatter ? topBatter.name : "Top-order watch",
+        bowler: topBowler ? topBowler.name : "New-ball watch"
+      },
+      tactical: {
+        commentary: "Opening night at " + venue + " looks built for a big batting game, but the side that survives the short square boundaries with smarter bowling will control the finish.",
+        battingPlan: battingStrategy,
+        bowlingPlan: bowlingCounter,
+        nextOverPlan: "Treat the toss, dew read, and first over with the hard new ball as the opening-night swing points.",
+        watchouts
+      },
+      assistant: {
+        trendLabel: "Preview mode",
+        urgency: "Toss watch",
+        smartCall: "Win toss, read the dew quickly, and protect the short square side from ball one.",
+        currentOver: [],
+        recentBalls: [],
+        lastBall: null,
+        recentRuns: 0,
+        recentWickets: 0,
+        recentDots: 0
+      },
+      recommendation: "Treat " + projectedLow + "-" + projectedHigh + " as the par band and build plans around the toss.",
+      keySignals: [
+        "Projected range: " + projectedLow + "-" + projectedHigh,
+        "Venue: " + venue,
+        "Start: " + (state.score.matchDateTime || "Match day"),
+        "Top batter watch: " + (topBatter ? topBatter.name : "Not set"),
+        "Connected viewers: " + ((state.stream && state.stream.viewerCount) || 0),
+        "Fan sentiment split: " + fanConfidence + "% / " + (100 - fanConfidence) + "%"
+      ],
+      briefing: {
+        summary: state.score.team1 + " vs " + state.score.team2 + " is set up as an opening-night shootout.",
+        narrative: state.score.team1 + " start the title defence at home, " + state.score.team2 + " arrive with one of the deepest power-hitting groups in the league, and the Chinnaswamy dimensions keep 200-plus firmly in play.",
+        phase: "Preview",
+        momentum: momentumLabel,
+        projected: String(projectedTotal),
+        pressure: "High on bowlers",
+        projectionRange: projectedLow + "-" + projectedHigh,
+        chaseable: "Yes under lights",
+        requiredRR: Number((projectedTotal / 20).toFixed(1)) + "+ baseline",
+        playerSpotlight: {
+          name: topBatter ? topBatter.name : "Opening-night watch",
+          impact: "Powerplay leverage on a short-square ground",
+          form: topBatter ? String(topBatter.runs) + " recent runs" : "Recent form leader"
+        },
+        turningPoint: "The toss and the first over with the hard new ball.",
+        battingStrategy,
+        bowlingCounter,
+        gameChangers: gameChangers.length ? gameChangers : [state.score.team1, state.score.team2],
+        keyInsights: [
+          "Projected par: " + projectedLow + "-" + projectedHigh,
+          "Venue trend: short square boundaries and fast scoring potential.",
+          "Recent edge: RCB lead the last five meetings 3-2.",
+          "Opening night still looks toss sensitive despite the batting depth on both sides."
+        ],
+        watchouts,
+        timestamp: generatedAt
+      }
     };
   }
 
@@ -607,7 +744,7 @@ function createAiInsights(state) {
   const projectedHigh = projectedTotal + 10;
 
   return {
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     summary: state.score.team1 + " are in the " + phase.label.toLowerCase() + " at " + state.score.team1Score + ", with a projection around " + projectedTotal + " and " + momentumLabel.toLowerCase() + " momentum.",
     prediction: {
       projectedTotal, projectedLow, projectedHigh, fanConfidenceTeam1: fanConfidence, fanConfidenceTeam2: 100 - fanConfidence, pressureIndex, momentumScore, momentumLabel, ballsRemaining, wicketsInHand
@@ -640,12 +777,49 @@ function createAiInsights(state) {
       "Last 6 balls: " + (ballFeedSummary.currentOver.map((event) => event.label).join(" ") || "No feed yet"),
       "Connected viewers: " + ((state.stream && state.stream.viewerCount) || 0),
       "Fan sentiment split: " + fanConfidence + "% / " + (100 - fanConfidence) + "%"
-    ]
+    ],
+    briefing: {
+      summary: state.score.team1 + " " + state.score.team1Score + " after " + (state.score.overs || "0.0") + " overs.",
+      narrative: batsmanName + " is shaping the " + phase.label.toLowerCase() + " while " + bowlerName + " tries to break the tempo before the next swing over.",
+      phase: phase.label,
+      momentum: momentumLabel,
+      projected: String(projectedTotal),
+      pressure: pressureIndex >= 70 ? "High" : pressureIndex >= 55 ? "Rising" : "Manageable",
+      projectionRange: projectedLow + "-" + projectedHigh,
+      chaseable: state.score.target ? (pressureIndex <= 60 ? "Yes" : "Tough but alive") : (projectedTotal >= 180 ? "Above par" : "In range"),
+      requiredRR: state.score.reqRR || "-",
+      playerSpotlight: {
+        name: batsmanName,
+        impact: "Set batter controlling the phase",
+        form: state.score.batsman || "Live batting pulse"
+      },
+      turningPoint: ballFeedSummary.recentWickets > 0 ? "The last wicket changed the over tempo." : "The next over will decide whether the projection surges or stalls.",
+      battingStrategy: phase.key === "death" ? "Keep the set batter on strike and attack straight boundaries without exposing the tail." : "Rotate strike and protect wickets until the launch window opens.",
+      bowlingCounter: "Hit hard lengths, vary pace, and deny width to stop acceleration.",
+      gameChangers: [batsmanName, bowlerName].filter(Boolean),
+      keyInsights: [
+        "Projected range: " + projectedLow + "-" + projectedHigh,
+        "Run rate vs par: " + effectiveRate.toFixed(2) + " vs " + parRunRate.toFixed(2),
+        "Balls remaining: " + ballsRemaining,
+        "Wickets in hand: " + wicketsInHand
+      ],
+      watchouts: ballsRemaining <= 24 ? ["The finish is in a high-volatility zone and one over can swing the projection sharply."] : ["A quiet over will hand momentum back to the fielding side."],
+      timestamp: generatedAt
+    }
   };
 }
 
 function createAiBulletinMessage(state, insights) {
   if (!hasLiveScore(state)) return "AI Bulletin: No live match data is available yet.";
+  if (isPreMatchBuildUp(state)) {
+    const parts = [
+      "AI Bulletin: Opening-night preview for " + state.score.team1 + " vs " + state.score.team2 + ".",
+      insights.summary,
+      insights.assistant && insights.assistant.smartCall ? insights.assistant.smartCall : "",
+      insights.recommendation || ""
+    ].filter(Boolean);
+    return parts.join(" ").slice(0, 500);
+  }
   const parts = [
     "AI Bulletin: " + state.score.team1 + " " + state.score.team1Score + " after " + (state.score.overs || "0") + " overs.",
     insights.summary,
@@ -1026,6 +1200,7 @@ app.put("/api/state", requireAdmin, async (req, res) => {
       upcomingMatches: Array.isArray(body.upcomingMatches) ? body.upcomingMatches.slice(0, 10) : currentState.upcomingMatches,
       recentResults: Array.isArray(body.recentResults) ? body.recentResults.slice(0, 10) : currentState.recentResults,
       ballFeed: Array.isArray(body.ballFeed) ? normalizeBallFeed(body.ballFeed) : currentState.ballFeed,
+      timelineEvents: Array.isArray(body.timelineEvents) ? normalizeTimelineEvents(body.timelineEvents) : currentState.timelineEvents,
       updatedAt: new Date().toISOString()
     };
 

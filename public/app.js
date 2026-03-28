@@ -264,6 +264,24 @@
   let aiRefreshTimer = null;
   let systemNotice = null;
   let systemNoticeTimer = null;
+  let matchCountdownTimer = null;
+  const reactionCounts = Object.create(null);
+  const TEAM_META = {
+    rcb: {
+      names: ["royal challengers bengaluru", "royal challengers bangalore", "royal challengers"],
+      code: "RCB",
+      badgeClass: "team-badge--rcb",
+      textClass: "team-text--rcb",
+      lineupClass: "team-lineup-card--rcb"
+    },
+    srh: {
+      names: ["sunrisers hyderabad", "sunrisers"],
+      code: "SRH",
+      badgeClass: "team-badge--srh",
+      textClass: "team-text--srh",
+      lineupClass: "team-lineup-card--srh"
+    }
+  };
   const fanAlias = getFanAlias();
 
   window.addEventListener("load", init);
@@ -393,6 +411,22 @@
     video.play().catch(function() {});
   };
 
+  window.setReminder = function() {
+    const matchTime = appState && appState.score ? appState.score.matchDateTime : "";
+    if (!matchTime) {
+      showSystemNotice("Match time has not been published yet.");
+      return;
+    }
+    localStorage.setItem("cricketlive_match_reminder", matchTime);
+    showSystemNotice("Reminder saved for " + (appState.score.team1 || "Team 1") + " vs " + (appState.score.team2 || "Team 2") + ".");
+  };
+
+  window.sendReaction = function(emoji) {
+    const key = String(emoji || "🔥");
+    reactionCounts[key] = (reactionCounts[key] || 0) + 1;
+    showSystemNotice(key + " reaction sent · " + reactionCounts[key] + " from this device");
+  };
+
   async function init() {
     // Hide loading screen
     const loadingScreen = document.getElementById("loading-screen");
@@ -447,6 +481,7 @@
       applyFullState(results[0]);
       if (results[1] && results[1].insights) {
         aiInsights = results[1].insights;
+        updateAiSourceBadge(results[1].source);
         renderPredictions();
         renderMatchCentre();
         updateCharts();
@@ -555,6 +590,12 @@
       indicator.textContent = "Updated: " + lastUpdateTime.toLocaleTimeString();
     }
   }
+
+  function updateAiSourceBadge(source) {
+    const badge = document.getElementById("ai-source-badge");
+    if (!badge) return;
+    badge.textContent = "Source: " + String(source || "rule-based").toUpperCase();
+  }
   
   // Update connection status indicator
   function updateConnectionStatus() {
@@ -588,6 +629,7 @@
       const payload = await fetchJson("/ai/insights");
       if (!payload || !payload.insights) return;
       aiInsights = payload.insights;
+      updateAiSourceBadge(payload.source);
       renderPredictions();
       renderMatchCentre();
       updateCharts();
@@ -681,6 +723,7 @@
 
   function renderAll() {
     renderHero();
+    renderMatchTicker();
     renderPromo();
     renderMatchCentre();
     renderMatchCards();
@@ -695,6 +738,7 @@
     renderAnalyticsTables();
     renderNotifications();
     renderAiBriefing();
+    renderStreamMeta();
     updateCharts();
   }
 
@@ -712,6 +756,54 @@
     setText("hero-live-count", liveLabel);
     setText("hero-upcoming-count", upcomingLabel);
     setText("hero-fans-count", fansLabel);
+  }
+
+  function renderMatchTicker() {
+    setText("next-match-teams", (appState.score.team1 || "Team 1") + " vs " + (appState.score.team2 || "Team 2"));
+
+    const countdownEl = document.getElementById("match-countdown");
+    if (!countdownEl) return;
+
+    const matchTime = Date.parse(appState.score.matchDateTime || "");
+    if (!Number.isFinite(matchTime)) {
+      countdownEl.textContent = "TBA";
+      return;
+    }
+
+    if (matchCountdownTimer) clearInterval(matchCountdownTimer);
+
+    const updateCountdown = function() {
+      const diff = matchTime - Date.now();
+      if (diff <= 0) {
+        countdownEl.textContent = (parseScore(appState.score.team1Score).runs > 0 || (appState.ballFeed || []).length) ? "LIVE NOW" : "LIVE BUILD-UP";
+        return;
+      }
+      const totalSeconds = Math.floor(diff / 1000);
+      const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      countdownEl.textContent = hours + ":" + minutes + ":" + seconds;
+    };
+
+    updateCountdown();
+    matchCountdownTimer = setInterval(updateCountdown, 1000);
+  }
+
+  function renderStreamMeta() {
+    setText("stream-title", appState.score.matchTitle || appState.content.matchCenter.league || "Live match");
+
+    const uptimeEl = document.getElementById("stream-uptime");
+    if (!uptimeEl) return;
+    const matchTime = Date.parse(appState.score.matchDateTime || "");
+    if (Number.isFinite(matchTime) && matchTime > Date.now()) {
+      uptimeEl.textContent = "Starts " + new Date(matchTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      return;
+    }
+    if (parseScore(appState.score.team1Score).runs > 0 || (appState.ballFeed || []).length) {
+      uptimeEl.textContent = (appState.score.overs || "0.0") + " overs live";
+      return;
+    }
+    uptimeEl.textContent = appState.stream.status === "live" ? "Build-up live" : "Offline";
   }
 
   function renderPromo() {
@@ -738,12 +830,12 @@
 
     setText("home-match-title", matchCenter.title || FALLBACK_STATE.content.matchCenter.title);
     setText("home-match-league", matchCenter.league || score.matchTitle || FALLBACK_STATE.content.matchCenter.league);
-    setText("home-team1-flag", score.team1Flag || FALLBACK_STATE.score.team1Flag);
+    setHtml("home-team1-flag", renderTeamBadge(score.team1, score.team1Flag || FALLBACK_STATE.score.team1Flag, "team-badge--xl"));
     setText("home-team1-name", score.team1 || FALLBACK_STATE.score.team1);
     setText("home-team1-score", score.team1Score || FALLBACK_STATE.score.team1Score);
     setText("home-overs", (score.overs || FALLBACK_STATE.score.overs) + " overs");
     setText("home-team2-name", score.team2 || matchCenter.team2 || FALLBACK_STATE.score.team2);
-    setText("home-team2-flag", score.team2Flag || matchCenter.team2Flag || FALLBACK_STATE.score.team2Flag);
+    setHtml("home-team2-flag", renderTeamBadge(score.team2 || matchCenter.team2, score.team2Flag || matchCenter.team2Flag || FALLBACK_STATE.score.team2Flag, "team-badge--xl"));
     setText("home-team2-score", score.team2Score || matchCenter.team2Score || "Yet to bat");
     setText("home-target", score.target || matchCenter.target || "Target updates live");
     setText("home-batsman", score.batsman || "Waiting for batter data");
@@ -754,6 +846,8 @@
     setText("home-team2-win", 100 - clampPercent(winProbability) + "%");
     setText("home-team1-short", abbreviateTeam(score.team1 || "Team 1"));
     setText("home-team2-short", abbreviateTeam(score.team2 || matchCenter.team2 || "Team 2"));
+    applyTeamTextTone("home-team1-name", score.team1);
+    applyTeamTextTone("home-team2-name", score.team2 || matchCenter.team2);
 
     const winBar = document.getElementById("home-win-bar");
     if (winBar) winBar.style.width = clampPercent(winProbability) + "%";
@@ -783,9 +877,9 @@
           + '<div class="flex gap-2"><span class="text-xs bg-red-500/30 text-red-300 px-2 py-1 rounded">' + escapeHtml(match.league || "LIVE") + '</span><span class="text-xs bg-orange-500/30 text-orange-300 px-2 py-1 rounded">' + escapeHtml(match.format || "T20") + "</span></div>"
           + "</div>"
           + '<div class="flex items-center justify-between mb-6">'
-          + '<div class="text-center"><span class="text-4xl mb-2 block">' + escapeHtml(match.team1Flag || "T1") + '</span><span class="font-semibold text-sm">' + escapeHtml(match.team1 || "Team 1") + "</span></div>"
+          + '<div class="text-center"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team1, match.team1Flag || "T1", "team-badge--lg") + '</div><span class="font-semibold text-sm ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + "</span></div>"
           + '<div class="flex flex-col items-center gap-2"><span class="text-red-400 live-pulse">LIVE</span><span class="text-lg font-bold text-slate-500">VS</span></div>'
-          + '<div class="text-center"><span class="text-4xl mb-2 block">' + escapeHtml(match.team2Flag || "T2") + '</span><span class="font-semibold text-sm">' + escapeHtml(match.team2 || "Team 2") + "</span></div>"
+          + '<div class="text-center"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--lg") + '</div><span class="font-semibold text-sm ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + "</span></div>"
           + "</div>"
           + '<button onclick="showPage(\'live\')" class="w-full accent-gradient py-3 rounded-xl font-bold hover:opacity-90 transition-all">Watch Live</button>'
           + "</div>";
@@ -797,8 +891,8 @@
       upcomingList.innerHTML = upcomingMatches.length ? upcomingMatches.map(function(match) {
         return ""
           + '<div class="card-gradient rounded-xl p-4 border border-slate-700 flex items-center gap-3">'
-          + '<div class="flex -space-x-2"><span class="text-2xl">' + escapeHtml(match.team1Flag || "T1") + '</span><span class="text-2xl">' + escapeHtml(match.team2Flag || "T2") + "</span></div>"
-          + '<div class="flex-1"><p class="font-semibold">' + escapeHtml((match.team1 || "Team 1") + " vs " + (match.team2 || "Team 2")) + '</p><p class="text-xs text-slate-400">' + escapeHtml(match.date || "TBD") + "</p></div>"
+          + '<div class="flex gap-2"><span>' + renderTeamBadge(match.team1, match.team1Flag || "T1", "team-badge--sm") + '</span><span>' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--sm") + '</span></div>'
+          + '<div class="flex-1"><p class="font-semibold ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + '</p><p class="text-xs ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + '</p><p class="text-xs text-slate-400">' + escapeHtml(match.date || "TBD") + "</p></div>"
           + '<span class="text-xs bg-orange-500/30 text-orange-300 px-2 py-1 rounded">' + escapeHtml(match.format || match.league || "Match") + "</span>"
           + "</div>";
       }).join("") : emptyCard("Upcoming fixtures will appear here.");
@@ -811,9 +905,9 @@
           + '<div class="card-gradient rounded-2xl p-6 border border-slate-700 slide-in" style="animation-delay: ' + (index * 0.08) + 's">'
           + '<div class="flex items-center justify-between mb-4"><span class="text-xs text-slate-400">' + escapeHtml(match.league || "Result") + '</span><span class="text-xs bg-orange-500/30 text-orange-300 px-2 py-1 rounded">' + escapeHtml(match.format || "Match") + "</span></div>"
           + '<div class="flex items-center justify-between mb-4">'
-          + '<div class="text-center"><span class="text-3xl mb-2 block">' + escapeHtml(match.team1Flag || "T1") + '</span><span class="font-semibold text-sm">' + escapeHtml(match.team1 || "Team 1") + "</span></div>"
+          + '<div class="text-center"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team1, match.team1Flag || "T1", "team-badge--sm") + '</div><span class="font-semibold text-sm ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + "</span></div>"
           + '<span class="text-lg font-bold text-slate-500">VS</span>'
-          + '<div class="text-center"><span class="text-3xl mb-2 block">' + escapeHtml(match.team2Flag || "T2") + '</span><span class="font-semibold text-sm">' + escapeHtml(match.team2 || "Team 2") + "</span></div>"
+          + '<div class="text-center"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--sm") + '</div><span class="font-semibold text-sm ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + "</span></div>"
           + "</div>"
           + '<div class="text-center"><p class="text-green-400 font-semibold text-sm mb-1">' + escapeHtml(match.result || "Result pending") + '</p><p class="text-slate-500 text-xs">' + escapeHtml(match.score || "") + "</p></div>"
           + "</div>";
@@ -1037,7 +1131,7 @@
     const viewerCount = document.getElementById("viewer-count");
     if (viewerCount) {
       const count = Number(stream.viewerCount) || 0;
-      viewerCount.textContent = (count > 0 ? compactNumber(count) : "0") + " watching";
+      viewerCount.textContent = count > 0 ? compactNumber(count) + " watching" : (status === "live" ? "Live now" : "0 watching");
     }
 
     if (status !== "live" || !url) {
@@ -1322,7 +1416,7 @@
 
     container.innerHTML = ""
       + '<div class="bg-slate-800 rounded-xl p-4">'
-      + '<div class="flex items-center justify-between mb-3"><span class="font-semibold">' + escapeHtml(score.team1 || "Team 1") + '</span><span class="text-2xl font-bold text-green-400">' + escapeHtml(score.team1Score || "--") + "</span></div>"
+      + '<div class="flex items-center justify-between gap-3 mb-3"><div class="flex items-center gap-3"><span>' + renderTeamBadge(score.team1, score.team1Flag || "T1", "team-badge--sm") + '</span><span class="font-semibold ' + getTeamTextClass(score.team1) + '">' + escapeHtml(score.team1 || "Team 1") + '</span></div><span class="text-2xl font-bold text-green-400">' + escapeHtml(score.team1Score || "--") + "</span></div>"
       + '<div class="flex items-center justify-between text-sm"><span class="text-slate-400">Overs: ' + escapeHtml(score.overs || "0.0") + '</span><span class="text-orange-400 font-semibold">RR: ' + escapeHtml(score.runRate || "0.00") + "</span></div>"
       + "</div>"
       + '<div class="grid grid-cols-2 gap-3">'
@@ -1348,14 +1442,22 @@
 
     const score = appState.score;
     const details = [score.matchTitle, score.venue, score.format].filter(Boolean).join(" | ");
+    const tossSummary = buildTossSummary(score);
+    const team1XI = normalizeTeamList(score.team1XI);
+    const team2XI = normalizeTeamList(score.team2XI);
 
     container.innerHTML = ""
       + '<div class="flex items-center justify-between bg-slate-800 rounded-xl p-4 gap-4">'
-      + '<div class="text-center flex-1"><span class="text-4xl mb-2 block">' + escapeHtml(score.team1Flag || "T1") + '</span><span class="font-bold">' + escapeHtml(score.team1 || "Team 1") + "</span></div>"
+      + '<div class="text-center flex-1"><div class="mb-2 flex justify-center">' + renderTeamBadge(score.team1, score.team1Flag || "T1", "team-badge--lg") + '</div><span class="font-bold ' + getTeamTextClass(score.team1) + '">' + escapeHtml(score.team1 || "Team 1") + "</span></div>"
       + '<div class="text-center flex-1"><span class="text-sm text-slate-400">' + escapeHtml(details || "Live fixture") + '</span><span class="text-2xl font-bold block my-2 text-red-400">VS</span><span class="text-xs text-slate-500">Broadcast synced with admin dashboard</span></div>'
-      + '<div class="text-center flex-1"><span class="text-4xl mb-2 block">' + escapeHtml(score.team2Flag || "T2") + '</span><span class="font-bold">' + escapeHtml(score.team2 || "Team 2") + "</span></div>"
+      + '<div class="text-center flex-1"><div class="mb-2 flex justify-center">' + renderTeamBadge(score.team2, score.team2Flag || "T2", "team-badge--lg") + '</div><span class="font-bold ' + getTeamTextClass(score.team2) + '">' + escapeHtml(score.team2 || "Team 2") + "</span></div>"
       + "</div>"
-      + '<div class="text-sm text-slate-400 text-center">Venue: ' + escapeHtml(score.venue || "Venue updates live") + " | Stream status: " + escapeHtml(appState.stream.status || "offline") + "</div>";
+      + '<div class="grid gap-3 mt-4 md:grid-cols-3">'
+      + '<div class="rounded-xl bg-slate-800 p-4"><div class="text-[11px] uppercase tracking-[0.2em] text-slate-500 mb-1">Toss</div><div class="text-sm text-slate-200">' + escapeHtml(tossSummary) + "</div></div>"
+      + '<div class="rounded-xl bg-slate-800 p-4"><div class="text-[11px] uppercase tracking-[0.2em] text-slate-500 mb-1">Captains</div><div class="text-sm text-slate-200">' + escapeHtml((score.team1Captain || score.team1 || "Team 1") + ' / ' + (score.team2Captain || score.team2 || "Team 2")) + "</div></div>"
+      + '<div class="rounded-xl bg-slate-800 p-4"><div class="text-[11px] uppercase tracking-[0.2em] text-slate-500 mb-1">Match Feed</div><div class="text-sm text-slate-200">Venue: ' + escapeHtml(score.venue || "Venue updates live") + '<br>Stream status: ' + escapeHtml(appState.stream.status || "offline") + "</div></div>"
+      + "</div>"
+      + renderLineupGrid(score.team1, score.team2, team1XI, team2XI);
   }
 
   function renderLiveBallFeed() {
@@ -2009,6 +2111,66 @@
       case "red": return "bg-red-500";
       default: return "bg-orange-500";
     }
+  }
+
+  function getTeamMeta(name) {
+    const normalized = String(name || "").trim().toLowerCase();
+    if (!normalized) return null;
+    for (const key in TEAM_META) {
+      if (TEAM_META[key].names.some(function(alias) { return normalized.indexOf(alias) >= 0; })) {
+        return TEAM_META[key];
+      }
+    }
+    return null;
+  }
+
+  function getTeamTextClass(name) {
+    const meta = getTeamMeta(name);
+    return meta ? meta.textClass : "text-white";
+  }
+
+  function applyTeamTextTone(id, name) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.classList.remove("team-text--rcb", "team-text--srh");
+    const meta = getTeamMeta(name);
+    if (meta && meta.textClass) element.classList.add(meta.textClass);
+  }
+
+  function renderTeamBadge(name, fallbackLabel, sizeClass) {
+    const meta = getTeamMeta(name);
+    const label = meta ? meta.code : (String(fallbackLabel || "").trim() || abbreviateTeam(name || "Team"));
+    return '<span class="team-badge ' + escapeHtml(sizeClass || "") + ' ' + escapeHtml(meta ? meta.badgeClass : "team-badge--neutral") + '">' + escapeHtml(label) + "</span>";
+  }
+
+  function normalizeTeamList(value) {
+    if (Array.isArray(value)) return value.filter(Boolean).map(function(item) { return String(item).trim(); }).filter(Boolean);
+    if (typeof value !== "string") return [];
+    return value.split(/\n|,/).map(function(item) { return item.trim(); }).filter(Boolean);
+  }
+
+  function buildTossSummary(score) {
+    if (!score || !score.tossWinner) return "Toss pending";
+    return score.tossWinner + " won the toss" + (score.tossDecision ? " and chose to " + score.tossDecision : "") + ".";
+  }
+
+  function renderLineupGrid(team1, team2, team1XI, team2XI) {
+    if (!team1XI.length && !team2XI.length) return "";
+    return ""
+      + '<div class="team-lineup-grid mt-4">'
+      + renderLineupCard(team1, team1XI)
+      + renderLineupCard(team2, team2XI)
+      + "</div>";
+  }
+
+  function renderLineupCard(teamName, players) {
+    if (!players.length) return "";
+    const meta = getTeamMeta(teamName);
+    return ""
+      + '<div class="team-lineup-card ' + escapeHtml(meta ? meta.lineupClass : "") + '">'
+      + '<div class="flex items-center gap-3 mb-3"><span>' + renderTeamBadge(teamName, abbreviateTeam(teamName), "team-badge--sm") + '</span><div><div class="text-xs uppercase tracking-[0.2em] text-slate-500">Playing XI</div><div class="font-semibold ' + getTeamTextClass(teamName) + '">' + escapeHtml(teamName || "Team") + "</div></div></div>"
+      + '<div class="text-sm text-slate-300 leading-6">' + escapeHtml(players.join(" | ")) + "</div>"
+      + "</div>";
   }
 
   function abbreviateTeam(name) {

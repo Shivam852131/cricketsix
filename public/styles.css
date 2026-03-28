@@ -882,6 +882,113 @@ h1, h2, h3, h4, h5, h6 {
     background: linear-gradient(90deg, #dc2626 0%, #f97316 100%);
 }
 
+/* ==================== TEAM BRANDING ==================== */
+.team-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3rem;
+    height: 3rem;
+    padding: 0 0.9rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.35);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.team-badge--sm {
+    min-width: 2.35rem;
+    height: 2.35rem;
+    padding: 0 0.6rem;
+    border-radius: 0.8rem;
+    font-size: 0.72rem;
+}
+
+.team-badge--lg {
+    min-width: 3.75rem;
+    height: 3.75rem;
+    padding: 0 1rem;
+    border-radius: 1.15rem;
+    font-size: 1.05rem;
+}
+
+.team-badge--xl {
+    min-width: 4.5rem;
+    height: 4.5rem;
+    padding: 0 1.1rem;
+    border-radius: 1.35rem;
+    font-size: 1.15rem;
+}
+
+.team-badge--rcb {
+    background: linear-gradient(135deg, #8b0000 0%, #dc2626 48%, #111827 100%);
+    box-shadow: 0 14px 28px rgba(127, 29, 29, 0.35);
+}
+
+.team-badge--srh {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 45%, #111827 100%);
+    box-shadow: 0 14px 28px rgba(194, 65, 12, 0.35);
+}
+
+.team-badge--neutral {
+    background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+}
+
+.team-text--rcb {
+    color: #fda4af !important;
+}
+
+.team-text--srh {
+    color: #fdba74 !important;
+}
+
+.team-surface {
+    position: relative;
+    overflow: hidden;
+}
+
+.team-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.18;
+    pointer-events: none;
+}
+
+.team-surface--rcb::before {
+    background: linear-gradient(135deg, rgba(127, 29, 29, 0.9) 0%, rgba(17, 24, 39, 0) 68%);
+}
+
+.team-surface--srh::before {
+    background: linear-gradient(135deg, rgba(194, 65, 12, 0.9) 0%, rgba(17, 24, 39, 0) 68%);
+}
+
+.team-lineup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.team-lineup-card {
+    border-radius: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(15, 23, 42, 0.9);
+    padding: 1rem;
+}
+
+.team-lineup-card--rcb {
+    box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.15);
+}
+
+.team-lineup-card--srh {
+    box-shadow: inset 0 0 0 1px rgba(251, 146, 60, 0.15);
+}
+
 /* ==================== GLASS EFFECT ==================== */
 .glass-effect {
     background: rgba(30, 41, 59, 0.85);

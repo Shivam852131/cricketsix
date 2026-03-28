@@ -429,15 +429,15 @@
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs text-slate-400 mb-1">Team Name</label>
-                                <input type="text" id="overlay-team" placeholder="India" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateScoreOverlay()">
+                                <input type="text" id="overlay-team" placeholder="RCB" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateScoreOverlay()">
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-400 mb-1">Score</label>
-                                <input type="text" id="overlay-score" placeholder="287/6" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateScoreOverlay()">
+                                <input type="text" id="overlay-score" placeholder="176/3" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateScoreOverlay()">
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-400 mb-1">Overs</label>
-                                <input type="text" id="overlay-overs" placeholder="45.3" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateScoreOverlay()">
+                                <input type="text" id="overlay-overs" placeholder="17.2" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateScoreOverlay()">
                             </div>
                         </div>
                         <div class="flex gap-3 mt-3">
@@ -621,40 +621,40 @@
                     <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-4 mb-6 border border-slate-700">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-3">
-                                <span id="score-team1-flag" class="text-3xl">🇮🇳</span>
+                                <span id="score-team1-flag" class="text-3xl">RCB</span>
                                 <div>
-                                    <div id="score-team1-name" class="font-bold text-lg">India</div>
-                                    <div class="text-xs text-slate-400">Batting</div>
+                                    <div id="score-team1-name" class="font-bold text-lg">Royal Challengers Bengaluru</div>
+                                    <div id="score-team1-role" class="text-xs text-slate-400">Batting</div>
                                 </div>
                             </div>
                             <div class="text-center">
-                                <div id="score-display" class="text-4xl font-bold text-green-400">287/6</div>
-                                <div id="overs-display" class="text-lg text-slate-300">45.3 Overs</div>
+                                <div id="score-display" class="text-4xl font-bold text-green-400">176/3</div>
+                                <div id="overs-display" class="text-lg text-slate-300">17.2 Overs</div>
                             </div>
                             <div class="flex items-center gap-3">
                                 <div class="text-right">
-                                    <div id="score-team2-name" class="font-bold text-lg">NZ</div>
-                                    <div class="text-xs text-slate-400">Target: 320</div>
+                                    <div id="score-team2-name" class="font-bold text-lg">Sunrisers Hyderabad</div>
+                                    <div id="score-team2-context" class="text-xs text-slate-400">SRH won toss and bowl</div>
                                 </div>
-                                <span id="score-team2-flag" class="text-3xl">🇳🇿</span>
+                                <span id="score-team2-flag" class="text-3xl">SRH</span>
                             </div>
                         </div>
                         <div class="grid grid-cols-4 gap-3 text-center">
                             <div class="bg-slate-800 rounded-lg p-2">
                                 <div class="text-xs text-slate-400">Run Rate</div>
-                                <div id="rr-display" class="font-bold text-orange-400">6.31</div>
+                                <div id="rr-display" class="font-bold text-orange-400">10.15</div>
                             </div>
                             <div class="bg-slate-800 rounded-lg p-2">
                                 <div class="text-xs text-slate-400">Projected</div>
-                                <div id="proj-display" class="font-bold text-blue-400">316</div>
+                                <div id="proj-display" class="font-bold text-blue-400">203</div>
                             </div>
                             <div class="bg-slate-800 rounded-lg p-2">
                                 <div class="text-xs text-slate-400">Powerplay</div>
-                                <div id="pp-display" class="font-bold text-purple-400">55/1</div>
+                                <div id="pp-display" class="font-bold text-purple-400">63/1</div>
                             </div>
                             <div class="bg-slate-800 rounded-lg p-2">
                                 <div class="text-xs text-slate-400">Last 6 Balls</div>
-                                <div id="last6-display" class="font-bold text-yellow-400">4.6.W.1</div>
+                                <div id="last6-display" class="font-bold text-yellow-400">1.4.Wd.6.1.2</div>
                             </div>
                         </div>
                     </div>
@@ -664,22 +664,22 @@
                         <!-- Team 1 Score -->
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">Team 1 Score</label>
-                            <input type="text" id="live-team1-score" placeholder="287/6" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-xl font-bold text-center" onchange="updateLiveScore()">
+                            <input type="text" id="live-team1-score" placeholder="176/3" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-xl font-bold text-center" onchange="updateLiveScore()">
                         </div>
                         <!-- Overs -->
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">Overs</label>
-                            <input type="text" id="live-overs" placeholder="45.3" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-xl font-bold text-center" onchange="updateLiveScore()">
+                            <input type="text" id="live-overs" placeholder="17.2" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-xl font-bold text-center" onchange="updateLiveScore()">
                         </div>
                         <!-- Run Rate -->
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">Run Rate</label>
-                            <input type="text" id="live-runrate" placeholder="6.31" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-xl font-bold text-center" onchange="updateLiveScore()">
+                            <input type="text" id="live-runrate" placeholder="10.15" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-xl font-bold text-center" onchange="updateLiveScore()">
                         </div>
                         <!-- Target -->
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">Target (2nd Inn)</label>
-                            <input type="text" id="live-target" placeholder="320" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-xl font-bold text-center" onchange="updateLiveScore()">
+                            <input type="text" id="live-target" placeholder="First innings - SRH chose to bowl" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-xl font-bold text-center" onchange="updateLiveScore()">
                         </div>
                     </div>
                     
@@ -687,11 +687,11 @@
                     <div class="grid md:grid-cols-2 gap-4 mb-4">
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">🏏 Batsmen</label>
-                            <input type="text" id="live-batsman" placeholder="Kohli 89*(76)  |  Sharma 45*(52)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-center" onchange="updateLiveScore()">
+                            <input type="text" id="live-batsman" placeholder="Kohli 68*(39) | Patidar 29*(15)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-center" onchange="updateLiveScore()">
                         </div>
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">🎯 Bowler</label>
-                            <input type="text" id="live-bowler" placeholder="Starc 4/45 (8 overs)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-center" onchange="updateLiveScore()">
+                            <input type="text" id="live-bowler" placeholder="Harshal Patel 3.2-0-34-1" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-center" onchange="updateLiveScore()">
                         </div>
                     </div>
                     
@@ -699,11 +699,11 @@
                     <div class="grid md:grid-cols-2 gap-4 mb-4">
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">🤝 Partnership</label>
-                            <input type="text" id="live-partnership" placeholder="Kohli-Sharma: 78 runs" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" onchange="updateLiveScore()">
+                            <input type="text" id="live-partnership" placeholder="Kohli-Patidar: 54 runs off 27" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" onchange="updateLiveScore()">
                         </div>
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">📉 Fall of Wickets</label>
-                            <input type="text" id="live-fow" placeholder="1-45, 2-120, 3-189, 4-245, 5-267, 6-287" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" onchange="updateLiveScore()">
+                            <input type="text" id="live-fow" placeholder="1-48 (Salt, 4.1), 2-96 (Padikkal, 9.3), 3-122 (Jitesh, 12.1)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" onchange="updateLiveScore()">
                         </div>
                     </div>
                     
@@ -722,11 +722,11 @@
                         </div>
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">⚡ Powerplay (PP1)</label>
-                            <input type="text" id="live-pp" placeholder="55/1 (6 overs)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" onchange="updateLiveScore()">
+                            <input type="text" id="live-pp" placeholder="63/1 (6 overs)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" onchange="updateLiveScore()">
                         </div>
                         <div class="bg-slate-900 rounded-xl p-4">
                             <label class="block text-sm text-slate-400 mb-2">🎯 Death Overs (16-20)</label>
-                            <input type="text" id="live-death" placeholder="45/2 (4 overs)" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" onchange="updateLiveScore()">
+                            <input type="text" id="live-death" placeholder="Projected finish: 58 in final 4 overs" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2" onchange="updateLiveScore()">
                         </div>
                     </div>
                     
@@ -765,11 +765,11 @@
                     <div class="grid md:grid-cols-4 gap-4 mb-4">
                         <div class="bg-slate-900 rounded-lg p-3">
                             <label class="block text-xs text-slate-400 mb-1">Extras</label>
-                            <input type="text" id="live-extras" placeholder="12 (wd5, nb2, b3, lb2)" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateLiveScore()">
+                            <input type="text" id="live-extras" placeholder="9 (wd5, nb1, lb3)" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateLiveScore()">
                         </div>
                         <div class="bg-slate-900 rounded-lg p-3">
                             <label class="block text-xs text-slate-400 mb-1">Wickets</label>
-                            <input type="text" id="live-wickets" placeholder="6" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateLiveScore()">
+                            <input type="text" id="live-wickets" placeholder="3" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateLiveScore()">
                         </div>
                         <div class="bg-slate-900 rounded-lg p-3">
                             <label class="block text-xs text-slate-400 mb-1">Total Overs</label>
@@ -777,7 +777,7 @@
                         </div>
                         <div class="bg-slate-900 rounded-lg p-3">
                             <label class="block text-xs text-slate-400 mb-1">Required RR</label>
-                            <input type="text" id="live-req-rr" placeholder="8.50" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateLiveScore()">
+                            <input type="text" id="live-req-rr" placeholder="-" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm" onchange="updateLiveScore()">
                         </div>
                     </div>
                     
@@ -785,6 +785,9 @@
                     <div class="flex gap-3 flex-wrap">
                         <button onclick="updateLiveScore()" class="accent-gradient px-6 py-3 rounded-lg font-bold">
                             ✅ Update Live Score
+                        </button>
+                        <button onclick="loadOpeningNightSimulation()" class="bg-orange-600/20 border border-orange-500 px-4 py-3 rounded-lg font-semibold text-orange-200">
+                            🎮 Load RCB vs SRH Sim
                         </button>
                         <button onclick="resetScore()" class="bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-lg font-semibold">
                             🔄 Reset
@@ -911,15 +914,19 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">Team 1 Name</label>
-                                <input type="text" id="match-team1" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                                <input type="text" id="match-team1" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2" placeholder="Royal Challengers Bengaluru">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">Team 2 Name</label>
-                                <input type="text" id="match-team2" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                                <input type="text" id="match-team2" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2" placeholder="Sunrisers Hyderabad">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <input type="text" id="match-team1-flag" placeholder="Flag (🇮🇳)" class="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
-                                <input type="text" id="match-team2-flag" placeholder="Flag (🇦🇺)" class="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                                <input type="text" id="match-team1-flag" placeholder="Badge (RCB)" class="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                                <input type="text" id="match-team2-flag" placeholder="Badge (SRH)" class="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="match-team1-captain" placeholder="Rajat Patidar (c)" class="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                                <input type="text" id="match-team2-captain" placeholder="Ishan Kishan (c)" class="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
                             </div>
                         </div>
                     </div>
@@ -928,13 +935,13 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">Match Title</label>
-                                <input type="text" id="match-title" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                                <input type="text" id="match-title" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2" placeholder="IPL 2026 - Match 1, Opening Night">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">Tournament</label>
                                 <select id="match-tournament" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
-                                    <option>T20 World Cup 2026</option>
                                     <option>IPL 2026</option>
+                                    <option>T20 World Cup 2026</option>
                                     <option>BBL 2024-25</option>
                                     <option>PSL 2024</option>
                                 </select>
@@ -947,10 +954,38 @@
                                     <option>Test</option>
                                 </select>
                             </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Venue</label>
+                                <input type="text" id="match-venue" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2" placeholder="M Chinnaswamy Stadium, Bengaluru">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Match Time</label>
+                                <input type="datetime-local" id="match-datetime" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Toss Winner</label>
+                                <input type="text" id="match-toss-winner" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2" placeholder="Sunrisers Hyderabad">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">Toss Decision</label>
+                                <select id="match-toss-decision" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2">
+                                    <option value="">Pending</option>
+                                    <option value="bat">Bat</option>
+                                    <option value="bowl">Bowl</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm text-slate-400 mb-2">Team 1 Playing XI</label>
+                                <textarea id="match-team1-xi" rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3" placeholder="Phil Salt&#10;Virat Kohli&#10;Devdutt Padikkal&#10;Rajat Patidar"></textarea>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm text-slate-400 mb-2">Team 2 Playing XI</label>
+                                <textarea id="match-team2-xi" rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3" placeholder="Abhishek Sharma&#10;Travis Head&#10;Ishan Kishan&#10;Heinrich Klaasen"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <button onclick="saveMatch()" class="accent-gradient w-full py-3 rounded-lg font-bold">💾 Save Match Settings</button>
+                <button onclick="saveMatch()" class="accent-gradient w-full py-3 rounded-lg font-bold">💾 Save Match Settings & XIs</button>
             </div>
 
             <!-- Live Score Tab -->
@@ -1573,6 +1608,160 @@
             if (element) element.innerText = value;
         }
 
+        const ADMIN_TEAM_META = {
+            rcb: {
+                names: ['royal challengers bengaluru', 'royal challengers bangalore', 'royal challengers'],
+                code: 'RCB',
+                badgeClass: 'team-badge--rcb',
+                textClass: 'team-text--rcb'
+            },
+            srh: {
+                names: ['sunrisers hyderabad', 'sunrisers'],
+                code: 'SRH',
+                badgeClass: 'team-badge--srh',
+                textClass: 'team-text--srh'
+            }
+        };
+
+        const OPENING_NIGHT_SIMULATION = {
+            score: {
+                team1: 'Royal Challengers Bengaluru',
+                team2: 'Sunrisers Hyderabad',
+                team1Flag: 'RCB',
+                team2Flag: 'SRH',
+                team1Captain: 'Rajat Patidar (c)',
+                team2Captain: 'Ishan Kishan (c)',
+                team1XI: ['Phil Salt', 'Virat Kohli', 'Devdutt Padikkal', 'Rajat Patidar (c)', 'Jitesh Sharma (wk)', 'Tim David', 'Krunal Pandya', 'Romario Shepherd', 'Bhuvneshwar Kumar', 'Suyash Sharma', 'Jacob Duffy'],
+                team2XI: ['Abhishek Sharma', 'Travis Head', 'Ishan Kishan (c/wk)', 'Heinrich Klaasen', 'Nitish Kumar Reddy', 'Liam Livingstone', 'Aniket Verma', 'Harshal Patel', 'Jaydev Unadkat', 'Harsh Dubey', 'Eshan Malinga'],
+                matchTitle: 'IPL 2026 - Match 1, RCB vs SRH',
+                league: 'IPL 2026',
+                format: 'T20',
+                venue: 'M Chinnaswamy Stadium, Bengaluru',
+                matchDateTime: '2026-03-28T19:30:00+05:30',
+                tossWinner: 'Sunrisers Hyderabad',
+                tossDecision: 'bowl',
+                team1Score: '176/3',
+                team2Score: 'Yet to bat',
+                overs: '17.2',
+                batsman: 'Virat Kohli 68* (39) | Rajat Patidar 29* (15)',
+                bowler: 'Harshal Patel 3.2-0-34-1',
+                runRate: '10.15',
+                target: 'First innings in progress - SRH chose to bowl',
+                partnership: 'Kohli-Patidar: 54 off 27',
+                fow: '1-48 (Salt, 4.1), 2-96 (Padikkal, 9.3), 3-122 (Jitesh, 12.1)',
+                pp: '63/1 (6)',
+                death: 'Projected finish: 54 in the final 2.4 overs',
+                extras: '9 (wd5, nb1, lb3)',
+                wickets: '3',
+                totalOvers: '20',
+                reqRR: '-'
+            },
+            ballFeed: [
+                { id: 'sim-1', type: 'single', label: '1', runs: 1, wickets: 0, legal: true, over: '16.4', timestamp: '2026-03-28T21:40:00+05:30' },
+                { id: 'sim-2', type: 'four', label: '4', runs: 4, wickets: 0, legal: true, over: '16.5', timestamp: '2026-03-28T21:41:00+05:30' },
+                { id: 'sim-3', type: 'wide', label: 'Wd', runs: 1, wickets: 0, legal: false, over: '17.0', timestamp: '2026-03-28T21:42:00+05:30' },
+                { id: 'sim-4', type: 'six', label: '6', runs: 6, wickets: 0, legal: true, over: '17.0', timestamp: '2026-03-28T21:42:20+05:30' },
+                { id: 'sim-5', type: 'single', label: '1', runs: 1, wickets: 0, legal: true, over: '17.1', timestamp: '2026-03-28T21:43:00+05:30' },
+                { id: 'sim-6', type: 'run', label: '2', runs: 2, wickets: 0, legal: true, over: '17.2', timestamp: '2026-03-28T21:43:32+05:30' }
+            ],
+            timelineEvents: [
+                { title: 'Toss', detail: 'Sunrisers Hyderabad win the toss and choose to bowl first under lights at the Chinnaswamy.', type: 'milestone', badge: 'TOSS', over: 'Pre' },
+                { title: 'Playing XIs In', detail: 'RCB go with Salt and Kohli at the top while SRH unleash Head, Abhishek and Kishan.', type: 'alert', badge: 'XI', over: 'Pre' },
+                { title: 'Powerplay Surge', detail: 'RCB rocket to 63/1 in the powerplay with Kohli controlling tempo after Salt\'s fast start.', type: 'milestone', badge: 'PP', over: '6.0' },
+                { title: 'Launch Over', detail: 'RCB cash in with 15 from the over to move to 176/3 and set up a 200-plus finish.', type: 'boundary', badge: 'SURGE', over: '17.2' }
+            ]
+        };
+
+        function getAdminTeamMeta(name = '') {
+            const normalized = String(name).trim().toLowerCase();
+            return Object.values(ADMIN_TEAM_META).find(meta => meta.names.some(alias => normalized.includes(alias))) || null;
+        }
+
+        function getAdminTeamCode(name = '', fallback = '') {
+            const meta = getAdminTeamMeta(name);
+            if (meta) return meta.code;
+            const fallbackText = String(fallback || '').trim();
+            if (fallbackText) return fallbackText;
+            return String(name || 'TEAM').split(/\s+/).filter(Boolean).slice(0, 3).map(token => token[0]).join('').toUpperCase() || 'TEAM';
+        }
+
+        function renderAdminTeamBadge(name = '', fallback = '') {
+            const meta = getAdminTeamMeta(name);
+            return `<span class="team-badge team-badge--sm ${meta ? meta.badgeClass : 'team-badge--neutral'}">${escapeHtml(getAdminTeamCode(name, fallback))}</span>`;
+        }
+
+        function applyAdminTeamTone(id, teamName) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('team-text--rcb', 'team-text--srh');
+            const meta = getAdminTeamMeta(teamName);
+            if (meta) el.classList.add(meta.textClass);
+        }
+
+        function normalizeAdminList(value) {
+            if (Array.isArray(value)) return value.filter(Boolean).map(item => String(item).trim()).filter(Boolean);
+            return String(value || '').split(/\n|,/).map(item => item.trim()).filter(Boolean);
+        }
+
+        function formatDateTimeLocal(value) {
+            const date = value ? new Date(value) : null;
+            if (!date || Number.isNaN(date.getTime())) return '';
+            const pad = number => String(number).padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        }
+
+        function hydrateScoreEditor(score = {}, feed = []) {
+            const team1 = score.team1 || document.getElementById('match-team1').value || 'Team 1';
+            const team2 = score.team2 || document.getElementById('match-team2').value || 'Team 2';
+
+            document.getElementById('score-team1-flag').innerHTML = renderAdminTeamBadge(team1, score.team1Flag);
+            document.getElementById('score-team2-flag').innerHTML = renderAdminTeamBadge(team2, score.team2Flag);
+            setText('score-team1-name', team1);
+            setText('score-team2-name', team2);
+            applyAdminTeamTone('score-team1-name', team1);
+            applyAdminTeamTone('score-team2-name', team2);
+            setText('score-team1-role', score.team1Score ? 'Batting' : 'Awaiting start');
+            setText('score-team2-context', score.target || (score.tossWinner ? `${score.tossWinner} won toss and ${score.tossDecision}` : 'Toss pending'));
+
+            document.getElementById('live-team1-score').value = score.team1Score || '';
+            document.getElementById('live-overs').value = score.overs || '';
+            document.getElementById('live-runrate').value = score.runRate || '';
+            document.getElementById('live-target').value = score.target || '';
+            document.getElementById('live-batsman').value = score.batsman || '';
+            document.getElementById('live-bowler').value = score.bowler || '';
+            document.getElementById('live-partnership').value = score.partnership || '';
+            document.getElementById('live-fow').value = score.fow || '';
+            document.getElementById('live-pp').value = score.pp || '';
+            document.getElementById('live-death').value = score.death || '';
+            document.getElementById('live-extras').value = score.extras || '';
+            document.getElementById('live-wickets').value = score.wickets || '';
+            document.getElementById('live-total-overs').value = score.totalOvers || '';
+            document.getElementById('live-req-rr').value = score.reqRR || '';
+
+            const scoreMatch = String(score.team1Score || '0/0').match(/^(\d+)(?:\/(\d+))?/);
+            const oversMatch = String(score.overs || '0.0').match(/^(\d+)(?:\.(\d))?$/);
+            currentScore = {
+                runs: scoreMatch ? parseInt(scoreMatch[1], 10) || 0 : 0,
+                wickets: scoreMatch && scoreMatch[2] ? parseInt(scoreMatch[2], 10) || 0 : 0,
+                overs: oversMatch ? parseInt(oversMatch[1], 10) || 0 : 0,
+                balls: oversMatch && oversMatch[2] ? parseInt(oversMatch[2], 10) || 0 : 0,
+                extras: parseInt(String(score.extras || '0').match(/\d+/)?.[0] || '0', 10) || 0
+            };
+            window.ballFeedData = Array.isArray(feed) ? feed.slice() : [];
+            ballHistory = window.ballFeedData.map(event => ({
+                runs: Number(event.runs) || 0,
+                wicket: Boolean(event.wickets),
+                extra: !event.legal ? event.type : '',
+                over: event.over || ''
+            }));
+            last6Balls = window.ballFeedData.slice(-6).map(event => event.label || '.');
+            updateScoreDisplay();
+            updateBallHistory();
+            renderBallFeedPreview(window.ballFeedData);
+            setText('pp-display', score.pp || '--');
+            setText('score-ai-summary', score.target || 'Simulation loaded.');
+        }
+
         const CMS_COLLECTIONS = {
             statsMetrics: {
                 storage: 'statsMetricsData',
@@ -1880,7 +2069,17 @@
             document.getElementById('match-team2').value = state.score?.team2 || '';
             document.getElementById('match-team1-flag').value = state.score?.team1Flag || '';
             document.getElementById('match-team2-flag').value = state.score?.team2Flag || '';
+            document.getElementById('match-team1-captain').value = state.score?.team1Captain || '';
+            document.getElementById('match-team2-captain').value = state.score?.team2Captain || '';
+            document.getElementById('match-team1-xi').value = normalizeAdminList(state.score?.team1XI).join('\n');
+            document.getElementById('match-team2-xi').value = normalizeAdminList(state.score?.team2XI).join('\n');
             document.getElementById('match-title').value = state.score?.matchTitle || '';
+            document.getElementById('match-tournament').value = state.score?.league || 'IPL 2026';
+            document.getElementById('match-format').value = state.score?.format || 'T20';
+            document.getElementById('match-venue').value = state.score?.venue || '';
+            document.getElementById('match-datetime').value = formatDateTimeLocal(state.score?.matchDateTime);
+            document.getElementById('match-toss-winner').value = state.score?.tossWinner || '';
+            document.getElementById('match-toss-decision').value = state.score?.tossDecision || '';
             
             // Score
             document.getElementById('score-team1').value = state.score?.team1Score || '';
@@ -2002,6 +2201,7 @@
 
             window.ballFeedData = state.ballFeed || [];
             renderBallFeedPreview(window.ballFeedData);
+            hydrateScoreEditor(state.score || {}, state.ballFeed || []);
             
             // Chat
             renderChat(state.chatMessages || []);
@@ -3102,6 +3302,8 @@
                     }))
                 })
             });
+
+            setText('score-team2-context', target || 'Live update saved');
             
             logActivity('Live score updated: ' + team1Score + ' in ' + overs + ' overs');
         }
@@ -3166,11 +3368,71 @@
                         team2: document.getElementById('match-team2').value,
                         team1Flag: document.getElementById('match-team1-flag').value,
                         team2Flag: document.getElementById('match-team2-flag').value,
-                        matchTitle: document.getElementById('match-title').value
+                        team1Captain: document.getElementById('match-team1-captain').value,
+                        team2Captain: document.getElementById('match-team2-captain').value,
+                        team1XI: normalizeAdminList(document.getElementById('match-team1-xi').value),
+                        team2XI: normalizeAdminList(document.getElementById('match-team2-xi').value),
+                        matchTitle: document.getElementById('match-title').value,
+                        league: document.getElementById('match-tournament').value,
+                        format: document.getElementById('match-format').value,
+                        venue: document.getElementById('match-venue').value,
+                        matchDateTime: document.getElementById('match-datetime').value ? new Date(document.getElementById('match-datetime').value).toISOString() : '',
+                        tossWinner: document.getElementById('match-toss-winner').value,
+                        tossDecision: document.getElementById('match-toss-decision').value
                     }
                 })
             });
+            await loadState();
             logActivity('Match settings updated');
+        }
+
+        async function loadOpeningNightSimulation() {
+            const sim = OPENING_NIGHT_SIMULATION;
+            document.getElementById('match-team1').value = sim.score.team1;
+            document.getElementById('match-team2').value = sim.score.team2;
+            document.getElementById('match-team1-flag').value = sim.score.team1Flag;
+            document.getElementById('match-team2-flag').value = sim.score.team2Flag;
+            document.getElementById('match-team1-captain').value = sim.score.team1Captain;
+            document.getElementById('match-team2-captain').value = sim.score.team2Captain;
+            document.getElementById('match-team1-xi').value = sim.score.team1XI.join('\n');
+            document.getElementById('match-team2-xi').value = sim.score.team2XI.join('\n');
+            document.getElementById('match-title').value = sim.score.matchTitle;
+            document.getElementById('match-tournament').value = sim.score.league;
+            document.getElementById('match-format').value = sim.score.format;
+            document.getElementById('match-venue').value = sim.score.venue;
+            document.getElementById('match-datetime').value = formatDateTimeLocal(sim.score.matchDateTime);
+            document.getElementById('match-toss-winner').value = sim.score.tossWinner;
+            document.getElementById('match-toss-decision').value = sim.score.tossDecision;
+
+            await apiCall('/state', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    currentScore: sim.score,
+                    ballFeed: sim.ballFeed,
+                    timelineEvents: sim.timelineEvents,
+                    content: {
+                        matchCenter: {
+                            title: 'MATCH CENTRE · LIVE',
+                            league: 'IPL 2026 | Match 1 | Bengaluru',
+                            team2: sim.score.team2,
+                            team2Score: 'Yet to bat',
+                            team2Flag: sim.score.team2Flag,
+                            target: 'Projected finish: 202-210',
+                            winProbabilityTeam1: 53,
+                            projectedTotal: 206
+                        }
+                    },
+                    poll: {
+                        question: 'Opening-night pick: who closes stronger from here?',
+                        votes: { team1: 18240, team2: 16790 }
+                    }
+                })
+            });
+
+            await loadState();
+            await refreshAiBriefing();
+            logActivity('RCB vs SRH opening-night simulation loaded', 'success');
+            showToast('Opening-night simulation applied', 'success');
         }
 
         // Score

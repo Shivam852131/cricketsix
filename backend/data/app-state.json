@@ -1,397 +1,299 @@
 {
   "stream": {
-    "url": "https://youtu.be/dQw4w9WgXcQ",
-    "platform": "youtube",
+    "url": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerJoyrides.mp4",
+    "platform": "video",
     "status": "live",
-    "viewerCount": 6
+    "viewerCount": 0
   },
   "score": {
-    "team1": "India",
-    "team2": "NZ",
-    "matchTitle": "T20 World Cup 2026 - Final",
-    "team1Score": "24",
-    "team2Score": "",
-    "overs": "0.5",
-    "batsman": "",
-    "bowler": "",
-    "runRate": "0.00",
-    "team1Flag": "🇮🇳",
-    "team2Flag": "NZ",
-    "venue": "",
-    "target": "",
-    "league": "",
-    "format": "",
-    "totalOvers": "",
-    "powerplayOvers": "",
-    "matchDateTime": "",
-    "tossWinner": "",
-    "tossDecision": "",
-    "partnership": "",
-    "fow": "",
-    "pp": "",
-    "death": "",
-    "extras": "",
-    "wickets": "",
-    "reqRR": ""
+    "team1": "Royal Challengers Bengaluru",
+    "team2": "Sunrisers Hyderabad",
+    "matchTitle": "IPL 2026 - Match 1, RCB vs SRH",
+    "team1Score": "176/3",
+    "team2Score": "Yet to bat",
+    "overs": "17.2",
+    "batsman": "Virat Kohli 68* (39) | Rajat Patidar 29* (15)",
+    "bowler": "Harshal Patel 3.2-0-34-1",
+    "runRate": "10.15",
+    "team1Flag": "RCB",
+    "team2Flag": "SRH",
+    "venue": "M Chinnaswamy Stadium, Bengaluru",
+    "target": "First innings in progress - SRH chose to bowl",
+    "league": "IPL 2026",
+    "format": "T20",
+    "totalOvers": "20",
+    "powerplayOvers": "6",
+    "matchDateTime": "2026-03-28T19:30:00+05:30",
+    "tossWinner": "Sunrisers Hyderabad",
+    "tossDecision": "bowl",
+    "partnership": "Kohli-Patidar: 54 off 27",
+    "fow": "1-48 (Salt, 4.1), 2-96 (Padikkal, 9.3), 3-122 (Jitesh, 12.1)",
+    "pp": "63/1 (6)",
+    "death": "Projected finish: 54 in the last 2.4 overs",
+    "extras": "9 (wd5, nb1, lb3)",
+    "wickets": "3",
+    "reqRR": "-",
+    "team1Captain": "Rajat Patidar (c)",
+    "team2Captain": "Ishan Kishan (c)",
+    "team1XI": [
+      "Phil Salt",
+      "Virat Kohli",
+      "Devdutt Padikkal",
+      "Rajat Patidar (c)",
+      "Jitesh Sharma (wk)",
+      "Tim David",
+      "Krunal Pandya",
+      "Romario Shepherd",
+      "Bhuvneshwar Kumar",
+      "Suyash Sharma",
+      "Jacob Duffy"
+    ],
+    "team2XI": [
+      "Abhishek Sharma",
+      "Travis Head",
+      "Ishan Kishan (c/wk)",
+      "Heinrich Klaasen",
+      "Nitish Kumar Reddy",
+      "Liam Livingstone",
+      "Aniket Verma",
+      "Harshal Patel",
+      "Jaydev Unadkat",
+      "Harsh Dubey",
+      "Eshan Malinga"
+    ]
   },
   "chatMessages": [
     {
       "id": "seed-1",
-      "username": "RohitFan",
-      "content": "What a six!",
-      "timestamp": "2026-03-10T11:05:20.790Z"
+      "username": "RCBArmy",
+      "content": "Kohli has paced this brilliantly. 200 is right there if RCB nail the last 16 balls.",
+      "timestamp": "2026-03-28T21:38:00+05:30"
     },
     {
       "id": "seed-2",
-      "username": "Starc_42",
-      "content": "Need 20 off 12",
-      "timestamp": "2026-03-10T11:05:20.791Z"
+      "username": "OrangeWave",
+      "content": "Harshal needs one smart over. SRH still keep this under control if they close with yorkers.",
+      "timestamp": "2026-03-28T21:40:00+05:30"
     },
     {
       "id": "seed-3",
-      "username": "Kohli_18",
-      "content": "King Kohli",
-      "timestamp": "2026-03-10T11:05:20.791Z"
+      "username": "PitchRadar",
+      "content": "The toss call already looks right. Dew plus these boundaries means SRH will back the chase hard.",
+      "timestamp": "2026-03-28T21:42:00+05:30"
     },
     {
-      "id": "1773160133175-fp24k9",
-      "username": "Admin",
-      "content": "hi",
-      "timestamp": "2026-03-10T16:28:53.175Z"
-    },
-    {
-      "id": "1773164347657-w7znkb",
-      "username": "AI Analyst",
-      "content": "AI Bulletin: India 293/6 after 46.2 overs. India are in the death overs at 293/6, with a projection around 316 and steady edge momentum. Projected finish: 316. Momentum is in hand. Press the advantage by attacking the weaker side of the field for the next over.",
-      "timestamp": "2026-03-10T17:39:07.657Z"
-    },
-    {
-      "id": "1773166644438-ph58yy",
-      "username": "AI Analyst",
-      "content": "AI Bulletin: India 293/6 after 46.2 overs. India are in the death overs at 293/6, with a projection around 316 and steady edge momentum. Projected finish: 316. Momentum is in hand. Press the advantage by attacking the weaker side of the field for the next over.",
-      "timestamp": "2026-03-10T18:17:24.438Z"
-    },
-    {
-      "id": "1773166722554-qmq7rj",
-      "username": "AI Analyst",
-      "content": "AI Bulletin: India 293/6 after 46.2 overs. India are in the death overs at 293/6, with a projection around 316 and steady edge momentum. Projected finish: 316. Momentum is in hand. Press the advantage by attacking the weaker side of the field for the next over.",
-      "timestamp": "2026-03-10T18:18:42.554Z"
-    },
-    {
-      "id": "1773244096573-xb29ay",
-      "username": "Admin",
-      "content": "hi",
-      "timestamp": "2026-03-11T15:48:16.573Z"
-    },
-    {
-      "id": "1773245948413-tck198",
-      "username": "Admin",
-      "content": "hi",
-      "timestamp": "2026-03-11T16:19:08.413Z"
-    },
-    {
-      "id": "1773249153737-w2tj84",
-      "username": "Fan471",
-      "content": "hi",
-      "timestamp": "2026-03-11T17:12:33.737Z"
-    },
-    {
-      "id": "1773249164263-kg91bj",
-      "username": "Fan471",
-      "content": "djfhd",
-      "timestamp": "2026-03-11T17:12:44.263Z"
-    },
-    {
-      "id": "1773253409051-x8fpl6",
-      "username": "AI Analyst",
-      "content": "AI Bulletin: No live match data is available yet.",
-      "timestamp": "2026-03-11T18:23:29.051Z"
-    },
-    {
-      "id": "1773429148630-peozvy",
-      "username": "Fan823",
-      "content": "hi",
-      "timestamp": "2026-03-13T19:12:28.630Z"
-    },
-    {
-      "id": "1773502845200-ah1txi",
-      "username": "Fan179",
-      "content": "hi",
-      "timestamp": "2026-03-14T21:10:45.200535"
-    },
-    {
-      "id": "1773502846551-06a8sz",
-      "username": "Fan179",
-      "content": "hi",
-      "timestamp": "2026-03-14T21:10:46.551570"
-    },
-    {
-      "id": "1773502846876-sqfoec",
-      "username": "Fan179",
-      "content": "hi",
-      "timestamp": "2026-03-14T21:10:46.877020"
-    },
-    {
-      "id": "1773502847064-jfmduk",
-      "username": "Fan179",
-      "content": "hi",
-      "timestamp": "2026-03-14T21:10:47.064733"
-    },
-    {
-      "id": "1773503158062-nvj3fj",
-      "username": "Fan179",
-      "content": "hi",
-      "timestamp": "2026-03-14T21:15:58.062932"
-    },
-    {
-      "id": "1773503946533-uipnwi",
-      "username": "Fan212",
-      "content": "hi",
-      "timestamp": "2026-03-14T21:29:06.533280"
-    },
-    {
-      "id": "1773508438094-zqin6d",
-      "username": "Fan401",
-      "content": "hi",
-      "timestamp": "2026-03-14T17:13:58.094Z"
-    },
-    {
-      "id": "1773676020397-wo59vj",
-      "username": "Fan542",
-      "content": "hi",
-      "timestamp": "2026-03-16T15:47:00.398Z"
-    },
-    {
-      "id": "1773676020472-1nojid",
-      "username": "Fan542",
-      "content": "hi",
-      "timestamp": "2026-03-16T15:47:00.472Z"
-    },
-    {
-      "id": "1773676020537-98jden",
-      "username": "Fan542",
-      "content": "hi",
-      "timestamp": "2026-03-16T15:47:00.537Z"
-    },
-    {
-      "id": "1773676831602-gwbwuq",
-      "username": "Fan403",
-      "content": "hi",
-      "timestamp": "2026-03-16T16:00:31.602Z"
-    },
-    {
-      "id": "1773677067379-31emkc",
-      "username": "Fan403",
-      "content": "hi",
-      "timestamp": "2026-03-16T16:04:27.379Z"
-    },
-    {
-      "id": "1773680370864-oqr3qn",
-      "username": "Fan719",
-      "content": "hi",
-      "timestamp": "2026-03-16T16:59:30.864Z"
+      "id": "seed-4",
+      "username": "NeutralAnalyst",
+      "content": "RCB have recovered well after 122/3. The Patidar-Kohli stand has reset the launch pad.",
+      "timestamp": "2026-03-28T21:44:00+05:30"
     }
   ],
   "poll": {
-    "question": "",
+    "question": "Opening-night pick: who closes stronger from here?",
     "votes": {
-      "team1": 0,
-      "team2": 0
+      "team1": 18240,
+      "team2": 16790
     }
   },
   "content": {
     "hero": {
-      "badge": "IPL 2026 FINAL",
-      "title": "CRICKET FEVER",
-      "subtitle": "Watch live matches now",
-      "ctaPrimary": "Watch Now",
-      "ctaSecondary": "Predictions",
+      "badge": "IPL 2026 OPENING NIGHT",
+      "title": "RCB vs SRH\nLive Match Command Centre",
+      "subtitle": "Track the season opener with toss context, playing XIs, live score pressure points, and AI-driven match intelligence from Bengaluru.",
+      "ctaPrimary": "Watch Live Feed",
+      "ctaSecondary": "See Match Edge",
       "liveMatches": "",
       "upcomingMatches": "",
-      "fansOnline": "2.4M Fans Online"
+      "fansOnline": "Opening-night buzz across India"
     },
     "matchCenter": {
-      "title": " CRICKET CENTRE",
-      "league": "IPL 2026 FINAL",
-      "team2": "NZ",
-      "team2Score": "180/1",
-      "team2Flag": "NZ",
-      "target": "target: 220",
-      "winProbabilityTeam1": 100,
-      "projectedTotal": 250
+      "title": "MATCH CENTRE · LIVE",
+      "league": "IPL 2026 | Match 1 | Bengaluru",
+      "team2": "Sunrisers Hyderabad",
+      "team2Score": "Yet to bat",
+      "team2Flag": "SRH",
+      "target": "Projected finish: 202-210",
+      "winProbabilityTeam1": 53,
+      "projectedTotal": 206
     },
     "quickActions": {
-      "scorecard": "Full Scorecard",
-      "analytics": "Analytics",
-      "highlights": "Highlights"
+      "scorecard": "Playing XIs",
+      "analytics": "Phase Split",
+      "highlights": "Live Moments"
     },
     "sections": {
-      "liveMatchesTitle": "LIVE MATCHES",
-      "upcomingTitle": "",
-      "resultsTitle": "",
-      "performersTitle": ""
+      "liveMatchesTitle": "OPENING NIGHT LIVE",
+      "upcomingTitle": "IPL 2026 NEXT UP",
+      "resultsTitle": "2025 FORM GUIDE",
+      "performersTitle": "RCB vs SRH MATCH LEADERS"
     },
     "promo": {
-      "title": "",
-      "subtitle": "",
-      "primaryLabel": "",
-      "secondaryLabel": ""
+      "title": "GET IPL 2026 MATCH ALERTS",
+      "subtitle": "Track toss, playing XIs, phase shifts, and late-innings surges all season long.",
+      "primaryLabel": "Season Alerts",
+      "secondaryLabel": "Squad Tracker"
     },
     "performers": {
       "batsmen": [
-        {
-          "rank": 1,
-          "name": "Virat Kohli",
-          "team": "IND",
-          "runs": 289
-        },
-        {
-          "rank": 2,
-          "name": "David Warner",
-          "team": "AUS",
-          "runs": 276
-        },
-        {
-          "rank": 3,
-          "name": "Jos Buttler",
-          "team": "ENG",
-          "runs": 245
-        },
-        {
-          "rank": 4,
-          "name": "Suryakumar Yadav",
-          "team": "IND",
-          "runs": 212
-        }
+        { "rank": 1, "name": "Virat Kohli", "team": "RCB", "runs": 68 },
+        { "rank": 2, "name": "Phil Salt", "team": "RCB", "runs": 37 },
+        { "rank": 3, "name": "Rajat Patidar", "team": "RCB", "runs": 29 },
+        { "rank": 4, "name": "Heinrich Klaasen", "team": "SRH", "runs": 0 }
       ],
       "bowlers": [
-        {
-          "rank": 1,
-          "name": "Mitchell Starc",
-          "team": "AUS",
-          "wickets": 14
-        },
-        {
-          "rank": 2,
-          "name": "Pat Cummins",
-          "team": "AUS",
-          "wickets": 11
-        },
-        {
-          "rank": 3,
-          "name": "Jasprit Bumrah",
-          "team": "IND",
-          "wickets": 10
-        },
-        {
-          "rank": 4,
-          "name": "Adil Rashid",
-          "team": "ENG",
-          "wickets": 9
-        }
+        { "rank": 1, "name": "Harshal Patel", "team": "SRH", "wickets": 1 },
+        { "rank": 2, "name": "Eshan Malinga", "team": "SRH", "wickets": 1 },
+        { "rank": 3, "name": "Bhuvneshwar Kumar", "team": "RCB", "wickets": 0 },
+        { "rank": 4, "name": "Krunal Pandya", "team": "RCB", "wickets": 0 }
       ]
     },
     "stats": {
       "highestScore": {
-        "label": "",
-        "value": "",
-        "subtitle": ""
+        "label": "Top score so far",
+        "value": "68*",
+        "subtitle": "Virat Kohli controlling the launch phase"
       },
       "bestBowling": {
-        "label": "",
-        "value": "",
-        "subtitle": ""
+        "label": "Best figures",
+        "value": "3.2-0-34-1",
+        "subtitle": "Harshal Patel still owns the death-over leverage"
       },
-      "keyMetrics": [],
+      "keyMetrics": [
+        { "label": "Powerplay", "value": "63/1", "tone": "orange" },
+        { "label": "Runs off last 12", "value": "24", "tone": "green" },
+        { "label": "Boundary count", "value": "16", "tone": "red" },
+        { "label": "Projected total", "value": "206", "tone": "blue" },
+        { "label": "Win edge", "value": "RCB 53%", "tone": "green" }
+      ],
       "momentum": {
-        "title": "",
-        "label": "",
-        "percent": 0
+        "title": "Opening Night Pulse",
+        "label": "RCB have the edge, but one SRH over can still drag the total back under 200.",
+        "percent": 57
       }
     },
     "predictions": {
       "expert": {
-        "title": "",
-        "winner": "",
-        "subtitle": "",
-        "note": ""
+        "title": "Live Match Edge",
+        "winner": "RCB slightly ahead",
+        "subtitle": "SRH still hold chase upside because of dew and batting depth",
+        "note": "The toss has already helped Hyderabad, but Kohli and Patidar have rebuilt enough for RCB to target a premium finish."
       },
-      "playerForm": [],
-      "scoreLines": []
+      "playerForm": [
+        { "name": "Virat Kohli", "status": "Set anchor", "tone": "green", "detail": "68* off 39 with full control over pace and match shape." },
+        { "name": "Rajat Patidar", "status": "Launch support", "tone": "orange", "detail": "29* off 15 has reopened the 200-plus route." },
+        { "name": "Harshal Patel", "status": "Death test", "tone": "blue", "detail": "His final spell likely decides whether this ends near 198 or 210." },
+        { "name": "Ishan Kishan", "status": "Chase captain", "tone": "orange", "detail": "Leads the SRH chase with Head, Abhishek and Klaasen behind him." }
+      ],
+      "scoreLines": [
+        { "label": "RCB finish", "value": "202-210" },
+        { "label": "SRH chase mode", "value": "Attack from ball one" },
+        { "label": "Match Result", "value": "Toss and dew keep this open despite RCB momentum" },
+        { "label": "Powerplay edge", "value": "RCB" }
+      ]
     },
     "highlights": {
       "featured": {
-        "videoUrl": "",
-        "title": "",
-        "description": "",
-        "likes": "",
-        "comments": "",
-        "favorites": ""
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
+        "title": "Kohli-Patidar Rebuild the RCB Finish",
+        "description": "RCB surge back after 122/3, using placement and clean boundary hitting to force SRH into reactive bowling.",
+        "likes": "26.4K",
+        "comments": "3.8K",
+        "favorites": "11.2K"
       },
-      "items": [],
-      "stats": [],
-      "trending": []
+      "items": [
+        { "title": "Toss Call Lands", "description": "SRH win the toss and choose to bowl first under lights.", "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4", "icon": "🪙", "time": "Pre-match" },
+        { "title": "Playing XIs Confirmed", "description": "RCB trust Salt-Kohli at the top while SRH stack power through Kishan and Klaasen.", "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4", "icon": "📋", "time": "Lineups" },
+        { "title": "Powerplay Surge", "description": "RCB reach 63/1 in six overs and force SRH to burn through matchups early.", "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4", "icon": "⚡", "time": "6.0 overs" },
+        { "title": "17th Over Burst", "description": "A boundary-heavy over pushes the projection line back above 200.", "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4", "icon": "🔥", "time": "17.2 overs" }
+      ],
+      "stats": [
+        { "label": "Toss", "value": "SRH bowl first" },
+        { "label": "Current score", "value": "176/3" },
+        { "label": "Projected finish", "value": "206" },
+        { "label": "Set batter", "value": "Kohli 68*" }
+      ],
+      "trending": [
+        { "title": "Toss value", "value": "Hyderabad chose the chase path immediately" },
+        { "title": "Set-batter control", "value": "Kohli is dictating tempo into the death phase" },
+        { "title": "Death-over pressure", "value": "Harshal vs Patidar-Kohli is the swing battle" },
+        { "title": "Chase fear factor", "value": "Head-Abhishek-Kishan keep SRH alive even at 205+" }
+      ]
     },
     "analytics": {
-      "battingRows": [],
-      "bowlingRows": [],
-      "geo": []
+      "battingRows": [
+        { "name": "Virat Kohli", "runs": "68*", "balls": "39", "strikeRate": "174.35", "fours": "7", "sixes": "2" },
+        { "name": "Phil Salt", "runs": "37", "balls": "19", "strikeRate": "194.73", "fours": "4", "sixes": "2" },
+        { "name": "Rajat Patidar", "runs": "29*", "balls": "15", "strikeRate": "193.33", "fours": "3", "sixes": "1" },
+        { "name": "Jitesh Sharma", "runs": "18", "balls": "10", "strikeRate": "180.00", "fours": "1", "sixes": "1" }
+      ],
+      "bowlingRows": [
+        { "name": "Harshal Patel", "overs": "3.2", "runs": "34", "wickets": "1", "economy": "10.20" },
+        { "name": "Eshan Malinga", "overs": "3", "runs": "31", "wickets": "1", "economy": "10.33" },
+        { "name": "Jaydev Unadkat", "overs": "3", "runs": "26", "wickets": "0", "economy": "8.66" },
+        { "name": "Harsh Dubey", "overs": "4", "runs": "38", "wickets": "1", "economy": "9.50" }
+      ],
+      "geo": [
+        { "label": "Bengaluru watch parties", "value": 34, "tone": "green" },
+        { "label": "Hyderabad watch parties", "value": 24, "tone": "red" },
+        { "label": "Mumbai neutral traffic", "value": 14, "tone": "blue" },
+        { "label": "Overseas viewers", "value": 10, "tone": "yellow" }
+      ]
     }
   },
   "liveMatches": [
     {
       "id": 1,
-      "team1": "Mumbai Indians",
-      "team2": "Royal Challengers",
-      "team1Flag": "🏏",
-      "team2Flag": "⚡",
-      "tournament": "IPL 2026",
-      "league": "IPL",
-      "format": "T20",
-      "status": "live"
-    },
-    {
-      "id": 2,
-      "team1": "Chennai Super Kings",
-      "team2": "Kolkata Knight Riders",
-      "team1Flag": "🌟",
-      "team2Flag": "🦁",
-      "tournament": "IPL 2026",
-      "league": "IPL",
-      "format": "T20",
-      "status": "live"
-    },
-    {
-      "id": 3,
-      "team1": "India",
-      "team2": "Pakistan",
-      "team1Flag": "🇮🇳",
-      "team2Flag": "🇵🇰",
-      "tournament": "T20 World Cup 2026",
-      "league": "ICC",
+      "team1": "Royal Challengers Bengaluru",
+      "team2": "Sunrisers Hyderabad",
+      "team1Flag": "RCB",
+      "team2Flag": "SRH",
+      "tournament": "IPL 2026 Opening Night",
+      "league": "LIVE",
       "format": "T20",
       "status": "live"
     }
   ],
   "upcomingMatches": [
     {
-      "id": 10,
-      "team1": "Delhi Capitals",
-      "team2": "Sunrisers Hyderabad",
-      "team1Flag": "🏛️",
-      "team2Flag": "🌅",
-      "date": "Jun 10, 7:00 PM",
+      "id": 2,
+      "team1": "Mumbai Indians",
+      "team2": "Kolkata Knight Riders",
+      "team1Flag": "MI",
+      "team2Flag": "KKR",
+      "date": "Mar 29, 7:30 PM · Mumbai",
       "tournament": "IPL 2026",
       "league": "IPL",
       "format": "T20"
     },
     {
-      "id": 11,
+      "id": 3,
       "team1": "Rajasthan Royals",
-      "team2": "Punjab Kings",
-      "team1Flag": "👸",
-      "team2Flag": "🔱",
-      "date": "Jun 11, 3:30 PM",
+      "team2": "Chennai Super Kings",
+      "team1Flag": "RR",
+      "team2Flag": "CSK",
+      "date": "Mar 30, 7:30 PM · Guwahati",
+      "tournament": "IPL 2026",
+      "league": "IPL",
+      "format": "T20"
+    },
+    {
+      "id": 4,
+      "team1": "Punjab Kings",
+      "team2": "Gujarat Titans",
+      "team1Flag": "PBKS",
+      "team2Flag": "GT",
+      "date": "Mar 31, 7:30 PM · New Chandigarh",
+      "tournament": "IPL 2026",
+      "league": "IPL",
+      "format": "T20"
+    },
+    {
+      "id": 5,
+      "team1": "Lucknow Super Giants",
+      "team2": "Delhi Capitals",
+      "team1Flag": "LSG",
+      "team2Flag": "DC",
+      "date": "Apr 1, 7:30 PM · Lucknow",
       "tournament": "IPL 2026",
       "league": "IPL",
       "format": "T20"
@@ -400,243 +302,165 @@
   "recentResults": [
     {
       "id": 20,
-      "team1": "Lucknow Super Giants",
-      "team2": "Gujarat Titans",
-      "team1Flag": "🦅",
-      "team2Flag": "💪",
-      "result": "Lucknow won by 5 wickets",
-      "score": "LSG 185/5 vs GT 184",
-      "league": "IPL",
+      "team1": "Royal Challengers Bengaluru",
+      "team2": "Punjab Kings",
+      "team1Flag": "RCB",
+      "team2Flag": "PBKS",
+      "result": "RCB won by 6 runs",
+      "score": "Final 2025 · RCB 190/9 vs PBKS 184/7",
+      "league": "IPL 2025",
       "format": "T20"
     },
     {
       "id": 21,
-      "team1": "India",
-      "team2": "England",
-      "team1Flag": "🇮🇳",
-      "team2Flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-      "result": "India won by 6 runs",
-      "score": "IND 178/6 vs ENG 172/8",
-      "league": "ICC",
+      "team1": "Punjab Kings",
+      "team2": "Royal Challengers Bengaluru",
+      "team1Flag": "PBKS",
+      "team2Flag": "RCB",
+      "result": "RCB won by 8 wickets",
+      "score": "Qualifier 1 · PBKS 101 vs RCB 106/2",
+      "league": "IPL 2025",
+      "format": "T20"
+    },
+    {
+      "id": 22,
+      "team1": "Kolkata Knight Riders",
+      "team2": "Sunrisers Hyderabad",
+      "team1Flag": "KKR",
+      "team2Flag": "SRH",
+      "result": "SRH won by 110 runs",
+      "score": "25 May 2025 · season-end statement win",
+      "league": "IPL 2025",
+      "format": "T20"
+    },
+    {
+      "id": 23,
+      "team1": "Royal Challengers Bengaluru",
+      "team2": "Sunrisers Hyderabad",
+      "team1Flag": "RCB",
+      "team2Flag": "SRH",
+      "result": "SRH won by 42 runs",
+      "score": "23 May 2025 · last meeting before opening night",
+      "league": "IPL 2025",
       "format": "T20"
     }
   ],
   "ballFeed": [
     {
-      "id": "1773676911506-0",
+      "id": "sim-1",
+      "type": "single",
+      "label": "1",
+      "runs": 1,
+      "wickets": 0,
+      "legal": true,
+      "over": "16.4",
+      "timestamp": "2026-03-28T21:40:00+05:30"
+    },
+    {
+      "id": "sim-2",
+      "type": "four",
+      "label": "4",
+      "runs": 4,
+      "wickets": 0,
+      "legal": true,
+      "over": "16.5",
+      "timestamp": "2026-03-28T21:41:00+05:30"
+    },
+    {
+      "id": "sim-3",
+      "type": "wide",
+      "label": "Wd",
+      "runs": 1,
+      "wickets": 0,
+      "legal": false,
+      "over": "17.0",
+      "timestamp": "2026-03-28T21:42:00+05:30"
+    },
+    {
+      "id": "sim-4",
       "type": "six",
       "label": "6",
       "runs": 6,
       "wickets": 0,
       "legal": true,
-      "over": "0.0",
-      "timestamp": "2026-03-16T16:01:51.506Z"
+      "over": "17.0",
+      "timestamp": "2026-03-28T21:42:20+05:30"
     },
     {
-      "id": "1773676911506-1",
-      "type": "six",
-      "label": "6",
-      "runs": 6,
+      "id": "sim-5",
+      "type": "single",
+      "label": "1",
+      "runs": 1,
       "wickets": 0,
       "legal": true,
-      "over": "0.1",
-      "timestamp": "2026-03-16T16:01:51.506Z"
+      "over": "17.1",
+      "timestamp": "2026-03-28T21:43:00+05:30"
     },
     {
-      "id": "1773676911506-2",
-      "type": "six",
-      "label": "6",
-      "runs": 6,
-      "wickets": 0,
-      "legal": true,
-      "over": "0.2",
-      "timestamp": "2026-03-16T16:01:51.506Z"
-    },
-    {
-      "id": "1773676911506-3",
+      "id": "sim-6",
       "type": "run",
-      "label": "3",
-      "runs": 3,
+      "label": "2",
+      "runs": 2,
       "wickets": 0,
       "legal": true,
-      "over": "0.3",
-      "timestamp": "2026-03-16T16:01:51.506Z"
-    },
-    {
-      "id": "1773676911506-4",
-      "type": "run",
-      "label": "3",
-      "runs": 3,
-      "wickets": 0,
-      "legal": true,
-      "over": "0.4",
-      "timestamp": "2026-03-16T16:01:51.506Z"
+      "over": "17.2",
+      "timestamp": "2026-03-28T21:43:32+05:30"
     }
   ],
   "timelineEvents": [
     {
-      "id": "1773676880269-d09nei",
-      "title": "Wicket",
-      "detail": "India lose a wicket at 138/4. Pressure swings back to the fielding side.",
-      "type": "wicket",
-      "badge": "OUT",
-      "over": "6.5",
-      "timestamp": "2026-03-16T16:01:20.269Z"
-    },
-    {
-      "id": "1773676880104-hubolf",
-      "title": "Wicket",
-      "detail": "India lose a wicket at 138/3. Pressure swings back to the fielding side.",
-      "type": "wicket",
-      "badge": "OUT",
-      "over": "6.4",
-      "timestamp": "2026-03-16T16:01:20.104Z"
-    },
-    {
-      "id": "1773676879700-qrd397",
-      "title": "Wicket",
-      "detail": "India lose a wicket at 138/2. Pressure swings back to the fielding side.",
-      "type": "wicket",
-      "badge": "OUT",
-      "over": "6.3",
-      "timestamp": "2026-03-16T16:01:19.700Z"
-    },
-    {
-      "id": "1773676879434-plcndb",
-      "title": "Wicket",
-      "detail": "India lose a wicket at 138/1. Pressure swings back to the fielding side.",
-      "type": "wicket",
-      "badge": "OUT",
-      "over": "6.2",
-      "timestamp": "2026-03-16T16:01:19.434Z"
-    },
-    {
-      "id": "1773676857667-fgnelw",
-      "title": "Boundary",
-      "detail": "India move to 130/0 after a crisp four.",
-      "type": "boundary",
-      "badge": "FOUR",
-      "over": "5.3",
-      "timestamp": "2026-03-16T16:00:57.667Z"
-    },
-    {
-      "id": "1773676857301-v7gg4u",
-      "title": "Boundary",
-      "detail": "India move to 126/0 after a crisp four.",
-      "type": "boundary",
-      "badge": "FOUR",
-      "over": "5.2",
-      "timestamp": "2026-03-16T16:00:57.301Z"
-    },
-    {
-      "id": "1773676857066-4hxtxw",
-      "title": "Boundary",
-      "detail": "India move to 122/0 after a crisp four.",
-      "type": "boundary",
-      "badge": "FOUR",
-      "over": "5.1",
-      "timestamp": "2026-03-16T16:00:57.066Z"
-    },
-    {
-      "id": "1773675600548-znzw9e",
-      "title": "Boundary",
-      "detail": "India move to 118/0 after a crisp four.",
-      "type": "boundary",
-      "badge": "FOUR",
-      "over": "5.0",
-      "timestamp": "2026-03-16T15:40:00.548Z"
-    },
-    {
-      "id": "1773245149875-o9evty",
-      "title": "Wicket",
-      "detail": "India lose a wicket at 299/7. Pressure swings back to the fielding side.",
-      "type": "wicket",
-      "badge": "OUT",
-      "over": "51.2",
-      "timestamp": "2026-03-11T16:05:49.875Z"
-    },
-    {
-      "id": "1773245146546-5nji40",
-      "title": "Maximum",
-      "detail": "India launch a six and surge to 299/6.",
-      "type": "boundary",
-      "badge": "SIX",
-      "over": "51.1",
-      "timestamp": "2026-03-11T16:05:46.546Z"
-    },
-    {
-      "id": "1773245045309-7h9duw",
-      "title": "Over Complete",
-      "detail": "India close the over at 293/6.",
+      "id": "sim-toss",
+      "title": "Toss",
+      "detail": "Sunrisers Hyderabad win the toss and choose to bowl first under lights at the Chinnaswamy.",
       "type": "milestone",
-      "badge": "OVER",
-      "over": "51.0",
-      "timestamp": "2026-03-11T16:04:05.309Z"
+      "badge": "TOSS",
+      "over": "Pre",
+      "timestamp": "2026-03-28T19:01:00+05:30"
     },
     {
-      "id": "1773221368574-i7vwtp",
-      "title": "Review Taken",
-      "detail": "Umpire review called for a close LBW shout.",
-      "type": "review",
-      "badge": "DRS",
-      "over": "47.1",
-      "timestamp": "2026-03-11T09:29:28.574Z"
+      "id": "sim-xi",
+      "title": "Playing XIs In",
+      "detail": "RCB back Salt and Kohli at the top, while SRH trust Head, Abhishek, Kishan and Klaasen for the chase.",
+      "type": "alert",
+      "badge": "XI",
+      "over": "Pre",
+      "timestamp": "2026-03-28T19:12:00+05:30"
     },
     {
-      "id": "seed-timeline-1",
+      "id": "sim-pp",
       "title": "Powerplay Surge",
-      "detail": "India race through the powerplay with crisp boundaries and controlled aggression.",
+      "detail": "RCB rocket to 63/1 in the powerplay and force SRH into early matchup changes.",
       "type": "milestone",
       "badge": "PP",
       "over": "6.0",
-      "timestamp": "2026-03-10T11:35:20.790Z"
+      "timestamp": "2026-03-28T20:05:00+05:30"
     },
     {
-      "id": "seed-timeline-2",
-      "title": "Wicket",
-      "detail": "A breakthrough arrives as the batter mistimes one to deep midwicket.",
-      "type": "wicket",
-      "badge": "OUT",
-      "over": "18.4",
-      "timestamp": "2026-03-10T12:48:20.790Z"
+      "id": "sim-finish",
+      "title": "17th Over Burst",
+      "detail": "A wide, six, single and two keep the finish line above 200 as Kohli and Patidar press SRH late.",
+      "type": "boundary",
+      "badge": "SURGE",
+      "over": "17.2",
+      "timestamp": "2026-03-28T21:43:32+05:30"
     }
   ],
   "notifications": [
     {
-      "id": "1773156813652-0wxr03",
-      "message": "287/5 - 45.3 overs",
-      "timestamp": "2026-03-10T15:33:33.655Z"
+      "id": "notice-1",
+      "message": "Toss: SRH win the toss and bowl first in the IPL 2026 opener.",
+      "timestamp": "2026-03-28T19:02:00+05:30"
     },
     {
-      "id": "1773157006465-3im0qp",
-      "message": "287/4 - 45.3 overs",
-      "timestamp": "2026-03-10T15:36:46.467Z"
+      "id": "notice-2",
+      "message": "Playing XIs confirmed: Salt-Kohli open for RCB; Head-Abhishek-Kishan headline the SRH chase unit.",
+      "timestamp": "2026-03-28T19:14:00+05:30"
     },
     {
-      "id": "1773166644438-hqaghn",
-      "message": "AI Bulletin: India 293/6 after 46.2 overs. India are in the death overs at 293/6, with a projection around 316 and steady edge momentum. Projected finish: 316. Momentum is in hand. Press the advantage by attacking the weaker side of the field for the next over.",
-      "timestamp": "2026-03-10T18:17:24.438Z"
-    },
-    {
-      "id": "1773243975191-isfo4u",
-      "message": "AI Bulletin: India 293/6 after 50.0 overs. India are in the death overs at 293/6, with a projection around 293 and balanced momentum. Projected finish: 293. Keep collecting low-risk runs and force the field to move. Bank one calm over before a full launch.",
-      "timestamp": "2026-03-11T15:46:15.191Z"
-    },
-    {
-      "id": "1773247490153-6xqi19",
-      "message": "AI Bulletin: India 299/7 after 51.2 overs. India are in the death overs at 299/7, with a projection around 299 and balanced momentum. Projected finish: 299. Rebuild with low-risk singles for two balls before targeting a release shot. Bank one calm over before a full launch.",
-      "timestamp": "2026-03-11T16:44:50.138Z"
-    },
-    {
-      "id": "1773254921867-hwlk6z",
-      "message": "-  overs",
-      "timestamp": "2026-03-11T18:48:41.867Z"
-    },
-    {
-      "id": "1773254922204-n37olw",
-      "message": "-  overs",
-      "timestamp": "2026-03-11T18:48:42.204Z"
+      "id": "notice-3",
+      "message": "Live: RCB 176/3 after 17.2 overs. Kohli and Patidar have pushed the projection back above 200.",
+      "timestamp": "2026-03-28T21:44:00+05:30"
     }
   ],
-  "updatedAt": "2026-03-16T17:20:12.796Z"
+  "updatedAt": "2026-03-28T21:44:00+05:30"
 }
