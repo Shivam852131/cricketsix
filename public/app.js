@@ -413,12 +413,13 @@
 
   window.setReminder = function() {
     const matchTime = appState && appState.score ? appState.score.matchDateTime : "";
+    const fixture = getFixtureTeams();
     if (!matchTime) {
       showSystemNotice("Match time has not been published yet.");
       return;
     }
     localStorage.setItem("cricketlive_match_reminder", matchTime);
-    showSystemNotice("Reminder saved for " + (appState.score.team1 || "Team 1") + " vs " + (appState.score.team2 || "Team 2") + ".");
+    showSystemNotice("Reminder saved for " + fixture.team1 + " vs " + fixture.team2 + ".");
   };
 
   window.sendReaction = function(emoji) {
@@ -759,7 +760,8 @@
   }
 
   function renderMatchTicker() {
-    setText("next-match-teams", (appState.score.team1 || "Team 1") + " vs " + (appState.score.team2 || "Team 2"));
+    const fixture = getFixtureTeams();
+    setText("next-match-teams", fixture.team1 + " vs " + fixture.team2);
 
     const countdownEl = document.getElementById("match-countdown");
     if (!countdownEl) return;
@@ -952,8 +954,9 @@
 
   function renderPoll() {
     const pollBreakdown = getPollBreakdown();
-    const team1 = appState.score.team1 || "Team 1";
-    const team2 = appState.score.team2 || "Team 2";
+    const fixture = getFixtureTeams();
+    const team1 = fixture.team1;
+    const team2 = fixture.team2;
 
     setText("poll-question", appState.poll.question || FALLBACK_STATE.poll.question);
     setText("poll-team1-label", team1);
@@ -1146,6 +1149,12 @@
 
     if (platform === "mobile" || url === "/stream/mobile") {
       loadMobileStream();
+      return;
+    }
+
+    if (platform === "iframe") {
+      framePlayer.src = url;
+      framePlayer.classList.remove("hidden");
       return;
     }
 
@@ -1992,6 +2001,7 @@
     const platform = typeof currentPlatform === "string" ? currentPlatform.toLowerCase() : "custom";
     if (!url) return platform;
     if (platform !== "custom") return platform;
+    if (url.indexOf("pages.dev") >= 0 || url.indexOf("/match?") >= 0) return "iframe";
     if (url.indexOf("youtube.com") >= 0 || url.indexOf("youtu.be") >= 0) return "youtube";
     if (url.indexOf("kick.com") >= 0) return "kick";
     if (url.indexOf("twitch.tv") >= 0) return "twitch";
@@ -2037,6 +2047,14 @@
       total: total,
       team1Percent: team1Percent,
       team2Percent: 100 - team1Percent
+    };
+  }
+
+  function getFixtureTeams() {
+    const primary = Array.isArray(appState.liveMatches) && appState.liveMatches.length ? appState.liveMatches[0] : null;
+    return {
+      team1: primary && primary.team1 ? primary.team1 : (appState.score.team1 || "Team 1"),
+      team2: primary && primary.team2 ? primary.team2 : (appState.score.team2 || "Team 2")
     };
   }
 

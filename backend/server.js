@@ -30,6 +30,59 @@ const ALLOWED_CORS_METHODS = "GET,POST,PUT,DELETE,OPTIONS";
 const ALLOWED_CORS_HEADERS = "Content-Type,X-Admin-Key";
 
 const CONFIG_FILE = path.join(DATA_DIR, "config.json");
+const LIVE_SYNC_INTERVAL_MS = Number(process.env.LIVE_SYNC_INTERVAL_MS) || 20000;
+const LIVE_SYNC_TIMEOUT_MS = 12000;
+const SPORTIFY_SCHEDULE_URL = "https://binge-api.pages.dev/sportify.json?t=";
+const ESPN_LIVE_INDEX_URL = "https://www.espncricinfo.com/live-cricket-score";
+const ESPN_BASE_URL = "https://www.espncricinfo.com";
+const IPL_OFFICIAL_SCHEDULE_URL = "https://ipl-stats-sports-mechanic.s3.ap-south-1.amazonaws.com/ipl/feeds/284-matchschedule.js";
+const TEAM_NAME_BY_CODE = {
+  CSK: "Chennai Super Kings",
+  DC: "Delhi Capitals",
+  GT: "Gujarat Titans",
+  KKR: "Kolkata Knight Riders",
+  LSG: "Lucknow Super Giants",
+  MI: "Mumbai Indians",
+  PBKS: "Punjab Kings",
+  RCB: "Royal Challengers Bengaluru",
+  RR: "Rajasthan Royals",
+  SRH: "Sunrisers Hyderabad"
+};
+const TEAM_CODE_ALIASES = {
+  "royal challengers bangalore": "RCB",
+  "royal challengers bengaluru": "RCB",
+  "sunrisers hyderabad": "SRH",
+  "mumbai indians": "MI",
+  "kolkata knight riders": "KKR",
+  "rajasthan royals": "RR",
+  "chennai super kings": "CSK",
+  "gujarat titans": "GT",
+  "punjab kings": "PBKS",
+  "lucknow super giants": "LSG",
+  "delhi capitals": "DC"
+};
+const SPORTIFY_MATCH_SOURCE_MAP = {
+  "2601": {
+    espnUrl: "https://www.espncricinfo.com/series/ipl-2026-1510719/royal-challengers-bengaluru-vs-sunrisers-hyderabad-1st-match-1527674/live-cricket-score",
+    captains: {
+      RCB: "Rajat Patidar (c)",
+      SRH: "Ishan Kishan (c)"
+    },
+    lineups: {
+      RCB: ["Phil Salt", "Virat Kohli", "Devdutt Padikkal", "Rajat Patidar (c)", "Jitesh Sharma (wk)", "Tim David", "Krunal Pandya", "Romario Shepherd", "Bhuvneshwar Kumar", "Suyash Sharma", "Jacob Duffy"],
+      SRH: ["Abhishek Sharma", "Travis Head", "Ishan Kishan (c/wk)", "Heinrich Klaasen", "Nitish Kumar Reddy", "Liam Livingstone", "Aniket Verma", "Harshal Patel", "Jaydev Unadkat", "Harsh Dubey", "Eshan Malinga"]
+    }
+  }
+};
+const liveSyncRuntime = {
+  inFlight: false,
+  matchKey: "",
+  cachedEspnUrl: "",
+  cachedEspnAt: 0,
+  lastSignature: "",
+  lastError: "",
+  lastSyncedAt: ""
+};
 const analytics = {
   pageViews: {},
   apiCalls: {},
@@ -509,6 +562,762 @@ function extractParticipantName(rawLabel, fallback) {
   return rawLabel.split("-")[0].trim() || fallback;
 }
 
+function normalizeTeamCode(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  const upper = raw.toUpperCase();
+  if (TEAM_NAME_BY_CODE[upper]) return upper;
+  const aliasKey = raw.toLowerCase();
+  if (TEAM_CODE_ALIASES[aliasKey]) return TEAM_CODE_ALIASES[aliasKey];
+  return upper.replace(/[^A-Z]/g, "").slice(0, 4);
+}
+
+function normalizeTeamName(value) {
+  const code = normalizeTeamCode(value);
+  return TEAM_NAME_BY_CODE[code] || String(value || "").trim();
+}
+
+function extractSportifyMatchId(streamUrl) {
+  if (typeof streamUrl !== "string" || !streamUrl.trim()) return "";
+  try {
+    const parsed = new URL(streamUrl);
+    if (!/sportify-beta\.pages\.dev$/i.test(parsed.hostname)) return "";
+    if (parsed.pathname !== "/match") return "";
+    return String(parsed.searchParams.get("id") || "").trim();
+  } catch {
+    const match = streamUrl.match(/[?&]id=(\d+)/i);
+    return match ? match[1] : "";
+  }
+}
+
+function toIsoDate(dateText) {
+  const value = String(dateText || "").trim();
+  const match = value.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (!match) return "";
+  return match[3] + "-" + match[2] + "-" + match[1];
+}
+
+function toIstDateTime(dateText, timeText) {
+  const isoDate = /^\d{4}-\d{2}-\d{2}$/.test(String(dateText || "")) ? String(dateText) : toIsoDate(dateText);
+  const time = String(timeText || "").trim();
+  if (!isoDate || !/^\d{2}:\d{2}$/.test(time)) return "";
+  return isoDate + "T" + time + ":00+05:30";
+}
+
+function stripHtmlTags(value) {
+  return String(value || "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&rsquo;/gi, "'")
+    .replace(/&ldquo;/gi, '"')
+    .replace(/&rdquo;/gi, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function formatOversValue(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return "";
+  const overs = Math.trunc(numeric);
+  const balls = Math.round((numeric - overs + Number.EPSILON) * 10);
+  return overs + "." + Math.max(0, Math.min(5, balls));
+}
+
+function extractScoreFromSummary(summaryText) {
+  const match = String(summaryText || "").match(/(\d+\/\d+)/);
+  return match ? match[1] : "";
+}
+
+function extractOversFromSummary(summaryText) {
+  const match = String(summaryText || "").match(/\((\d+(?:\.\d+)?)\s*Ov/i);
+  return match ? match[1] : "";
+}
+
+function extractOversFromScoreInfo(scoreInfo) {
+  const match = String(scoreInfo || "").match(/(\d+(?:\.\d+)?)\s*\/\s*\d+\s*ov/i);
+  return match ? match[1] : "";
+}
+
+function calculateRunRate(scoreText, oversText) {
+  const score = parseScoreBreakdown(scoreText);
+  const overs = parseOversBreakdown(oversText);
+  if (!overs.completedOvers) return "0.00";
+  return (score.runs / overs.completedOvers).toFixed(2);
+}
+
+function calculateProjectedBand(scoreText, oversText, totalOvers, officialSummary) {
+  const officialValues = [officialSummary && officialSummary.ProjectedScore, officialSummary && officialSummary["2ndProjectedScore"], officialSummary && officialSummary["3rdProjectedScore"]]
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value) && value > 0);
+  if (officialValues.length >= 2) {
+    return {
+      projected: officialValues[Math.min(1, officialValues.length - 1)],
+      low: Math.min(...officialValues),
+      high: Math.max(...officialValues)
+    };
+  }
+
+  const score = parseScoreBreakdown(scoreText);
+  const overs = parseOversBreakdown(oversText);
+  const inningsLength = Math.max(1, Number(totalOvers) || 20);
+  const projected = overs.completedOvers > 0 ? Math.round((score.runs / overs.completedOvers) * inningsLength) : score.runs;
+  return {
+    projected,
+    low: Math.max(score.runs, projected - 12),
+    high: projected + 12
+  };
+}
+
+function buildCommentaryText(items) {
+  return Array.isArray(items)
+    ? items.map((item) => stripHtmlTags(item && (item.html || item.text || item.value || ""))).filter(Boolean).join(" ").trim()
+    : "";
+}
+
+async function fetchTextWithTimeout(url, label) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LIVE_SYNC_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "user-agent": "Mozilla/5.0 (compatible; CricketLivePro/1.0; +https://github.com/Shivam852131/cricketsix)",
+        accept: "text/html,application/json;q=0.9,*/*;q=0.8"
+      },
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      throw new Error(label + " request failed with status " + response.status);
+    }
+    return await response.text();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchJsonWithTimeout(url, label) {
+  const text = await fetchTextWithTimeout(url, label);
+  return JSON.parse(text);
+}
+
+function extractNextDataPayload(html) {
+  const match = String(html || "").match(/<script id=\"__NEXT_DATA__\" type=\"application\/json\">([\s\S]*?)<\/script>/i);
+  if (!match) {
+    throw new Error("Could not locate __NEXT_DATA__ payload");
+  }
+  return JSON.parse(match[1]);
+}
+
+async function fetchSportifyFixture(matchId) {
+  const payload = await fetchJsonWithTimeout(SPORTIFY_SCHEDULE_URL + Date.now(), "Sportify schedule");
+  const matches = Array.isArray(payload.matches) ? payload.matches : [];
+  const fixture = matches.find((entry) => String(entry && entry.id) === String(matchId));
+  if (!fixture) {
+    throw new Error("Sportify match " + matchId + " was not found in the schedule feed");
+  }
+  return fixture;
+}
+
+function buildEspnMatchUrl(match) {
+  const series = match && match.series ? match.series : {};
+  return ESPN_BASE_URL + "/series/" + series.slug + "-" + series.objectId + "/" + match.slug + "-" + match.objectId + "/live-cricket-score";
+}
+
+function matchEspnFixture(match, fixture) {
+  const teams = Array.isArray(match && match.teams) ? match.teams : [];
+  const codes = teams.map((entry) => normalizeTeamCode(entry && entry.team && (entry.team.abbreviation || entry.team.longName || entry.team.name))).filter(Boolean);
+  const fixtureCodes = [normalizeTeamCode(fixture.team1), normalizeTeamCode(fixture.team2)].filter(Boolean);
+  const fixtureDate = toIsoDate(fixture.date);
+  const matchDate = String(match && match.startDate || "").slice(0, 10);
+  return fixtureCodes.every((code) => codes.includes(code)) && (!fixtureDate || fixtureDate === matchDate);
+}
+
+async function discoverEspnMatchUrl(fixture) {
+  const mappedSource = fixture && SPORTIFY_MATCH_SOURCE_MAP[String(fixture.id || "")];
+  if (mappedSource && mappedSource.espnUrl) {
+    liveSyncRuntime.cachedEspnUrl = mappedSource.espnUrl;
+    liveSyncRuntime.cachedEspnAt = Date.now();
+    return liveSyncRuntime.cachedEspnUrl;
+  }
+
+  if (liveSyncRuntime.cachedEspnUrl && (Date.now() - liveSyncRuntime.cachedEspnAt) < 600000) {
+    return liveSyncRuntime.cachedEspnUrl;
+  }
+
+  const html = await fetchTextWithTimeout(ESPN_LIVE_INDEX_URL, "ESPN score index");
+  const payload = extractNextDataPayload(html);
+  const matches = payload && payload.props && payload.props.appPageProps && payload.props.appPageProps.data && payload.props.appPageProps.data.content && Array.isArray(payload.props.appPageProps.data.content.matches)
+    ? payload.props.appPageProps.data.content.matches
+    : [];
+  const match = matches.find((entry) => matchEspnFixture(entry, fixture));
+  if (!match) {
+    throw new Error("Could not discover the ESPN live page for " + fixture.team1 + " vs " + fixture.team2);
+  }
+
+  liveSyncRuntime.cachedEspnUrl = buildEspnMatchUrl(match);
+  liveSyncRuntime.cachedEspnAt = Date.now();
+  return liveSyncRuntime.cachedEspnUrl;
+}
+
+async function fetchEspnLivePayload(fixture) {
+  const url = await discoverEspnMatchUrl(fixture);
+  const html = await fetchTextWithTimeout(url, "ESPN live score page");
+  const payload = extractNextDataPayload(html);
+  return payload && payload.props && payload.props.appPageProps && payload.props.appPageProps.data
+    ? payload.props.appPageProps.data.data
+    : null;
+}
+
+function parseOfficialSchedulePayload(text) {
+  const prefix = "MatchSchedule(";
+  const start = String(text || "").indexOf(prefix);
+  const end = String(text || "").lastIndexOf(")");
+  if (start < 0 || end <= start) {
+    throw new Error("Could not parse IPL official schedule payload");
+  }
+  return JSON.parse(String(text).slice(start + prefix.length, end));
+}
+
+function matchOfficialFixture(match, fixture) {
+  const title = [match && match.MatchName, match && match.HomeTeamName, match && match.AwayTeamName, match && match.FirstBattingTeamName, match && match.SecondBattingTeamName].filter(Boolean).join(" ").toLowerCase();
+  const code1 = normalizeTeamCode(fixture.team1);
+  const code2 = normalizeTeamCode(fixture.team2);
+  const name1 = normalizeTeamName(fixture.team1).toLowerCase();
+  const name2 = normalizeTeamName(fixture.team2).toLowerCase();
+  const fixtureDate = toIsoDate(fixture.date);
+  const matchDate = String(match && match.MatchDate || "").slice(0, 10);
+  return (!fixtureDate || fixtureDate === matchDate) && title.includes(name1) && title.includes(name2) && [code1, code2].every(Boolean);
+}
+
+async function fetchOfficialIplSummary(fixture) {
+  const text = await fetchTextWithTimeout(IPL_OFFICIAL_SCHEDULE_URL, "IPL official feed");
+  const payload = parseOfficialSchedulePayload(text);
+  const list = payload && Array.isArray(payload.Matchsummary) ? payload.Matchsummary : [];
+  return list.find((entry) => matchOfficialFixture(entry, fixture)) || null;
+}
+
+function getEspnCurrentInnings(espnPayload, officialSummary) {
+  const content = espnPayload && espnPayload.content ? espnPayload.content : {};
+  const innings = Array.isArray(content.innings) ? content.innings : [];
+  const liveInning = Number(officialSummary && officialSummary.CurrentInnings) || Number(espnPayload && espnPayload.match && espnPayload.match.liveInning) || 1;
+  return innings.find((inning) => Number(inning && inning.inningNumber) === liveInning) || innings.find((inning) => inning && inning.isCurrent) || innings[innings.length - 1] || null;
+}
+
+function formatBatterState(name, runs, balls, isStriker) {
+  if (!name) return "";
+  return name + " " + (Number.isFinite(Number(runs)) ? Number(runs) : 0) + (isStriker ? "*" : "") + " (" + (Number.isFinite(Number(balls)) ? Number(balls) : 0) + ")";
+}
+
+function buildBallLabel(comment) {
+  if (!comment || typeof comment !== "object") return ".";
+  if (comment.isWicket) return "W";
+  if (Number(comment.wides) > 0) return Number(comment.wides) > 1 ? String(comment.wides) + "Wd" : "Wd";
+  if (Number(comment.noballs) > 0) return Number(comment.noballs) > 1 ? String(comment.noballs) + "Nb" : "Nb";
+  if (Number(comment.byes) > 0) return String(comment.byes) + "B";
+  if (Number(comment.legbyes) > 0) return String(comment.legbyes) + "Lb";
+  if (Number(comment.totalRuns) === 0) return ".";
+  return String(Number(comment.totalRuns) || 0);
+}
+
+function buildBallType(comment) {
+  if (!comment || typeof comment !== "object") return "update";
+  if (comment.isWicket) return "wicket";
+  if (comment.isSix) return "six";
+  if (comment.isFour) return "four";
+  if (Number(comment.wides) > 0) return "wide";
+  if (Number(comment.noballs) > 0) return "noball";
+  if (Number(comment.totalRuns) === 0) return "dot";
+  return "run";
+}
+
+function buildRecentBallFeed(espnPayload) {
+  const comments = espnPayload && espnPayload.content && espnPayload.content.recentBallCommentary && Array.isArray(espnPayload.content.recentBallCommentary.ballComments)
+    ? espnPayload.content.recentBallCommentary.ballComments.slice(0, 20)
+    : [];
+
+  return comments.slice().reverse().map((comment) => normalizeBallEvent({
+    id: "espn-ball-" + comment.id,
+    type: buildBallType(comment),
+    label: buildBallLabel(comment),
+    runs: Number(comment.totalRuns) || 0,
+    wickets: comment.isWicket ? 1 : 0,
+    legal: Number(comment.wides) === 0 && Number(comment.noballs) === 0,
+    over: formatOversValue(comment.oversActual),
+    timestamp: comment.timestamp || comment.modified || new Date().toISOString()
+  }));
+}
+
+function buildTimelineFromLiveData(fixture, espnPayload, officialSummary, currentInnings, team1XI, team2XI, ballFeed) {
+  const events = [];
+  if (officialSummary && officialSummary.TossDetails) {
+    events.push(normalizeTimelineEvent({
+      id: "toss-" + fixture.id,
+      title: "Toss",
+      detail: stripHtmlTags(officialSummary.TossDetails),
+      type: "milestone",
+      badge: "TOSS",
+      over: "Pre",
+      timestamp: toIstDateTime(officialSummary.MatchDate, officialSummary.MatchTime) || new Date().toISOString()
+    }));
+  }
+
+  if (team1XI.length || team2XI.length) {
+    events.push(normalizeTimelineEvent({
+      id: "xi-" + fixture.id,
+      title: "Playing XIs",
+      detail: normalizeTeamName(fixture.team1) + " and " + normalizeTeamName(fixture.team2) + " confirm their lineups for the live feed.",
+      type: "alert",
+      badge: "XI",
+      over: "Pre",
+      timestamp: toIstDateTime(officialSummary && officialSummary.MatchDate, officialSummary && officialSummary.MatchTime) || new Date().toISOString()
+    }));
+  }
+
+  const comments = espnPayload && espnPayload.content && espnPayload.content.recentBallCommentary && Array.isArray(espnPayload.content.recentBallCommentary.ballComments)
+    ? espnPayload.content.recentBallCommentary.ballComments.slice(0, 8)
+    : [];
+  comments.forEach((comment) => {
+    const type = buildBallType(comment);
+    if (!(type === "wicket" || type === "four" || type === "six" || comment === comments[0])) return;
+    events.push(normalizeTimelineEvent({
+      id: "ball-" + comment.id,
+      title: comment.title || "Ball update",
+      detail: buildCommentaryText(comment.commentTextItems) || "Live ball update available.",
+      type: type === "run" ? "update" : type,
+      badge: buildBallLabel(comment),
+      over: formatOversValue(comment.oversActual),
+      timestamp: comment.timestamp || comment.modified || new Date().toISOString()
+    }));
+  });
+
+  if (!comments.length && Array.isArray(ballFeed) && ballFeed.length) {
+    const latestEvent = ballFeed[ballFeed.length - 1];
+    events.push(normalizeTimelineEvent({
+      id: "synthetic-timeline-" + latestEvent.id,
+      title: "Live update",
+      detail: "Score moved to the latest live state at " + (latestEvent.over || "current over") + ".",
+      type: latestEvent.type || "update",
+      badge: latestEvent.label || ".",
+      over: latestEvent.over || "",
+      timestamp: latestEvent.timestamp || new Date().toISOString()
+    }));
+  }
+
+  return normalizeTimelineEvents(events).slice(0, 8);
+}
+
+function getTeamLineup(matchPlayers, teamName) {
+  const groups = matchPlayers && Array.isArray(matchPlayers.teamPlayers) ? matchPlayers.teamPlayers : [];
+  const code = normalizeTeamCode(teamName);
+  const group = groups.find((entry) => normalizeTeamCode(entry && entry.team && (entry.team.abbreviation || entry.team.longName || entry.team.name)) === code);
+  const players = group && Array.isArray(group.players) ? group.players : [];
+  return players.map((entry) => entry && entry.player && entry.player.longName).filter(Boolean).slice(0, 11);
+}
+
+function resolveStateCaptainForTeam(state, teamName) {
+  const code = normalizeTeamCode(teamName);
+  if (normalizeTeamCode(state && state.score && state.score.team1) === code) return state.score.team1Captain || "";
+  if (normalizeTeamCode(state && state.score && state.score.team2) === code) return state.score.team2Captain || "";
+  return "";
+}
+
+function resolveStateLineupForTeam(state, teamName) {
+  const code = normalizeTeamCode(teamName);
+  if (normalizeTeamCode(state && state.score && state.score.team1) === code) return Array.isArray(state.score.team1XI) ? state.score.team1XI : [];
+  if (normalizeTeamCode(state && state.score && state.score.team2) === code) return Array.isArray(state.score.team2XI) ? state.score.team2XI : [];
+  return [];
+}
+
+function resolveMappedCaptain(fixture, teamName) {
+  const source = fixture && SPORTIFY_MATCH_SOURCE_MAP[String(fixture.id || "")];
+  const code = normalizeTeamCode(teamName);
+  return source && source.captains ? (source.captains[code] || "") : "";
+}
+
+function resolveMappedLineup(fixture, teamName) {
+  const source = fixture && SPORTIFY_MATCH_SOURCE_MAP[String(fixture.id || "")];
+  const code = normalizeTeamCode(teamName);
+  return source && source.lineups && Array.isArray(source.lineups[code]) ? source.lineups[code] : [];
+}
+
+function buildSyntheticBallFeed(currentState, scoreText, oversText) {
+  const previousScore = parseScoreBreakdown(currentState && currentState.score && currentState.score.team1Score);
+  const nextScore = parseScoreBreakdown(scoreText);
+  const previousOvers = parseOversBreakdown(currentState && currentState.score && currentState.score.overs);
+  const nextOvers = parseOversBreakdown(oversText);
+  const deltaRuns = Math.max(0, nextScore.runs - previousScore.runs);
+  const deltaWickets = Math.max(0, nextScore.wickets - previousScore.wickets);
+  const deltaBalls = Math.max(0, nextOvers.totalBalls - previousOvers.totalBalls);
+  const existingFeed = Array.isArray(currentState && currentState.ballFeed) ? currentState.ballFeed.slice(-59) : [];
+
+  if (!deltaRuns && !deltaWickets && !deltaBalls) {
+    return existingFeed;
+  }
+
+  let label = ".";
+  let type = "dot";
+  if (deltaWickets > 0 && deltaRuns === 0 && deltaBalls <= 1) {
+    label = "W";
+    type = "wicket";
+  } else if (deltaBalls === 0 && deltaRuns > 0 && deltaWickets === 0) {
+    label = deltaRuns === 1 ? "Wd" : "+" + deltaRuns;
+    type = "wide";
+  } else if (deltaBalls <= 1 && deltaRuns >= 6) {
+    label = String(deltaRuns);
+    type = "six";
+  } else if (deltaBalls <= 1 && deltaRuns >= 4) {
+    label = String(deltaRuns);
+    type = "four";
+  } else if (deltaRuns > 0 && deltaWickets > 0) {
+    label = "W+" + deltaRuns;
+    type = "wicket";
+  } else if (deltaRuns > 0) {
+    label = deltaBalls > 1 ? "+" + deltaRuns : String(deltaRuns);
+    type = "run";
+  }
+
+  return normalizeBallFeed(existingFeed.concat({
+    id: "synthetic-" + Date.now(),
+    type,
+    label,
+    runs: deltaRuns,
+    wickets: deltaWickets,
+    legal: deltaBalls > 0,
+    over: oversText,
+    timestamp: new Date().toISOString()
+  }));
+}
+
+function buildLiveSyncPatch(fixture, espnPayload, officialSummary, currentState) {
+  const match = espnPayload && espnPayload.match ? espnPayload.match : null;
+  const content = espnPayload && espnPayload.content ? espnPayload.content : {};
+  const currentInnings = getEspnCurrentInnings(espnPayload, officialSummary);
+  const liveInning = Number(officialSummary && officialSummary.CurrentInnings) || Number(match && match.liveInning) || Number(currentInnings && currentInnings.inningNumber) || 1;
+
+  const battingTeamName = liveInning === 1
+    ? (officialSummary && officialSummary.FirstBattingTeamName) || (currentInnings && currentInnings.team && currentInnings.team.longName) || normalizeTeamName(fixture.team1)
+    : (officialSummary && officialSummary.SecondBattingTeamName) || (currentInnings && currentInnings.team && currentInnings.team.longName) || normalizeTeamName(fixture.team2);
+  const fieldingTeamName = liveInning === 1
+    ? (officialSummary && officialSummary.SecondBattingTeamName) || normalizeTeamName(fixture.team2)
+    : (officialSummary && officialSummary.FirstBattingTeamName) || normalizeTeamName(fixture.team1);
+
+  const battingTeamCode = normalizeTeamCode(battingTeamName);
+  const fieldingTeamCode = normalizeTeamCode(fieldingTeamName);
+  const battingSummary = (officialSummary && (officialSummary[liveInning + "Summary"] || (liveInning === 1 ? officialSummary.FirstBattingSummary : officialSummary.SecondBattingSummary))) || "";
+  const bowlingSummary = liveInning === 2 ? ((officialSummary && officialSummary["1Summary"]) || (officialSummary && officialSummary.FirstBattingSummary) || "") : "";
+  const scoreText = extractScoreFromSummary(battingSummary) || (match && Array.isArray(match.teams) ? (match.teams.find((entry) => normalizeTeamCode(entry && entry.team && (entry.team.abbreviation || entry.team.longName || entry.team.name)) === battingTeamCode) || {}).score : "") || (currentInnings ? currentInnings.runs + "/" + currentInnings.wickets : "");
+  const oversText = extractOversFromSummary(battingSummary) || (match && Array.isArray(match.teams) ? extractOversFromScoreInfo((match.teams.find((entry) => normalizeTeamCode(entry && entry.team && (entry.team.abbreviation || entry.team.longName || entry.team.name)) === battingTeamCode) || {}).scoreInfo) : "") || (currentInnings ? formatOversValue(currentInnings.overs) : "");
+  const runRate = (officialSummary && officialSummary[liveInning + "RunRate"]) || calculateRunRate(scoreText, oversText);
+  const fieldingScoreText = extractScoreFromSummary(bowlingSummary) || (liveInning > 1 && match && Array.isArray(match.teams)
+    ? ((match.teams.find((entry) => normalizeTeamCode(entry && entry.team && (entry.team.abbreviation || entry.team.longName || entry.team.name)) === fieldingTeamCode) || {}).score || "")
+    : (liveInning === 1 ? "Yet to bat" : ""));
+  const totalOvers = String((currentInnings && currentInnings.totalOvers) || (match && match.scheduledOvers) || (officialSummary && officialSummary.MATCH_NO_OF_OVERS) || "20");
+  const projection = calculateProjectedBand(scoreText, oversText, totalOvers, officialSummary);
+  const inningsScore = parseScoreBreakdown(scoreText);
+  const inningsOvers = parseOversBreakdown(oversText);
+  const ballsRemaining = Math.max(0, (Number(totalOvers) || 20) * 6 - inningsOvers.totalBalls);
+  const targetRuns = currentInnings && Number(currentInnings.target) > 0
+    ? Number(currentInnings.target)
+    : (liveInning > 1 ? parseScoreBreakdown(fieldingScoreText).runs + 1 : 0);
+  const runsNeeded = targetRuns > 0 ? Math.max(0, targetRuns - inningsScore.runs) : 0;
+  const reqRR = targetRuns > 0 && ballsRemaining > 0 ? ((runsNeeded * 6) / ballsRemaining).toFixed(2) : "-";
+  const targetText = targetRuns > 0
+    ? battingTeamCode + " need " + runsNeeded + " from " + ballsRemaining + " balls"
+    : "Projected finish: " + projection.low + "-" + projection.high;
+  const resolvedTeam1XI = getTeamLineup(content.matchPlayers, battingTeamName);
+  const resolvedTeam2XI = getTeamLineup(content.matchPlayers, fieldingTeamName);
+  const team1XI = resolvedTeam1XI.length ? resolvedTeam1XI : (resolveMappedLineup(fixture, battingTeamName).length ? resolveMappedLineup(fixture, battingTeamName) : resolveStateLineupForTeam(currentState, battingTeamName));
+  const team2XI = resolvedTeam2XI.length ? resolvedTeam2XI : (resolveMappedLineup(fixture, fieldingTeamName).length ? resolveMappedLineup(fixture, fieldingTeamName) : resolveStateLineupForTeam(currentState, fieldingTeamName));
+  const livePartnership = currentInnings && Array.isArray(currentInnings.inningPartnerships)
+    ? currentInnings.inningPartnerships.find((entry) => entry && entry.isLive)
+    : null;
+  const fowList = currentInnings && Array.isArray(currentInnings.inningFallOfWickets)
+    ? currentInnings.inningFallOfWickets
+    : [];
+  const extrasText = currentInnings
+    ? currentInnings.extras + " (wd" + (currentInnings.wides || 0) + ", nb" + (currentInnings.noballs || 0) + ", lb" + (currentInnings.legbyes || 0) + ", b" + (currentInnings.byes || 0) + ")"
+    : "Live extras updating";
+  const ballFeed = buildRecentBallFeed(espnPayload).length ? buildRecentBallFeed(espnPayload) : buildSyntheticBallFeed(currentState, scoreText, oversText);
+  const liveBatsmen = currentInnings && Array.isArray(currentInnings.inningBatsmen)
+    ? currentInnings.inningBatsmen.filter((entry) => entry && entry.battedType !== "DNB")
+    : [];
+  const liveBowlers = currentInnings && Array.isArray(currentInnings.inningBowlers)
+    ? currentInnings.inningBowlers.filter((entry) => entry && Number.isFinite(Number(entry.overs)) && Number(entry.overs) > 0)
+    : [];
+
+  const striker = officialSummary && officialSummary.CurrentStrikerName
+    ? { name: officialSummary.CurrentStrikerName, runs: officialSummary.StrikerRuns, balls: officialSummary.StrikerBalls, fours: officialSummary.StrikerFours, sixes: officialSummary.StrikerSixes, rate: officialSummary.StrikerSR }
+    : null;
+  const nonStriker = officialSummary && officialSummary.CurrentNonStrikerName
+    ? { name: officialSummary.CurrentNonStrikerName, runs: officialSummary.NonStrikerRuns, balls: officialSummary.NonStrikerBalls, fours: officialSummary.NonStrikerFours, sixes: officialSummary.NonStrikerSixes, rate: officialSummary.NonStrikerSR }
+    : null;
+  const currentBowler = officialSummary && officialSummary.CurrentBowlerName
+    ? { name: officialSummary.CurrentBowlerName, overs: officialSummary.BowlerOvers, runs: officialSummary.BowlerRuns, wickets: officialSummary.BowlerWickets, economy: officialSummary.BowlerEconomy }
+    : null;
+  const batsmanLine = [
+    formatBatterState(striker && striker.name, striker && striker.runs, striker && striker.balls, true),
+    formatBatterState(nonStriker && nonStriker.name, nonStriker && nonStriker.runs, nonStriker && nonStriker.balls, false)
+  ].filter(Boolean).join(" | ") || currentState.score.batsman;
+  const bowlerLine = currentBowler
+    ? currentBowler.name + " " + currentBowler.overs + "-0-" + currentBowler.runs + "-" + currentBowler.wickets
+    : currentState.score.bowler;
+  const liveMatchOrder = Number(officialSummary && officialSummary.RowNo) || Number(fixture.match_no) || 1;
+  const venue = (officialSummary && officialSummary.GroundName ? officialSummary.GroundName : (match && match.ground && match.ground.name) || fixture.venue || currentState.score.venue)
+    + ((officialSummary && officialSummary.city) ? ", " + officialSummary.city : "");
+  const tossWinner = (officialSummary && officialSummary.TossTeam) || (() => {
+    if (!match || !match.tossWinnerTeamId || !Array.isArray(match.teams)) return currentState.score.tossWinner || "";
+    const winner = match.teams.find((entry) => entry && entry.team && entry.team.id === match.tossWinnerTeamId);
+    return winner && winner.team ? winner.team.longName : "";
+  })();
+  const tossDecision = officialSummary && /field/i.test(officialSummary.TossDetails || "")
+    ? "field"
+    : officialSummary && /bat/i.test(officialSummary.TossDetails || "")
+      ? "bat"
+      : (match && Number(match.tossWinnerChoice) === 2 ? "field" : Number(match && match.tossWinnerChoice) === 1 ? "bat" : (currentState.score.tossDecision || ""));
+  const winProbability = ballFeed.length && espnPayload && espnPayload.content && espnPayload.content.recentBallCommentary && Array.isArray(espnPayload.content.recentBallCommentary.ballComments) && espnPayload.content.recentBallCommentary.ballComments[0] && espnPayload.content.recentBallCommentary.ballComments[0].predictions
+    ? Number(espnPayload.content.recentBallCommentary.ballComments[0].predictions.winProbability) || 50
+    : 50;
+
+  const fallbackPartnershipRuns = officialSummary && Number(officialSummary[liveInning + "FallScore"]);
+  const fallbackPartnership = Number.isFinite(fallbackPartnershipRuns)
+    ? Math.max(0, inningsScore.runs - fallbackPartnershipRuns)
+    : null;
+  const fallbackFow = officialSummary && officialSummary[liveInning + "FallWickets"]
+    ? officialSummary[liveInning + "FallWickets"] + "-" + officialSummary[liveInning + "FallScore"] + " (" + (officialSummary[liveInning + "FallOvers"] || "-") + ")"
+    : "";
+
+  const performersBatsmen = [striker, nonStriker]
+    .filter(Boolean)
+    .concat(liveBatsmen.map((entry) => ({
+      name: entry.player && entry.player.longName,
+      team: battingTeamCode,
+      runs: entry.runs,
+      balls: entry.balls,
+      rate: entry.strikerate
+    })))
+    .filter((entry, index, list) => entry && entry.name && list.findIndex((item) => item && item.name === entry.name) === index)
+    .slice(0, 4)
+    .map((entry, index) => ({ rank: index + 1, name: entry.name, team: battingTeamCode, runs: Number(entry.runs) || 0 }));
+  const performersBowlers = (currentBowler ? [currentBowler] : [])
+    .concat(liveBowlers.map((entry) => ({ name: entry.player && entry.player.longName, team: fieldingTeamCode, wickets: entry.wickets, overs: entry.overs, economy: entry.economy, runs: entry.conceded })))
+    .filter((entry, index, list) => entry && entry.name && list.findIndex((item) => item && item.name === entry.name) === index)
+    .slice(0, 4)
+    .map((entry, index) => ({ rank: index + 1, name: entry.name, team: fieldingTeamCode, wickets: Number(entry.wickets) || 0 }));
+
+  return {
+    score: {
+      team1: battingTeamName,
+      team2: fieldingTeamName,
+      matchTitle: "IPL 2026 - Match " + liveMatchOrder + ", " + normalizeTeamCode(fixture.team1) + " vs " + normalizeTeamCode(fixture.team2),
+      team1Score: scoreText,
+      team2Score: fieldingScoreText || (liveInning === 1 ? "Yet to bat" : currentState.score.team2Score),
+      overs: oversText,
+      batsman: batsmanLine,
+      bowler: bowlerLine,
+      runRate: runRate,
+      team1Flag: battingTeamCode,
+      team2Flag: fieldingTeamCode,
+      venue: venue,
+      target: targetText,
+      league: "IPL 2026",
+      format: match && match.format ? match.format : "T20",
+      totalOvers: totalOvers,
+      powerplayOvers: "6",
+      matchDateTime: toIstDateTime(officialSummary && officialSummary.MatchDate, officialSummary && officialSummary.MatchTime) || currentState.score.matchDateTime,
+      tossWinner: tossWinner,
+      tossDecision: tossDecision,
+      partnership: livePartnership
+        ? (livePartnership.player1.longName + " / " + livePartnership.player2.longName + ": " + livePartnership.runs + " runs")
+        : (fallbackPartnership !== null ? ((striker && striker.name || battingTeamCode) + " / " + (nonStriker && nonStriker.name || fieldingTeamCode) + ": " + fallbackPartnership + " runs") : "Live stand updating"),
+      fow: fowList.length
+        ? fowList.map((entry) => entry.fowWicketNum + "-" + entry.fowRuns + " (" + (entry.dismissalBatsman && entry.dismissalBatsman.longName || "Wicket") + ", " + formatOversValue(entry.fowOvers) + ")").join(", ")
+        : (fallbackFow || "Fall of wickets updating"),
+      pp: inningsOvers.completedOvers <= 6 ? (scoreText + " after " + oversText + " overs") : ("Powerplay benchmark: 50+ keeps pressure on the fielding side"),
+      death: inningsOvers.completedOvers >= 16 ? ("Death overs live - projected finish " + projection.low + "-" + projection.high) : ("Projected finish: " + projection.low + "-" + projection.high),
+      extras: extrasText,
+      wickets: String(currentInnings && currentInnings.wickets !== undefined ? currentInnings.wickets : parseScoreBreakdown(scoreText).wickets),
+      reqRR: reqRR,
+      team1Captain: resolveMappedCaptain(fixture, battingTeamName) || resolveStateCaptainForTeam(currentState, battingTeamName) || battingTeamName,
+      team2Captain: resolveMappedCaptain(fixture, fieldingTeamName) || resolveStateCaptainForTeam(currentState, fieldingTeamName) || fieldingTeamName,
+      team1XI: team1XI,
+      team2XI: team2XI
+    },
+    content: {
+      matchCenter: {
+        title: "MATCH CENTRE · LIVE",
+        league: "IPL 2026 | Match " + liveMatchOrder + " | " + (match && match.statusEng ? match.statusEng : (officialSummary && officialSummary.MatchStatus) || "Live"),
+        team2: fieldingTeamName,
+        team2Score: fieldingScoreText || (liveInning === 1 ? "Yet to bat" : currentState.score.team2Score),
+        team2Flag: fieldingTeamCode,
+        target: targetText,
+        winProbabilityTeam1: Math.round(winProbability),
+        projectedTotal: projection.projected
+      },
+      performers: {
+        batsmen: performersBatsmen,
+        bowlers: performersBowlers
+      },
+      stats: {
+        highestScore: {
+          label: "Top live batter",
+          value: performersBatsmen[0] ? String(performersBatsmen[0].runs) : scoreText,
+          subtitle: performersBatsmen[0] ? performersBatsmen[0].name + " leading the innings" : battingTeamName + " live"
+        },
+        bestBowling: {
+          label: "Current bowler",
+          value: currentBowler ? currentBowler.overs + "-0-" + currentBowler.runs + "-" + currentBowler.wickets : (performersBowlers[0] ? String(performersBowlers[0].wickets) + " wicket" : "Live"),
+          subtitle: currentBowler ? currentBowler.name + " operating now" : fieldingTeamName + " bowling live"
+        },
+        keyMetrics: [
+          { label: "Live score", value: scoreText, tone: "orange" },
+          { label: "Overs", value: oversText, tone: "yellow" },
+          { label: "Run rate", value: runRate, tone: "green" },
+          { label: liveInning > 1 ? "Required RR" : "Projected", value: liveInning > 1 ? reqRR : String(projection.projected), tone: "blue" },
+          { label: "Wickets in hand", value: String(Math.max(0, 10 - parseScoreBreakdown(scoreText).wickets)), tone: "red" }
+        ],
+        momentum: {
+          title: "Live Momentum",
+          label: (match && match.statusEng ? match.statusEng : "Live") + " - " + battingTeamCode + " at " + scoreText,
+          percent: Math.round(winProbability)
+        }
+      },
+      predictions: {
+        expert: {
+          title: "Live Match Edge",
+          winner: battingTeamCode + " driving the current phase",
+          subtitle: liveInning > 1 ? (battingTeamCode + " chase pressure updates in real time") : (battingTeamCode + " set the pace in the first innings"),
+          note: targetText
+        },
+        playerForm: [
+          { name: striker && striker.name || extractParticipantName(currentState.score.batsman, "Current batter"), status: "Striker", tone: "green", detail: striker ? (striker.runs + " from " + striker.balls + " balls") : currentState.score.batsman },
+          { name: nonStriker && nonStriker.name || fieldingTeamName, status: "Non-striker", tone: "orange", detail: nonStriker ? (nonStriker.runs + " from " + nonStriker.balls + " balls") : "Support batter live" },
+          { name: currentBowler && currentBowler.name || extractParticipantName(currentState.score.bowler, "Current bowler"), status: "Bowling watch", tone: "blue", detail: currentBowler ? (currentBowler.overs + "-0-" + currentBowler.runs + "-" + currentBowler.wickets) : currentState.score.bowler }
+        ],
+        scoreLines: [
+          { label: battingTeamCode + " total", value: liveInning > 1 ? scoreText : (projection.low + "-" + projection.high) },
+          { label: liveInning > 1 ? (fieldingTeamCode + " defence") : (fieldingTeamCode + " chase") , value: targetText },
+          { label: "Match status", value: match && match.statusEng ? match.statusEng : "Live" },
+          { label: "Venue", value: venue }
+        ]
+      },
+      analytics: {
+        battingRows: liveBatsmen.slice(0, 6).map((entry) => ({
+          name: entry.player && entry.player.longName || "Batter",
+          runs: entry.runs == null ? "-" : String(entry.runs),
+          balls: entry.balls == null ? "-" : String(entry.balls),
+          strikeRate: entry.strikerate == null ? "-" : String(entry.strikerate),
+          fours: entry.fours == null ? "-" : String(entry.fours),
+          sixes: entry.sixes == null ? "-" : String(entry.sixes)
+        })),
+        bowlingRows: liveBowlers.slice(0, 6).map((entry) => ({
+          name: entry.player && entry.player.longName || "Bowler",
+          overs: entry.overs == null ? "-" : String(entry.overs),
+          runs: entry.conceded == null ? "-" : String(entry.conceded),
+          wickets: entry.wickets == null ? "-" : String(entry.wickets),
+          economy: entry.economy == null ? "-" : String(entry.economy)
+        }))
+      }
+    },
+    ballFeed,
+    timelineEvents: buildTimelineFromLiveData(fixture, espnPayload, officialSummary, currentInnings, team1XI, team2XI, ballFeed),
+    notifications: [
+      normalizeTimelineEvent({
+        id: "live-sync-" + fixture.id,
+        title: "Live sync",
+        detail: battingTeamCode + " are " + scoreText + " after " + oversText + " overs.",
+        type: "update",
+        badge: "LIVE",
+        over: oversText,
+        timestamp: new Date().toISOString()
+      }),
+      normalizeTimelineEvent({
+        id: "live-target-" + fixture.id,
+        title: liveInning > 1 ? "Chase equation" : "Projection",
+        detail: targetText,
+        type: liveInning > 1 ? "alert" : "milestone",
+        badge: liveInning > 1 ? "CHASE" : "PROJ",
+        over: oversText,
+        timestamp: new Date().toISOString()
+      })
+    ].map((entry) => ({ id: entry.id, message: entry.detail, timestamp: entry.timestamp }))
+  };
+}
+
+async function refreshLiveMatchSync() {
+  if (liveSyncRuntime.inFlight) return;
+  liveSyncRuntime.inFlight = true;
+
+  try {
+    const currentState = await readState();
+    const sportifyMatchId = extractSportifyMatchId(currentState.stream && currentState.stream.url);
+    if (!sportifyMatchId || currentState.stream.status !== "live") {
+      liveSyncRuntime.lastError = "";
+      liveSyncRuntime.lastSyncedAt = "";
+      liveSyncRuntime.cachedEspnUrl = "";
+      liveSyncRuntime.cachedEspnAt = 0;
+      liveSyncRuntime.matchKey = "";
+      liveSyncRuntime.lastSignature = "";
+      return;
+    }
+
+    const nextMatchKey = "sportify:" + sportifyMatchId;
+    if (liveSyncRuntime.matchKey !== nextMatchKey) {
+      liveSyncRuntime.matchKey = nextMatchKey;
+      liveSyncRuntime.cachedEspnUrl = "";
+      liveSyncRuntime.cachedEspnAt = 0;
+      liveSyncRuntime.lastSignature = "";
+    }
+
+    const fixture = await fetchSportifyFixture(sportifyMatchId);
+    const [espnResult, officialResult] = await Promise.allSettled([
+      fetchEspnLivePayload(fixture),
+      fetchOfficialIplSummary(fixture)
+    ]);
+    const espnPayload = espnResult.status === "fulfilled" ? espnResult.value : null;
+    const officialSummary = officialResult.status === "fulfilled" ? officialResult.value : null;
+
+    if (!espnPayload && !officialSummary) {
+      throw new Error("No live score source returned usable data");
+    }
+
+    const patch = buildLiveSyncPatch(fixture, espnPayload, officialSummary, currentState);
+    const signature = JSON.stringify({
+      score: patch.score,
+      matchCenter: patch.content.matchCenter,
+      performers: patch.content.performers,
+      ballFeed: patch.ballFeed,
+      timelineEvents: patch.timelineEvents
+    });
+
+    liveSyncRuntime.lastError = "";
+    liveSyncRuntime.lastSyncedAt = new Date().toISOString();
+    if (signature === liveSyncRuntime.lastSignature) {
+      return;
+    }
+
+    liveSyncRuntime.lastSignature = signature;
+    const nextState = {
+      ...currentState,
+      score: { ...currentState.score, ...patch.score },
+      content: mergeContent(currentState.content, patch.content),
+      ballFeed: patch.ballFeed,
+      timelineEvents: patch.timelineEvents,
+      notifications: Array.isArray(patch.notifications) ? patch.notifications : currentState.notifications,
+      updatedAt: new Date().toISOString()
+    };
+    const savedState = await writeState(nextState);
+    broadcastStateUpdate(savedState);
+  } catch (error) {
+    liveSyncRuntime.lastError = error && error.message ? error.message : "Live sync failed";
+    console.error("Live sync failed:", liveSyncRuntime.lastError);
+  } finally {
+    liveSyncRuntime.inFlight = false;
+  }
+}
+
 function hasLiveScore(state) {
   return Boolean(state && state.score && state.score.team1 && state.score.team1Score);
 }
@@ -849,7 +1658,7 @@ function applyRealtimeViewerMetrics(state) {
 
 function createStatePayload(state) {
   const realtimeState = applyRealtimeViewerMetrics(state);
-  return { stream: realtimeState.stream, score: realtimeState.score, poll: realtimeState.poll, content: realtimeState.content, liveMatches: realtimeState.liveMatches, upcomingMatches: realtimeState.upcomingMatches, recentResults: realtimeState.recentResults, ballFeed: realtimeState.ballFeed, timelineEvents: realtimeState.timelineEvents, updatedAt: realtimeState.updatedAt };
+  return { stream: realtimeState.stream, score: realtimeState.score, poll: realtimeState.poll, content: realtimeState.content, liveMatches: realtimeState.liveMatches, upcomingMatches: realtimeState.upcomingMatches, recentResults: realtimeState.recentResults, ballFeed: realtimeState.ballFeed, timelineEvents: realtimeState.timelineEvents, notifications: realtimeState.notifications, updatedAt: realtimeState.updatedAt };
 }
 
 function createSsePacket(eventName, payload) {
@@ -1537,6 +2346,22 @@ setInterval(() => {
   analytics.activeUsers = activeViewerIds;
 }, 60000);
 
+setInterval(() => {
+  void refreshLiveMatchSync();
+}, LIVE_SYNC_INTERVAL_MS);
+
+app.get("/api/live-sync/status", async (_req, res) => {
+  res.json({
+    ok: true,
+    active: Boolean(liveSyncRuntime.matchKey),
+    source: liveSyncRuntime.matchKey || null,
+    lastSyncedAt: liveSyncRuntime.lastSyncedAt || null,
+    lastError: liveSyncRuntime.lastError || null,
+    cachedEspnUrl: liveSyncRuntime.cachedEspnUrl || null,
+    intervalMs: LIVE_SYNC_INTERVAL_MS
+  });
+});
+
 app.get("/api/poll/status", async (_req, res) => {
   try {
     const state = applyRealtimeViewerMetrics(await readState());
@@ -1980,6 +2805,7 @@ process.on("SIGINT", async () => {
 
 async function initializeApp() {
   await ensureDataFile();
+  await refreshLiveMatchSync();
   console.log("CricketLive Pro server initialized on http://localhost:" + PORT);
 }
 

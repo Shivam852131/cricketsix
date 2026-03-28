@@ -835,6 +835,7 @@
                             <label class="block text-sm text-slate-400 mb-2">Platform</label>
                             <select id="stream-platform" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2" onchange="onPlatformChange()">
                                 <option value="custom">Custom URL</option>
+                                <option value="iframe">Web Page / Iframe</option>
                                 <option value="youtube">YouTube</option>
                                 <option value="kick">Kick</option>
                                 <option value="twitch">Twitch</option>
@@ -879,6 +880,7 @@
                             <label class="block text-sm text-slate-400 mb-2">🏏 Free Live Cricket Streams</label>
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                                 <button onclick="setStream('https://kick.com/cricinfo', 'kick')" class="bg-red-600/80 hover:bg-red-600 px-3 py-2 rounded-lg text-xs font-semibold">🔴 Kick Cricket</button>
+                                <button onclick="setStream('https://sportify-beta.pages.dev/match?id=2601', 'iframe')" class="bg-emerald-600/80 hover:bg-emerald-600 px-3 py-2 rounded-lg text-xs font-semibold">⚡ Sportify Live</button>
                                 <button onclick="setStream('https://kick.com/cricbuzz', 'kick')" class="bg-red-600/80 hover:bg-red-600 px-3 py-2 rounded-lg text-xs font-semibold">🔴 Kick Cric</button>
                                 <button onclick="setStream('https://no-ball.pages.dev/?id=starsports1', 'starsports')" class="bg-yellow-600/80 hover:bg-yellow-600 px-3 py-2 rounded-lg text-xs font-semibold">⭐ Star Sports 1</button>
                                 <button onclick="setStream('https://no-ball.pages.dev/?id=starsports2', 'starsports')" class="bg-yellow-600/80 hover:bg-yellow-600 px-3 py-2 rounded-lg text-xs font-semibold">⭐ Star Sports 2</button>
@@ -892,6 +894,7 @@
                         
                         <div class="flex gap-2 flex-wrap mt-4">
                             <button onclick="setStream('/stream/mobile', 'mobile')" class="bg-green-600 px-4 py-2 rounded-lg text-sm">📱 Mobile Camera</button>
+                            <button onclick="setStream('https://sportify-beta.pages.dev/match?id=2601', 'iframe')" class="bg-emerald-600 px-4 py-2 rounded-lg text-sm">⚡ Sportify Live</button>
                             <button onclick="setStream('https://kick.com/heyutkarsh', 'kick')" class="bg-red-600 px-4 py-2 rounded-lg text-sm">🔴 Kick</button>
                             <button onclick="setStream('https://no-ball.pages.dev/?id=jio-hotstar', 'jio')" class="bg-blue-600 px-4 py-2 rounded-lg text-sm">📺 Jio</button>
                             <button onclick="setStream('https://youtu.be/dQw4w9WgXcQ', 'youtube')" class="bg-red-500 px-4 py-2 rounded-lg text-sm">▶️ YouTube</button>
@@ -2332,6 +2335,10 @@
         
         function getEmbedUrl(url, platform) {
             if (!url) return null;
+
+            if (platform === 'iframe' || url.includes('pages.dev') || url.includes('/match?')) {
+                return url;
+            }
             
             // YouTube
             if (platform === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) {

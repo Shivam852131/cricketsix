@@ -1,54 +1,41 @@
 {
   "stream": {
-    "url": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerJoyrides.mp4",
-    "platform": "video",
+    "url": "https://sportify-beta.pages.dev/match?id=2601",
+    "platform": "iframe",
     "status": "live",
     "viewerCount": 0
   },
   "score": {
-    "team1": "Royal Challengers Bengaluru",
-    "team2": "Sunrisers Hyderabad",
+    "team1": "Sunrisers Hyderabad",
+    "team2": "Royal Challengers Bengaluru",
     "matchTitle": "IPL 2026 - Match 1, RCB vs SRH",
-    "team1Score": "176/3",
+    "team1Score": "137/4",
     "team2Score": "Yet to bat",
-    "overs": "17.2",
-    "batsman": "Virat Kohli 68* (39) | Rajat Patidar 29* (15)",
-    "bowler": "Harshal Patel 3.2-0-34-1",
-    "runRate": "10.15",
-    "team1Flag": "RCB",
-    "team2Flag": "SRH",
+    "overs": "14.2",
+    "batsman": "Ishan Kishan 74* (36) | Salil Arora 9 (5)",
+    "bowler": "Suyash Sharma 2.2-0-23-0",
+    "runRate": "9.56",
+    "team1Flag": "SRH",
+    "team2Flag": "RCB",
     "venue": "M Chinnaswamy Stadium, Bengaluru",
-    "target": "First innings in progress - SRH chose to bowl",
+    "target": "Projected finish: 191-205",
     "league": "IPL 2026",
     "format": "T20",
     "totalOvers": "20",
     "powerplayOvers": "6",
     "matchDateTime": "2026-03-28T19:30:00+05:30",
-    "tossWinner": "Sunrisers Hyderabad",
-    "tossDecision": "bowl",
-    "partnership": "Kohli-Patidar: 54 off 27",
-    "fow": "1-48 (Salt, 4.1), 2-96 (Padikkal, 9.3), 3-122 (Jitesh, 12.1)",
-    "pp": "63/1 (6)",
-    "death": "Projected finish: 54 in the last 2.4 overs",
-    "extras": "9 (wd5, nb1, lb3)",
-    "wickets": "3",
+    "tossWinner": "Royal Challengers Bengaluru",
+    "tossDecision": "field",
+    "partnership": "Ishan Kishan / Salil Arora: 0 runs",
+    "fow": "4-137 (14.2)",
+    "pp": "Powerplay benchmark: 50+ keeps pressure on the fielding side",
+    "death": "Projected finish: 191-205",
+    "extras": "Live extras updating",
+    "wickets": "4",
     "reqRR": "-",
-    "team1Captain": "Rajat Patidar (c)",
-    "team2Captain": "Ishan Kishan (c)",
+    "team1Captain": "Ishan Kishan (c)",
+    "team2Captain": "Rajat Patidar (c)",
     "team1XI": [
-      "Phil Salt",
-      "Virat Kohli",
-      "Devdutt Padikkal",
-      "Rajat Patidar (c)",
-      "Jitesh Sharma (wk)",
-      "Tim David",
-      "Krunal Pandya",
-      "Romario Shepherd",
-      "Bhuvneshwar Kumar",
-      "Suyash Sharma",
-      "Jacob Duffy"
-    ],
-    "team2XI": [
       "Abhishek Sharma",
       "Travis Head",
       "Ishan Kishan (c/wk)",
@@ -60,6 +47,19 @@
       "Jaydev Unadkat",
       "Harsh Dubey",
       "Eshan Malinga"
+    ],
+    "team2XI": [
+      "Phil Salt",
+      "Virat Kohli",
+      "Devdutt Padikkal",
+      "Rajat Patidar (c)",
+      "Jitesh Sharma (wk)",
+      "Tim David",
+      "Krunal Pandya",
+      "Romario Shepherd",
+      "Bhuvneshwar Kumar",
+      "Suyash Sharma",
+      "Jacob Duffy"
     ]
   },
   "chatMessages": [
@@ -108,13 +108,13 @@
     },
     "matchCenter": {
       "title": "MATCH CENTRE · LIVE",
-      "league": "IPL 2026 | Match 1 | Bengaluru",
-      "team2": "Sunrisers Hyderabad",
+      "league": "IPL 2026 | Match 1 | Live",
+      "team2": "Royal Challengers Bengaluru",
       "team2Score": "Yet to bat",
-      "team2Flag": "SRH",
-      "target": "Projected finish: 202-210",
-      "winProbabilityTeam1": 53,
-      "projectedTotal": 206
+      "team2Flag": "RCB",
+      "target": "Projected finish: 191-205",
+      "winProbabilityTeam1": 50,
+      "projectedTotal": 194
     },
     "quickActions": {
       "scorecard": "Playing XIs",
@@ -135,60 +135,116 @@
     },
     "performers": {
       "batsmen": [
-        { "rank": 1, "name": "Virat Kohli", "team": "RCB", "runs": 68 },
-        { "rank": 2, "name": "Phil Salt", "team": "RCB", "runs": 37 },
-        { "rank": 3, "name": "Rajat Patidar", "team": "RCB", "runs": 29 },
-        { "rank": 4, "name": "Heinrich Klaasen", "team": "SRH", "runs": 0 }
+        {
+          "rank": 1,
+          "name": "Ishan Kishan",
+          "team": "SRH",
+          "runs": 74
+        },
+        {
+          "rank": 2,
+          "name": "Salil Arora",
+          "team": "SRH",
+          "runs": 9
+        }
       ],
       "bowlers": [
-        { "rank": 1, "name": "Harshal Patel", "team": "SRH", "wickets": 1 },
-        { "rank": 2, "name": "Eshan Malinga", "team": "SRH", "wickets": 1 },
-        { "rank": 3, "name": "Bhuvneshwar Kumar", "team": "RCB", "wickets": 0 },
-        { "rank": 4, "name": "Krunal Pandya", "team": "RCB", "wickets": 0 }
+        {
+          "rank": 1,
+          "name": "Suyash Sharma",
+          "team": "RCB",
+          "wickets": 0
+        }
       ]
     },
     "stats": {
       "highestScore": {
-        "label": "Top score so far",
-        "value": "68*",
-        "subtitle": "Virat Kohli controlling the launch phase"
+        "label": "Top live batter",
+        "value": "74",
+        "subtitle": "Ishan Kishan leading the innings"
       },
       "bestBowling": {
-        "label": "Best figures",
-        "value": "3.2-0-34-1",
-        "subtitle": "Harshal Patel still owns the death-over leverage"
+        "label": "Current bowler",
+        "value": "2.2-0-23-0",
+        "subtitle": "Suyash Sharma operating now"
       },
       "keyMetrics": [
-        { "label": "Powerplay", "value": "63/1", "tone": "orange" },
-        { "label": "Runs off last 12", "value": "24", "tone": "green" },
-        { "label": "Boundary count", "value": "16", "tone": "red" },
-        { "label": "Projected total", "value": "206", "tone": "blue" },
-        { "label": "Win edge", "value": "RCB 53%", "tone": "green" }
+        {
+          "label": "Live score",
+          "value": "137/4",
+          "tone": "orange"
+        },
+        {
+          "label": "Overs",
+          "value": "14.2",
+          "tone": "yellow"
+        },
+        {
+          "label": "Run rate",
+          "value": "9.56",
+          "tone": "green"
+        },
+        {
+          "label": "Projected",
+          "value": "194",
+          "tone": "blue"
+        },
+        {
+          "label": "Wickets in hand",
+          "value": "6",
+          "tone": "red"
+        }
       ],
       "momentum": {
-        "title": "Opening Night Pulse",
-        "label": "RCB have the edge, but one SRH over can still drag the total back under 200.",
-        "percent": 57
+        "title": "Live Momentum",
+        "label": "Live - SRH at 137/4",
+        "percent": 50
       }
     },
     "predictions": {
       "expert": {
         "title": "Live Match Edge",
-        "winner": "RCB slightly ahead",
-        "subtitle": "SRH still hold chase upside because of dew and batting depth",
-        "note": "The toss has already helped Hyderabad, but Kohli and Patidar have rebuilt enough for RCB to target a premium finish."
+        "winner": "SRH driving the current phase",
+        "subtitle": "SRH set the pace in the first innings",
+        "note": "Projected finish: 191-205"
       },
       "playerForm": [
-        { "name": "Virat Kohli", "status": "Set anchor", "tone": "green", "detail": "68* off 39 with full control over pace and match shape." },
-        { "name": "Rajat Patidar", "status": "Launch support", "tone": "orange", "detail": "29* off 15 has reopened the 200-plus route." },
-        { "name": "Harshal Patel", "status": "Death test", "tone": "blue", "detail": "His final spell likely decides whether this ends near 198 or 210." },
-        { "name": "Ishan Kishan", "status": "Chase captain", "tone": "orange", "detail": "Leads the SRH chase with Head, Abhishek and Klaasen behind him." }
+        {
+          "name": "Ishan Kishan",
+          "status": "Striker",
+          "tone": "green",
+          "detail": "74 from 36 balls"
+        },
+        {
+          "name": "Salil Arora",
+          "status": "Non-striker",
+          "tone": "orange",
+          "detail": "9 from 5 balls"
+        },
+        {
+          "name": "Suyash Sharma",
+          "status": "Bowling watch",
+          "tone": "blue",
+          "detail": "2.2-0-23-0"
+        }
       ],
       "scoreLines": [
-        { "label": "RCB finish", "value": "202-210" },
-        { "label": "SRH chase mode", "value": "Attack from ball one" },
-        { "label": "Match Result", "value": "Toss and dew keep this open despite RCB momentum" },
-        { "label": "Powerplay edge", "value": "RCB" }
+        {
+          "label": "SRH total",
+          "value": "191-205"
+        },
+        {
+          "label": "RCB chase",
+          "value": "Projected finish: 191-205"
+        },
+        {
+          "label": "Match status",
+          "value": "Live"
+        },
+        {
+          "label": "Venue",
+          "value": "M Chinnaswamy Stadium, Bengaluru"
+        }
       ]
     },
     "highlights": {
@@ -201,42 +257,96 @@
         "favorites": "11.2K"
       },
       "items": [
-        { "title": "Toss Call Lands", "description": "SRH win the toss and choose to bowl first under lights.", "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4", "icon": "🪙", "time": "Pre-match" },
-        { "title": "Playing XIs Confirmed", "description": "RCB trust Salt-Kohli at the top while SRH stack power through Kishan and Klaasen.", "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4", "icon": "📋", "time": "Lineups" },
-        { "title": "Powerplay Surge", "description": "RCB reach 63/1 in six overs and force SRH to burn through matchups early.", "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4", "icon": "⚡", "time": "6.0 overs" },
-        { "title": "17th Over Burst", "description": "A boundary-heavy over pushes the projection line back above 200.", "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4", "icon": "🔥", "time": "17.2 overs" }
+        {
+          "title": "Toss Call Lands",
+          "description": "SRH win the toss and choose to bowl first under lights.",
+          "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
+          "icon": "🪙",
+          "time": "Pre-match"
+        },
+        {
+          "title": "Playing XIs Confirmed",
+          "description": "RCB trust Salt-Kohli at the top while SRH stack power through Kishan and Klaasen.",
+          "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
+          "icon": "📋",
+          "time": "Lineups"
+        },
+        {
+          "title": "Powerplay Surge",
+          "description": "RCB reach 63/1 in six overs and force SRH to burn through matchups early.",
+          "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
+          "icon": "⚡",
+          "time": "6.0 overs"
+        },
+        {
+          "title": "17th Over Burst",
+          "description": "A boundary-heavy over pushes the projection line back above 200.",
+          "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
+          "icon": "🔥",
+          "time": "17.2 overs"
+        }
       ],
       "stats": [
-        { "label": "Toss", "value": "SRH bowl first" },
-        { "label": "Current score", "value": "176/3" },
-        { "label": "Projected finish", "value": "206" },
-        { "label": "Set batter", "value": "Kohli 68*" }
+        {
+          "label": "Toss",
+          "value": "SRH bowl first"
+        },
+        {
+          "label": "Current score",
+          "value": "176/3"
+        },
+        {
+          "label": "Projected finish",
+          "value": "206"
+        },
+        {
+          "label": "Set batter",
+          "value": "Kohli 68*"
+        }
       ],
       "trending": [
-        { "title": "Toss value", "value": "Hyderabad chose the chase path immediately" },
-        { "title": "Set-batter control", "value": "Kohli is dictating tempo into the death phase" },
-        { "title": "Death-over pressure", "value": "Harshal vs Patidar-Kohli is the swing battle" },
-        { "title": "Chase fear factor", "value": "Head-Abhishek-Kishan keep SRH alive even at 205+" }
+        {
+          "title": "Toss value",
+          "value": "Hyderabad chose the chase path immediately"
+        },
+        {
+          "title": "Set-batter control",
+          "value": "Kohli is dictating tempo into the death phase"
+        },
+        {
+          "title": "Death-over pressure",
+          "value": "Harshal vs Patidar-Kohli is the swing battle"
+        },
+        {
+          "title": "Chase fear factor",
+          "value": "Head-Abhishek-Kishan keep SRH alive even at 205+"
+        }
       ]
     },
     "analytics": {
-      "battingRows": [
-        { "name": "Virat Kohli", "runs": "68*", "balls": "39", "strikeRate": "174.35", "fours": "7", "sixes": "2" },
-        { "name": "Phil Salt", "runs": "37", "balls": "19", "strikeRate": "194.73", "fours": "4", "sixes": "2" },
-        { "name": "Rajat Patidar", "runs": "29*", "balls": "15", "strikeRate": "193.33", "fours": "3", "sixes": "1" },
-        { "name": "Jitesh Sharma", "runs": "18", "balls": "10", "strikeRate": "180.00", "fours": "1", "sixes": "1" }
-      ],
-      "bowlingRows": [
-        { "name": "Harshal Patel", "overs": "3.2", "runs": "34", "wickets": "1", "economy": "10.20" },
-        { "name": "Eshan Malinga", "overs": "3", "runs": "31", "wickets": "1", "economy": "10.33" },
-        { "name": "Jaydev Unadkat", "overs": "3", "runs": "26", "wickets": "0", "economy": "8.66" },
-        { "name": "Harsh Dubey", "overs": "4", "runs": "38", "wickets": "1", "economy": "9.50" }
-      ],
+      "battingRows": [],
+      "bowlingRows": [],
       "geo": [
-        { "label": "Bengaluru watch parties", "value": 34, "tone": "green" },
-        { "label": "Hyderabad watch parties", "value": 24, "tone": "red" },
-        { "label": "Mumbai neutral traffic", "value": 14, "tone": "blue" },
-        { "label": "Overseas viewers", "value": 10, "tone": "yellow" }
+        {
+          "label": "Bengaluru watch parties",
+          "value": 34,
+          "tone": "green"
+        },
+        {
+          "label": "Hyderabad watch parties",
+          "value": 24,
+          "tone": "red"
+        },
+        {
+          "label": "Mumbai neutral traffic",
+          "value": 14,
+          "tone": "blue"
+        },
+        {
+          "label": "Overseas viewers",
+          "value": 10,
+          "tone": "yellow"
+        }
       ]
     }
   },
@@ -347,120 +457,66 @@
   ],
   "ballFeed": [
     {
-      "id": "sim-1",
-      "type": "single",
-      "label": "1",
-      "runs": 1,
-      "wickets": 0,
-      "legal": true,
-      "over": "16.4",
-      "timestamp": "2026-03-28T21:40:00+05:30"
-    },
-    {
-      "id": "sim-2",
-      "type": "four",
-      "label": "4",
-      "runs": 4,
-      "wickets": 0,
-      "legal": true,
-      "over": "16.5",
-      "timestamp": "2026-03-28T21:41:00+05:30"
-    },
-    {
-      "id": "sim-3",
-      "type": "wide",
-      "label": "Wd",
-      "runs": 1,
-      "wickets": 0,
-      "legal": false,
-      "over": "17.0",
-      "timestamp": "2026-03-28T21:42:00+05:30"
-    },
-    {
-      "id": "sim-4",
-      "type": "six",
-      "label": "6",
-      "runs": 6,
-      "wickets": 0,
-      "legal": true,
-      "over": "17.0",
-      "timestamp": "2026-03-28T21:42:20+05:30"
-    },
-    {
-      "id": "sim-5",
-      "type": "single",
-      "label": "1",
-      "runs": 1,
-      "wickets": 0,
-      "legal": true,
-      "over": "17.1",
-      "timestamp": "2026-03-28T21:43:00+05:30"
-    },
-    {
-      "id": "sim-6",
+      "id": "synthetic-1774711087318",
       "type": "run",
-      "label": "2",
+      "label": "+8",
+      "runs": 8,
+      "wickets": 0,
+      "legal": true,
+      "over": "14.0",
+      "timestamp": "2026-03-28T15:18:07.318Z"
+    },
+    {
+      "id": "synthetic-1774711169941",
+      "type": "run",
+      "label": "+2",
       "runs": 2,
       "wickets": 0,
       "legal": true,
-      "over": "17.2",
-      "timestamp": "2026-03-28T21:43:32+05:30"
+      "over": "14.2",
+      "timestamp": "2026-03-28T15:19:29.941Z"
     }
   ],
   "timelineEvents": [
     {
-      "id": "sim-toss",
+      "id": "toss-2601",
       "title": "Toss",
-      "detail": "Sunrisers Hyderabad win the toss and choose to bowl first under lights at the Chinnaswamy.",
+      "detail": "Royal Challengers Bengaluru Won The Toss And Elected To Field",
       "type": "milestone",
       "badge": "TOSS",
       "over": "Pre",
-      "timestamp": "2026-03-28T19:01:00+05:30"
+      "timestamp": "2026-03-28T19:30:00+05:30"
     },
     {
-      "id": "sim-xi",
-      "title": "Playing XIs In",
-      "detail": "RCB back Salt and Kohli at the top, while SRH trust Head, Abhishek, Kishan and Klaasen for the chase.",
+      "id": "xi-2601",
+      "title": "Playing XIs",
+      "detail": "Royal Challengers Bengaluru and Sunrisers Hyderabad confirm their lineups for the live feed.",
       "type": "alert",
       "badge": "XI",
       "over": "Pre",
-      "timestamp": "2026-03-28T19:12:00+05:30"
+      "timestamp": "2026-03-28T19:30:00+05:30"
     },
     {
-      "id": "sim-pp",
-      "title": "Powerplay Surge",
-      "detail": "RCB rocket to 63/1 in the powerplay and force SRH into early matchup changes.",
-      "type": "milestone",
-      "badge": "PP",
-      "over": "6.0",
-      "timestamp": "2026-03-28T20:05:00+05:30"
-    },
-    {
-      "id": "sim-finish",
-      "title": "17th Over Burst",
-      "detail": "A wide, six, single and two keep the finish line above 200 as Kohli and Patidar press SRH late.",
-      "type": "boundary",
-      "badge": "SURGE",
-      "over": "17.2",
-      "timestamp": "2026-03-28T21:43:32+05:30"
+      "id": "synthetic-timeline-synthetic-1774711169941",
+      "title": "Live update",
+      "detail": "Score moved to the latest live state at 14.2.",
+      "type": "run",
+      "badge": "+2",
+      "over": "14.2",
+      "timestamp": "2026-03-28T15:19:29.941Z"
     }
   ],
   "notifications": [
     {
-      "id": "notice-1",
-      "message": "Toss: SRH win the toss and bowl first in the IPL 2026 opener.",
-      "timestamp": "2026-03-28T19:02:00+05:30"
+      "id": "live-sync-2601",
+      "message": "SRH are 137/4 after 14.2 overs.",
+      "timestamp": "2026-03-28T15:19:29.943Z"
     },
     {
-      "id": "notice-2",
-      "message": "Playing XIs confirmed: Salt-Kohli open for RCB; Head-Abhishek-Kishan headline the SRH chase unit.",
-      "timestamp": "2026-03-28T19:14:00+05:30"
-    },
-    {
-      "id": "notice-3",
-      "message": "Live: RCB 176/3 after 17.2 overs. Kohli and Patidar have pushed the projection back above 200.",
-      "timestamp": "2026-03-28T21:44:00+05:30"
+      "id": "live-target-2601",
+      "message": "Projected finish: 191-205",
+      "timestamp": "2026-03-28T15:19:29.943Z"
     }
   ],
-  "updatedAt": "2026-03-28T21:44:00+05:30"
+  "updatedAt": "2026-03-28T15:19:29.944Z"
 }
