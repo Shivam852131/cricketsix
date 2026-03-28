@@ -1,7 +1,7 @@
 {
   "stream": {
-    "url": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerJoyrides.mp4",
-    "platform": "video",
+    "url": "https://sportify-beta.pages.dev/match?id=2601",
+    "platform": "iframe",
     "status": "live",
     "viewerCount": 0
   },

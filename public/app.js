@@ -1149,6 +1149,12 @@
       return;
     }
 
+    if (platform === "iframe") {
+      framePlayer.src = url;
+      framePlayer.classList.remove("hidden");
+      return;
+    }
+
     if (platform === "starsports" || url.indexOf("starsports") >= 0 || url.indexOf("no-ball") >= 0) {
       const streamId = extractNoBallId(url);
       if (streamId) {
@@ -1992,6 +1998,7 @@
     const platform = typeof currentPlatform === "string" ? currentPlatform.toLowerCase() : "custom";
     if (!url) return platform;
     if (platform !== "custom") return platform;
+    if (url.indexOf("pages.dev") >= 0 || url.indexOf("/match?") >= 0) return "iframe";
     if (url.indexOf("youtube.com") >= 0 || url.indexOf("youtu.be") >= 0) return "youtube";
     if (url.indexOf("kick.com") >= 0) return "kick";
     if (url.indexOf("twitch.tv") >= 0) return "twitch";
