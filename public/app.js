@@ -463,6 +463,38 @@
       }).catch(function() {});
     }, 10000);
     
+    // Fetch live match stats every 15 seconds for additional real-time data
+    setInterval(function() {
+      fetchJson("/match/stats").then(function(stats) {
+        if (stats && stats.ok) {
+          // Update match stats if available
+          if (stats.score) {
+            appState.score = Object.assign({}, appState.score, stats.score);
+            renderAll();
+          }
+        }
+      }).catch(function() {});
+    }, 15000);
+    
+    // Fetch poll status every 5 seconds
+    setInterval(function() {
+      fetchJson("/poll/status").then(function(poll) {
+        if (poll && poll.ok && appState.poll) {
+          // Poll status for real-time vote counts
+          renderPoll();
+        }
+      }).catch(function() {});
+    }, 5000);
+    
+    // Fetch live sync status every 20 seconds
+    setInterval(function() {
+      fetchJson("/live-sync/status").then(function(sync) {
+        if (sync && sync.ok && sync.active) {
+          // Live sync is active - score is being updated automatically
+        }
+      }).catch(function() {});
+    }, 20000);
+    
     // Update connection status periodically
     setInterval(updateConnectionStatus, 5000);
     
@@ -541,6 +573,12 @@
           notifications: appState.notifications
         }));
         scheduleAiRefresh();
+        // Force immediate render of all dynamic sections
+        renderAll();
+        renderLiveScore();
+        renderMatchDetails();
+        renderPoll();
+        renderChats();
       });
 
       realtime.addEventListener("chat-snapshot", function(event) {
