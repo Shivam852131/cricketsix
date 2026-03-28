@@ -1214,6 +1214,17 @@
       }
     }
 
+    if (platform === "jioembed" || url.indexOf("jio") >= 0 || url.indexOf("hotstar") >= 0) {
+      if (url.indexOf("no-ball.pages.dev") >= 0 || url.indexOf("sportify") >= 0 || url.indexOf("cricflux") >= 0) {
+        framePlayer.src = url;
+        framePlayer.classList.remove("hidden");
+        return;
+      }
+      framePlayer.src = url || "https://no-ball.pages.dev/?id=jio-hotstar";
+      framePlayer.classList.remove("hidden");
+      return;
+    }
+
     if (platform === "vidplay" || url.indexOf("vidplay") >= 0 || url.indexOf("vidplay") >= 0) {
       const videoId = extractStreamId(url, "vidplay");
       if (videoId) {
