@@ -370,6 +370,7 @@
                     <button onclick="showPage('live')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Live</button>
                     <button onclick="showPage('stats')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Stats</button>
                     <button onclick="showPage('predictions')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Predictions</button>
+                    <button onclick="showPage('scenario')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Scenario Lab</button>
                     <button onclick="showPage('highlights')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Highlights</button>
                     <button onclick="showPage('analytics')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Analytics</button>
                     
@@ -412,6 +413,7 @@
                 </button>
                 <button onclick="showPage('stats'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">📊 Stats</button>
                 <button onclick="showPage('predictions'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">🎯 Predictions</button>
+                <button onclick="showPage('scenario'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">🧪 Scenario Lab</button>
                 <button onclick="showPage('highlights'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">🎬 Highlights</button>
                 <button onclick="showPage('analytics'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">📈 Analytics</button>
                 <div class="flex items-center justify-between pt-2 border-t border-slate-700/50">
@@ -646,14 +648,15 @@
 
         <!-- Quick Action Strip -->
         <div class="max-w-7xl mx-auto px-4 py-8 flex flex-wrap gap-3 justify-between items-center">
-            <div class="flex gap-3 flex-wrap">
-                <button onclick="showPage('stats')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>📊</span> <span id="quick-action-scorecard">Full Scorecard</span></button>
-                <button onclick="showPage('analytics')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>📈</span> <span id="quick-action-analytics">Analytics</span></button>
-                <button onclick="showPage('highlights')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>🎬</span> <span id="quick-action-highlights">Highlights</span></button>
-                <button onclick="shareMatch()" class="bg-blue-600/80 hover:bg-blue-600 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>📤</span> Share</button>
-                <button onclick="toggleVoiceControl()" class="bg-purple-600/80 hover:bg-purple-600 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2" title="Voice Control"><span>🎤</span> Voice</button>
-                <button onclick="showAdvancedMenu()" class="bg-slate-700/80 hover:bg-slate-600 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>⚡</span> More</button>
-            </div>
+                <div class="flex gap-3 flex-wrap">
+                    <button onclick="showPage('stats')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>📊</span> <span id="quick-action-scorecard">Full Scorecard</span></button>
+                    <button onclick="showPage('analytics')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>📈</span> <span id="quick-action-analytics">Analytics</span></button>
+                    <button onclick="showPage('highlights')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>🎬</span> <span id="quick-action-highlights">Highlights</span></button>
+                    <button onclick="showPage('scenario')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>🧪</span> Scenario Lab</button>
+                    <button onclick="shareMatch()" class="bg-blue-600/80 hover:bg-blue-600 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>📤</span> Share</button>
+                    <button onclick="toggleVoiceControl()" class="bg-purple-600/80 hover:bg-purple-600 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2" title="Voice Control"><span>🎤</span> Voice</button>
+                    <button onclick="showAdvancedMenu()" class="bg-slate-700/80 hover:bg-slate-600 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>⚡</span> More</button>
+                </div>
             <div class="flex items-center gap-2 text-sm bg-slate-800/60 px-4 py-2 rounded-full">
                 <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> <span id="quick-strip-viewers">Streaming in 4K · 2,847 watching</span>
             </div>
@@ -1141,6 +1144,162 @@
                             <div class="flex justify-between"><span id="prediction-total-label">India Total:</span><span id="prediction-total-value" class="font-bold">320-340</span></div>
                             <div class="flex justify-between"><span id="prediction-target-label">Aus Target:</span><span id="prediction-target-value" class="font-bold">310+</span></div>
                             <div class="flex justify-between"><span>Match Result:</span><span id="prediction-result-value" class="font-bold text-green-400">IND by 15 R</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 card-gradient rounded-2xl p-5 border border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <p class="section-kicker">New Feature</p>
+                    <h3 class="font-display text-xl font-bold mt-2">Scenario Lab</h3>
+                    <p class="text-sm text-slate-300 mt-2">Simulate aggressive finishes, safe chases, and par-beating innings from the live match state.</p>
+                </div>
+                <button onclick="showPage('scenario')" class="accent-gradient px-5 py-3 rounded-xl font-semibold whitespace-nowrap">Open Scenario Lab</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario Lab Page -->
+    <div id="scenario-page" class="page hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="control-hero p-5 sm:p-6 mb-6">
+                <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
+                    <div class="space-y-4 xl:max-w-3xl">
+                        <div>
+                            <p class="section-kicker">What If Lab</p>
+                            <h2 id="scenario-title" class="font-display text-3xl md:text-4xl font-bold mt-2">Scenario Lab</h2>
+                            <p id="scenario-subtitle" class="text-slate-300 mt-3 text-base leading-7">Stress-test the chase, wickets in hand, and final-overs pressure.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <span id="scenario-mode" class="broadcast-chip">PAR BUILD · BALANCED</span>
+                            <span id="scenario-phase" class="broadcast-chip">PHASE</span>
+                            <span id="scenario-overs-left" class="broadcast-chip">0.0 OVERS LEFT</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 xl:w-[480px]">
+                        <div class="metric-card">
+                            <span>Current</span>
+                            <strong id="scenario-current">0/0 · 0.0</strong>
+                            <small id="scenario-current-rate">RR --</small>
+                        </div>
+                        <div class="metric-card">
+                            <span id="scenario-chance-label">Win chance</span>
+                            <strong id="scenario-chance">--</strong>
+                            <small id="scenario-status">Waiting for scenario</small>
+                        </div>
+                        <div class="metric-card">
+                            <span id="scenario-required-label">Required RR</span>
+                            <strong id="scenario-required-rr">--</strong>
+                            <small id="scenario-target-line">Target / par line</small>
+                        </div>
+                        <div class="metric-card">
+                            <span>Projection</span>
+                            <strong id="scenario-projected-total">--</strong>
+                            <small id="scenario-projected-range">--</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid xl:grid-cols-[1.05fr_0.95fr] gap-6">
+                <div class="card-gradient rounded-2xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <div>
+                            <p class="section-kicker">Control Deck</p>
+                            <h3 class="font-display text-xl font-bold mt-2">Adjust the live state</h3>
+                        </div>
+                        <button onclick="resetScenarioLab()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">↺ Reset to Live</button>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-2">Score</label>
+                            <input id="scenario-score" type="text" oninput="updateScenarioLab()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 font-semibold" placeholder="176/3">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-2">Overs</label>
+                            <input id="scenario-overs" type="text" oninput="updateScenarioLab()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 font-semibold" placeholder="17.2">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-2">Wickets Lost</label>
+                            <input id="scenario-wickets" type="number" min="0" max="10" oninput="updateScenarioLab()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 font-semibold" placeholder="3">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-2">Target / Par</label>
+                            <input id="scenario-target" type="text" oninput="updateScenarioLab()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 font-semibold" placeholder="Need 182 to win">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-2">Total Overs</label>
+                            <input id="scenario-total-overs" type="number" min="1" max="90" oninput="updateScenarioLab()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 font-semibold" placeholder="20">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-2">Current RR</label>
+                            <div class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 font-semibold text-slate-200" id="scenario-current-rate-readout">--</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-2">
+                                <span>Aggression</span>
+                                <span id="scenario-aggression-value">55</span>
+                            </div>
+                            <input id="scenario-aggression" type="range" min="0" max="100" value="55" oninput="updateScenarioLab()" class="w-full accent-orange-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-2">
+                                <span>Pressure</span>
+                                <span id="scenario-pressure-value">36</span>
+                            </div>
+                            <input id="scenario-pressure" type="range" min="0" max="100" value="36" oninput="updateScenarioLab()" class="w-full accent-red-500">
+                        </div>
+                    </div>
+
+                    <div class="mt-5 flex flex-wrap gap-2">
+                        <button onclick="applyScenarioPreset('safe')" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">Safe Chase</button>
+                        <button onclick="applyScenarioPreset('balanced')" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">Balanced</button>
+                        <button onclick="applyScenarioPreset('attack')" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">Attack</button>
+                        <button onclick="applyScenarioPreset('defend')" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">Defend</button>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="control-hero p-5 sm:p-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="metric-card">
+                                <span>Safe Finish</span>
+                                <strong id="scenario-safe-total">--</strong>
+                                <small>Protect wickets and keep pace</small>
+                            </div>
+                            <div class="metric-card">
+                                <span>Balanced Finish</span>
+                                <strong id="scenario-balanced-total">--</strong>
+                                <small>Most likely live outcome</small>
+                            </div>
+                            <div class="metric-card">
+                                <span>Attack Finish</span>
+                                <strong id="scenario-attack-total">--</strong>
+                                <small>Maximum upside path</small>
+                            </div>
+                        </div>
+                        <div class="mt-5 space-y-3">
+                            <p id="scenario-summary" class="text-slate-200 leading-7">Use the controls to simulate different endings.</p>
+                            <p id="scenario-plan" class="text-sm text-slate-400">The lab will suggest the best finish path here.</p>
+                            <p id="scenario-ai-note" class="text-xs text-slate-500">AI insights will appear here when available.</p>
+                        </div>
+                    </div>
+
+                    <div class="card-gradient rounded-2xl p-6 border border-slate-700">
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <div>
+                                <p class="section-kicker">Projection Curve</p>
+                                <h3 class="font-display text-xl font-bold mt-2">Run-rate path</h3>
+                            </div>
+                            <span id="scenario-status" class="broadcast-chip">Waiting</span>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="scenarioChart"></canvas>
                         </div>
                     </div>
                 </div>

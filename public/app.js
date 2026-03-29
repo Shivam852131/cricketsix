@@ -149,6 +149,7 @@
     "live",
     "stats",
     "predictions",
+    "scenario",
     "highlights",
     "analytics"
   ]);
@@ -260,6 +261,8 @@
   let realtime = null;
   let runrateChart = null;
   let wicketChart = null;
+  let scenarioChart = null;
+  let scenarioAutoSeed = true;
   let renderedStreamKey = "";
   let aiRefreshTimer = null;
   let systemNotice = null;
@@ -693,6 +696,7 @@
     }
 
     if (nextPage === "live") renderStreamPlayer();
+    if (nextPage === "scenario") renderScenarioLab();
     if (nextPage === "analytics") updateCharts();
   }
 
@@ -774,6 +778,7 @@
     renderTimeline();
     renderStats();
     renderPredictions();
+    renderScenarioLab();
     renderHighlights();
     renderAnalyticsTables();
     renderNotifications();
@@ -1872,6 +1877,407 @@
     }).join("");
   }
 
+  function parseFirstNumber(value, fallback) {
+    const match = String(value || "").match(/-?\d+(?:\.\d+)?/);
+    if (!match) return fallback;
+    const numeric = Number(match[0]);
+    return Number.isFinite(numeric) ? numeric : fallback;
+  }
+
+  function parseTargetValue(value) {
+    const text = String(value || "").trim();
+    if (!text) return null;
+    if (/^\d+(?:\.\d+)?$/.test(text)) return Number.parseFloat(text);
+    const explicitMatch = text.match(/\b(\d{2,3})\b/);
+    if (explicitMatch) return Number.parseInt(explicitMatch[1], 10);
+    return null;
+  }
+
+  function parseCricketOvers(value) {
+    const text = String(value || "").trim();
+    const match = text.match(/^(\d+)(?:\.(\d))?/);
+    if (!match) {
+      return { overs: 0, balls: 0, completed: 0, ballsTotal: 0 };
+    }
+
+    const overs = Number.parseInt(match[1], 10) || 0;
+    const balls = Math.min(5, Number.parseInt(match[2] || "0", 10) || 0);
+    return {
+      overs: overs,
+      balls: balls,
+      completed: overs + (balls / 6),
+      ballsTotal: (overs * 6) + balls
+    };
+  }
+
+  function formatBallsAsOvers(balls) {
+    const safeBalls = Math.max(0, Math.round(Number(balls) || 0));
+    return Math.floor(safeBalls / 6) + "." + (safeBalls % 6);
+  }
+
+  function formatRate(value) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric.toFixed(2) : "--";
+  }
+
+  function getScenarioTotalOvers(score) {
+    return firstFinite([
+      numericValue(score && score.totalOvers),
+      parseFirstNumber(score && score.totalOvers, null)
+    ], inferInningsLength(score ? score.matchTitle : "", score ? score.overs : ""));
+  }
+
+  function getScenarioSeedValues() {
+    const score = appState.score || {};
+    const parsedScore = parseScore(score.team1Score);
+    const totalOvers = getScenarioTotalOvers(score);
+    const target = parseTargetValue(score.target);
+    const runRate = Number.parseFloat(String(score.runRate || "0")) || 0;
+
+    const aggressionSeed = target !== null ? (runRate >= 9 ? 64 : 56) : (runRate >= 8 ? 58 : 46);
+    const pressureSeed = target !== null ? (parsedScore.wickets >= 5 ? 60 : 42) : (parsedScore.wickets >= 4 ? 36 : 26);
+
+    return {
+      score: score.team1Score || (parsedScore.runs || parsedScore.wickets ? parsedScore.runs + "/" + parsedScore.wickets : "0/0"),
+      overs: score.overs || "0.0",
+      wickets: String(Math.max(0, parsedScore.wickets || 0)),
+      target: target !== null ? String(target) : "",
+      totalOvers: String(totalOvers),
+      aggression: String(clampPercent(aggressionSeed)),
+      pressure: String(clampPercent(pressureSeed))
+    };
+  }
+
+  function setScenarioField(id, value) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.value = value;
+    element.dataset.scenarioDirty = "false";
+  }
+
+  function syncScenarioFieldsFromLive() {
+    const seed = getScenarioSeedValues();
+    setScenarioField("scenario-score", seed.score);
+    setScenarioField("scenario-overs", seed.overs);
+    setScenarioField("scenario-wickets", seed.wickets);
+    setScenarioField("scenario-target", seed.target);
+    setScenarioField("scenario-total-overs", seed.totalOvers);
+    setScenarioField("scenario-aggression", seed.aggression);
+    setScenarioField("scenario-pressure", seed.pressure);
+  }
+
+  function updateScenarioLab() {
+    scenarioAutoSeed = false;
+    renderScenarioLab();
+  }
+
+  function resetScenarioLab() {
+    scenarioAutoSeed = true;
+    ["scenario-score", "scenario-overs", "scenario-wickets", "scenario-target", "scenario-total-overs", "scenario-aggression", "scenario-pressure"].forEach(function(id) {
+      const element = document.getElementById(id);
+      if (element) element.dataset.scenarioDirty = "false";
+    });
+    renderScenarioLab();
+    showToast("Scenario lab reset to live data", "success");
+  }
+
+  function applyScenarioPreset(mode) {
+    scenarioAutoSeed = false;
+    const presets = {
+      safe: { aggression: 28, pressure: 22, wickets: 2 },
+      balanced: { aggression: 54, pressure: 36, wickets: 3 },
+      attack: { aggression: 78, pressure: 48, wickets: 4 },
+      defend: { aggression: 42, pressure: 18, wickets: 5 }
+    };
+    const preset = presets[String(mode || "balanced").toLowerCase()] || presets.balanced;
+    [
+      ["scenario-wickets", preset.wickets],
+      ["scenario-aggression", preset.aggression],
+      ["scenario-pressure", preset.pressure]
+    ].forEach(function(pair) {
+      const element = document.getElementById(pair[0]);
+      if (element) {
+        element.value = String(pair[1]);
+        element.dataset.scenarioDirty = "true";
+      }
+    });
+    renderScenarioLab();
+  }
+
+  function buildScenarioModel() {
+    const score = appState.score || {};
+    const currentScoreInput = document.getElementById("scenario-score");
+    const oversInput = document.getElementById("scenario-overs");
+    const wicketsInput = document.getElementById("scenario-wickets");
+    const targetInput = document.getElementById("scenario-target");
+    const totalOversInput = document.getElementById("scenario-total-overs");
+    const aggressionInput = document.getElementById("scenario-aggression");
+    const pressureInput = document.getElementById("scenario-pressure");
+
+    const currentScoreText = String(currentScoreInput && currentScoreInput.value ? currentScoreInput.value : score.team1Score || "0/0").trim();
+    const parsedScore = parseScore(currentScoreText || "0/0");
+    const oversText = String(oversInput && oversInput.value ? oversInput.value : score.overs || "0.0").trim();
+    const overs = parseCricketOvers(oversText);
+    const wicketsValue = parseFirstNumber(wicketsInput && wicketsInput.value, parsedScore.wickets);
+    const totalOversValue = Math.max(1, Math.round(parseFirstNumber(totalOversInput && totalOversInput.value, getScenarioTotalOvers(score))));
+    const targetValue = targetInput ? parseTargetValue(targetInput.value) : parseTargetValue(score.target);
+    const aggression = clampPercent(parseFirstNumber(aggressionInput && aggressionInput.value, 54));
+    const pressure = clampPercent(parseFirstNumber(pressureInput && pressureInput.value, 36));
+
+    const currentRuns = Math.max(0, parsedScore.runs || 0);
+    const completedBalls = overs.ballsTotal;
+    const totalBalls = totalOversValue * 6;
+    const ballsRemaining = Math.max(0, totalBalls - completedBalls);
+    const oversRemaining = ballsRemaining / 6;
+    const completedOvers = completedBalls > 0 ? (completedBalls / 6) : overs.completed;
+    const currentRunRate = completedOvers > 0 ? currentRuns / completedOvers : firstFinite([numericValue(score.runRate)], 0);
+    const wicketsLost = Math.max(0, Math.min(10, Number(wicketsValue) || 0));
+    const wicketsInHand = Math.max(0, 10 - wicketsLost);
+    const pressureLoad = pressure + Math.max(0, 5 - wicketsInHand) * 4;
+    const aggressionFactor = 1 + ((aggression - 50) / 180);
+    const stressFactor = 1 + (pressureLoad / 220);
+    const wicketFactor = 1 + (Math.max(0, 7 - wicketsInHand) / 18);
+
+    const safeRate = Math.max(0.5, (currentRunRate * (0.82 * aggressionFactor)) / stressFactor - ((10 - wicketsInHand) * 0.05));
+    const balancedRate = Math.max(0.5, (currentRunRate * aggressionFactor) / Math.max(0.85, stressFactor) - ((10 - wicketsInHand) * 0.03));
+    const attackRate = Math.max(0.5, (currentRunRate * (1.12 + (aggression / 160))) / Math.max(0.8, stressFactor * 0.92) / Math.max(0.85, wicketFactor) + (aggression / 28) - ((10 - wicketsInHand) * 0.02));
+
+    const safeProjected = Math.round(currentRuns + (oversRemaining * safeRate));
+    const balancedProjected = Math.round(currentRuns + (oversRemaining * balancedRate));
+    const attackProjected = Math.round(currentRuns + (oversRemaining * attackRate));
+    const parReference = targetValue !== null
+      ? targetValue
+      : firstFinite([
+          aiInsights && aiInsights.prediction ? aiInsights.prediction.projectedTotal : null,
+          numericValue(appState.content.matchCenter.projectedTotal)
+        ], Math.max(balancedProjected, currentRuns));
+
+    const requiredRuns = targetValue !== null ? Math.max(0, targetValue - currentRuns) : 0;
+    const requiredRR = targetValue !== null
+      ? (oversRemaining > 0 ? requiredRuns / oversRemaining : requiredRuns)
+      : Math.max(0, parReference - currentRuns);
+    const rateMargin = targetValue !== null ? (balancedRate - requiredRR) : (balancedProjected - parReference);
+
+    let chance = targetValue !== null
+      ? 50 + (rateMargin * 16) + (wicketsInHand * 1.8) + (aggression * 0.08) - (pressureLoad * 0.18)
+      : 50 + (rateMargin * 0.9) + (wicketsInHand * 1.2) + (aggression * 0.06) - (pressureLoad * 0.12);
+
+    if (targetValue !== null && currentRuns >= targetValue) chance = 100;
+    if (targetValue !== null && oversRemaining <= 0) chance = currentRuns >= targetValue ? 100 : 0;
+
+    const chancePercent = clampPercent(Math.round(chance));
+    const modeLabel = aggression >= 72 ? "ATTACK" : pressureLoad >= 62 ? "UNDER PRESSURE" : wicketsInHand <= 4 ? "WICKET SAVING" : "BALANCED";
+    const phaseLabel = getMatchPhaseLabel(score, Date.parse(score.matchDateTime || ""), currentRuns > 0 || (appState.ballFeed || []).length > 0);
+    const modeState = targetValue !== null ? "CHASE MODE" : "PAR BUILD";
+
+    const statusLine = targetValue !== null
+      ? (currentRuns >= targetValue
+        ? "Target already reached. Keep it calm."
+        : requiredRR > balancedRate
+          ? "Need a sharper finish than the balanced plan."
+          : "Balanced tempo keeps the chase alive.")
+      : (balancedProjected >= parReference
+        ? "Balanced tempo is projecting above par."
+        : "The lab wants a late acceleration to reach par.");
+
+    const summaryLine = targetValue !== null
+      ? "Need " + requiredRuns + " from " + formatBallsAsOvers(ballsRemaining) + " overs at " + formatRate(requiredRR) + " RR."
+      : "Projected finish " + safeProjected + "-" + attackProjected + " depending on the risk dial.";
+
+    const planLine = targetValue !== null
+      ? (currentRuns >= targetValue
+        ? "Target locked. Focus on strike rotation and wickets in hand."
+        : pressureLoad > 55
+          ? "Protect wickets and pick one over to target."
+          : "You can keep a balanced chase path without over-correcting.")
+      : (attackProjected > parReference + 15
+        ? "This setup is beating par if the finish stays clean."
+        : "A single power over could move the projection into strong territory.");
+
+    const seriesPoints = 6;
+    const labels = Array.from({ length: seriesPoints }, function(_, index) {
+      if (index === 0) return "Now";
+      if (index === seriesPoints - 1) return "Finish";
+      const segmentBalls = Math.round((ballsRemaining * index) / (seriesPoints - 1));
+      return "+" + formatBallsAsOvers(segmentBalls) + " ov";
+    });
+
+    function buildSeries(rate) {
+      return Array.from({ length: seriesPoints }, function(_, index) {
+        const fraction = index / (seriesPoints - 1);
+        return Math.round(currentRuns + (rate * oversRemaining * fraction));
+      });
+    }
+
+    return {
+      currentRuns: currentRuns,
+      wicketsLost: wicketsLost,
+      wicketsInHand: wicketsInHand,
+      currentOversText: oversText,
+      currentRunRate: currentRunRate,
+      oversRemaining: oversRemaining,
+      ballsRemaining: ballsRemaining,
+      totalOvers: totalOversValue,
+      targetValue: targetValue,
+      aggression: aggression,
+      pressure: pressureLoad,
+      phaseLabel: phaseLabel,
+      modeLabel: modeLabel,
+      modeState: modeState,
+      chancePercent: chancePercent,
+      statusLine: statusLine,
+      summaryLine: summaryLine,
+      planLine: planLine,
+      requiredRR: requiredRR,
+      safeProjected: safeProjected,
+      balancedProjected: balancedProjected,
+      attackProjected: attackProjected,
+      parReference: parReference,
+      safeSeries: buildSeries(safeRate),
+      balancedSeries: buildSeries(balancedRate),
+      attackSeries: buildSeries(attackRate),
+      referenceSeries: Array.from({ length: seriesPoints }, function() {
+        return parReference;
+      }),
+      chartLabels: labels
+    };
+  }
+
+  function renderScenarioLab() {
+    const scenarioPage = document.getElementById("scenario-page");
+    if (!scenarioPage) return;
+
+    if (scenarioAutoSeed) {
+      syncScenarioFieldsFromLive();
+    }
+
+    const model = buildScenarioModel();
+    const targetActive = model.targetValue !== null;
+
+    setText("scenario-title", targetActive ? "Chase Scenario Lab" : "Par Scenario Lab");
+    setText("scenario-subtitle", targetActive
+      ? "Stress-test the chase, wickets in hand, and final-overs pressure."
+      : "Model the innings finish and compare it against the projected par line.");
+    setText("scenario-mode", model.modeState + " · " + model.modeLabel);
+    setText("scenario-phase", model.phaseLabel);
+    setText("scenario-current", model.currentRuns + "/" + model.wicketsLost + " · " + model.currentOversText);
+    setText("scenario-overs-left", formatBallsAsOvers(model.ballsRemaining) + " overs left");
+    setText("scenario-required-label", targetActive ? "Required RR" : "Par RR");
+    setText("scenario-required-rr", targetActive ? formatRate(model.requiredRR) : formatRate(model.parReference / Math.max(1, model.totalOvers)));
+    setText("scenario-projected-total", String(model.balancedProjected));
+    setText("scenario-projected-range", model.safeProjected + " - " + model.attackProjected);
+    setText("scenario-chance", model.chancePercent + "%");
+    setText("scenario-chance-label", targetActive ? "Win chance" : "Par-beat chance");
+    setText("scenario-target-line", targetActive ? ("Target " + model.targetValue) : ("Par " + model.parReference));
+    setText("scenario-safe-total", String(model.safeProjected));
+    setText("scenario-balanced-total", String(model.balancedProjected));
+    setText("scenario-attack-total", String(model.attackProjected));
+    setText("scenario-summary", model.summaryLine);
+    setText("scenario-status", model.modeState);
+    setText("scenario-plan", model.planLine);
+    setText("scenario-ai-note", aiInsights && aiInsights.summary ? aiInsights.summary : model.statusLine);
+    setText("scenario-aggression-value", String(model.aggression));
+    setText("scenario-pressure-value", String(model.pressure));
+    setText("scenario-current-rate", "RR " + formatRate(model.currentRunRate));
+    setText("scenario-current-rate-readout", formatRate(model.currentRunRate));
+
+    const chartElement = document.getElementById("scenarioChart");
+    const canRenderChart = scenarioChart || (!scenarioPage.classList.contains("hidden") && chartElement);
+    if (!canRenderChart || !chartElement) return;
+
+    const datasets = [
+      {
+        label: "Safe",
+        data: model.safeSeries,
+        borderColor: "#22c55e",
+        backgroundColor: "rgba(34, 197, 94, 0.12)",
+        fill: false,
+        borderWidth: 2,
+        tension: 0.32,
+        pointRadius: 0
+      },
+      {
+        label: "Balanced",
+        data: model.balancedSeries,
+        borderColor: "#f97316",
+        backgroundColor: "rgba(249, 115, 22, 0.12)",
+        fill: false,
+        borderWidth: 2,
+        tension: 0.32,
+        pointRadius: 0
+      },
+      {
+        label: "Attack",
+        data: model.attackSeries,
+        borderColor: "#38bdf8",
+        backgroundColor: "rgba(56, 189, 248, 0.12)",
+        fill: false,
+        borderWidth: 2,
+        tension: 0.32,
+        pointRadius: 0
+      },
+      {
+        label: targetActive ? "Target" : "Par line",
+        data: model.referenceSeries,
+        borderColor: "#f43f5e",
+        backgroundColor: "rgba(244, 63, 94, 0.08)",
+        fill: false,
+        borderDash: [6, 6],
+        borderWidth: 2,
+        tension: 0,
+        pointRadius: 0
+      }
+    ];
+
+    if (!scenarioChart) {
+      scenarioChart = new Chart(chartElement.getContext("2d"), {
+        type: "line",
+        data: {
+          labels: model.chartLabels,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: "#cbd5e1",
+                usePointStyle: true,
+                pointStyle: "line"
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: "#94a3b8" },
+              grid: { color: "rgba(148, 163, 184, 0.06)" }
+            },
+            y: {
+              ticks: { color: "#94a3b8" },
+              grid: { color: "rgba(148, 163, 184, 0.1)" }
+            }
+          }
+        }
+      });
+      return;
+    }
+
+    scenarioChart.data.labels = model.chartLabels;
+    scenarioChart.data.datasets.forEach(function(dataset, index) {
+      dataset.data = datasets[index].data;
+      dataset.borderColor = datasets[index].borderColor;
+      dataset.backgroundColor = datasets[index].backgroundColor;
+      dataset.borderDash = datasets[index].borderDash;
+    });
+    scenarioChart.update();
+  }
+
+  window.updateScenarioLab = updateScenarioLab;
+  window.resetScenarioLab = resetScenarioLab;
+  window.applyScenarioPreset = applyScenarioPreset;
+  window.renderScenarioLab = renderScenarioLab;
+
   function renderHighlights() {
     const highlights = appState.content.highlights || FALLBACK_STATE.content.highlights;
     const featured = highlights.featured || FALLBACK_STATE.content.highlights.featured;
@@ -2587,6 +2993,9 @@
         case '4':
           window.showPage('predictions');
           break;
+        case '7':
+          window.showPage('scenario');
+          break;
         case '5':
           window.showPage('highlights');
           break;
@@ -2711,7 +3120,7 @@
       
       // Horizontal swipe - change pages
       if (Math.abs(diffX) > 100 && Math.abs(diffX) > Math.abs(diffY)) {
-        const pages = ['home', 'live', 'stats', 'predictions', 'highlights', 'analytics'];
+        const pages = ['home', 'live', 'stats', 'predictions', 'scenario', 'highlights', 'analytics'];
         const currentPage = document.querySelector('.page:not(.hidden)');
         
         if (currentPage) {
@@ -2983,6 +3392,7 @@
     version: '3.0.0',
     state: appState,
     showPage: window.showPage,
+    openScenarioLab: function() { window.showPage('scenario'); },
     refreshData: window.refreshData,
     getAppState: window.getAppState,
     shareMatch: window.shareMatch,
@@ -3114,7 +3524,8 @@
         const command = event.results[0][0].transcript.toLowerCase();
         console.log('Voice command:', command);
         
-        if (command.includes('home')) window.showPage('home');
+        if (command.includes('scenario') || command.includes('what if') || command.includes('scenario lab')) window.showPage('scenario');
+        else if (command.includes('home')) window.showPage('home');
         else if (command.includes('live')) window.showPage('live');
         else if (command.includes('stats')) window.showPage('stats');
         else if (command.includes('play')) document.getElementById('live-player')?.play();
