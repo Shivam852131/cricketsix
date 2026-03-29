@@ -17,8 +17,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="site.css">
     
-    <script src="https://cdn.tailwindcss.com/4.1.7"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     
@@ -178,7 +179,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-white min-h-screen font-body">
+<body data-page="home" class="site-shell bg-slate-950 text-white min-h-screen font-body">
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm"></div>
     
@@ -204,6 +205,18 @@
                         <span class="text-[10px] text-slate-400 font-medium tracking-wider">PRO</span>
                     </div>
                 </div>
+
+                <nav class="hidden xl:flex items-center gap-1">
+                    <a href="/" class="site-nav-link is-active" data-site-nav="home"><i class="ri-home-5-line"></i><span>Home</span></a>
+                    <a href="/stream" class="site-nav-link" data-site-nav="stream"><i class="ri-broadcast-line"></i><span>Stream</span></a>
+                    <a href="/matches" class="site-nav-link" data-site-nav="matches"><i class="ri-live-line"></i><span>Matches</span></a>
+                    <a href="/schedule" class="site-nav-link" data-site-nav="schedule"><i class="ri-calendar-event-line"></i><span>Schedule</span></a>
+                    <a href="/stats" class="site-nav-link" data-site-nav="stats"><i class="ri-bar-chart-grouped-line"></i><span>Stats</span></a>
+                    <a href="/teams" class="site-nav-link" data-site-nav="teams"><i class="ri-shield-star-line"></i><span>Teams</span></a>
+                    <a href="/players" class="site-nav-link" data-site-nav="players"><i class="ri-user-star-line"></i><span>Players</span></a>
+                    <a href="/news" class="site-nav-link" data-site-nav="news"><i class="ri-newspaper-line"></i><span>News</span></a>
+                    <a href="/videos" class="site-nav-link" data-site-nav="videos"><i class="ri-movie-line"></i><span>Videos</span></a>
+                </nav>
                 
                 <!-- Search & Actions -->
                 <div class="flex items-center gap-2">
@@ -225,6 +238,12 @@
             </div>
         </div>
     </header>
+
+    <div class="site-ticker-bar">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div id="site-ticker-track" class="site-ticker-track"></div>
+        </div>
+    </div>
     
     <!-- Match Selector Bar -->
     <div class="border-b border-slate-800 bg-slate-900/50">
@@ -673,29 +692,33 @@
                 </div>
             </div>
         </div>
+
+        <div id="advanced-home-hub"></div>
     </main>
+
+    <div id="site-global-footer"></div>
     
     <!-- Bottom Navigation (Mobile) -->
     <nav class="bottom-nav">
-        <a href="#" class="bottom-nav-item active" data-page="home">
+        <a href="/" class="bottom-nav-item active" data-page="home">
             <i class="ri-home-5-line"></i>
             <span>Home</span>
         </a>
-        <a href="#" class="bottom-nav-item" data-page="live">
+        <a href="/stream" class="bottom-nav-item" data-page="stream">
+            <i class="ri-broadcast-line"></i>
+            <span>Stream</span>
+        </a>
+        <a href="/matches" class="bottom-nav-item" data-page="matches">
             <i class="ri-live-line"></i>
-            <span>Live</span>
+            <span>Matches</span>
         </a>
-        <a href="#" class="bottom-nav-item" data-page="schedule">
-            <i class="ri-calendar-line"></i>
-            <span>Schedule</span>
+        <a href="/teams" class="bottom-nav-item" data-page="teams">
+            <i class="ri-shield-star-line"></i>
+            <span>Teams</span>
         </a>
-        <a href="#" class="bottom-nav-item" data-page="stats">
-            <i class="ri-bar-chart-2-line"></i>
-            <span>Stats</span>
-        </a>
-        <a href="#" class="bottom-nav-item" data-page="more">
-            <i class="ri-menu-5-line"></i>
-            <span>More</span>
+        <a href="/players" class="bottom-nav-item" data-page="players">
+            <i class="ri-user-star-line"></i>
+            <span>Players</span>
         </a>
     </nav>
     
@@ -760,6 +783,7 @@
     </div>
     
     <!-- Scripts -->
-    <script src="app.js"></script>
+    <script src="app.js?v=2.0.1"></script>
+    <script src="site.js?v=3.1.0"></script>
 </body>
 </html>

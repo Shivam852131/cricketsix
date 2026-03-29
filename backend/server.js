@@ -18,6 +18,16 @@ const DATA_DIR = path.join(__dirname, "data");
 const DATA_FILE = path.join(DATA_DIR, "app-state.json");
 const INDEX_FILE = path.join(PUBLIC_DIR, "index.html");
 const ADMIN_FILE = path.join(PUBLIC_DIR, "admin.html");
+const MATCHES_FILE = path.join(PUBLIC_DIR, "matches.html");
+const SCHEDULE_FILE = path.join(PUBLIC_DIR, "schedule.html");
+const STATS_FILE = path.join(PUBLIC_DIR, "stats.html");
+const TEAMS_FILE = path.join(PUBLIC_DIR, "teams.html");
+const TEAM_DETAIL_FILE = path.join(PUBLIC_DIR, "team.html");
+const STREAM_FILE = path.join(PUBLIC_DIR, "stream.html");
+const PLAYERS_FILE = path.join(PUBLIC_DIR, "players.html");
+const PLAYER_FILE = path.join(PUBLIC_DIR, "player.html");
+const NEWS_FILE = path.join(PUBLIC_DIR, "news.html");
+const VIDEOS_FILE = path.join(PUBLIC_DIR, "videos.html");
 const APP_SCRIPT_FILE = path.join(PUBLIC_DIR, "app.js");
 const CSS_FILE = path.join(PUBLIC_DIR, "styles.css");
 const SW_FILE = path.join(PUBLIC_DIR, "sw.js");
@@ -114,7 +124,8 @@ const analytics = {
 const stateStore = {
   client: null,
   collection: null,
-  initPromise: null
+  initPromise: null,
+  useFileStorage: false
 };
 
 // WebSocket handling
@@ -576,42 +587,95 @@ async function initializeStateCollection() {
   if (stateStore.collection) return stateStore.collection;
   if (!stateStore.initPromise) {
     stateStore.initPromise = (async () => {
-      const client = new MongoClient(MONGODB_URI);
-      await client.connect();
-      const collection = client.db(MONGODB_DB_NAME).collection(STATE_COLLECTION_NAME);
-      const existingState = await collection.findOne({ _id: STATE_DOCUMENT_ID });
-      if (!existingState) {
-        const seedState = await loadLegacyStateSeed();
-        await collection.updateOne({ _id: STATE_DOCUMENT_ID }, { $set: seedState }, { upsert: true });
+      try {
+        const client = new MongoClient(MONGODB_URI);
+        await client.connect();
+        const collection = client.db(MONGODB_DB_NAME).collection(STATE_COLLECTION_NAME);
+        const existingState = await collection.findOne({ _id: STATE_DOCUMENT_ID });
+        if (!existingState) {
+          const seedState = await loadLegacyStateSeed();
+          await collection.updateOne({ _id: STATE_DOCUMENT_ID }, { $set: seedState }, { upsert: true });
+        }
+        stateStore.client = client;
+        stateStore.collection = collection;
+        stateStore.useFileStorage = false;
+        console.log("Connected to MongoDB successfully");
+        return collection;
+      } catch (error) {
+        console.warn("MongoDB not available, using file-based storage:", error.message);
+        stateStore.useFileStorage = true;
+        stateStore.client = null;
+        stateStore.collection = null;
+        // Initialize file-based storage
+        await fsPromises.mkdir(DATA_DIR, { recursive: true });
+        if (!fs.existsSync(DATA_FILE)) {
+          const seedState = await loadLegacyStateSeed();
+          await fsPromises.writeFile(DATA_FILE, JSON.stringify(seedState, null, 2), "utf8");
+        }
+        return null; // File-based storage doesn't use collection
       }
-      stateStore.client = client;
-      stateStore.collection = collection;
-      return collection;
     })().catch((error) => {
+      console.warn("State collection initialization failed, using file-based storage:", error.message);
+      stateStore.useFileStorage = true;
       stateStore.client = null;
       stateStore.collection = null;
       stateStore.initPromise = null;
-      throw error;
+      return null;
     });
   }
   return stateStore.initPromise;
 }
 
 async function readState() {
-  const collection = await initializeStateCollection();
-  const data = await collection.findOne({ _id: STATE_DOCUMENT_ID });
-  if (!data) {
-    const seedState = await loadLegacyStateSeed();
-    return writeState(seedState);
+  await initializeStateCollection();
+  
+  if (stateStore.useFileStorage) {
+    // File-based storage
+    try {
+      const data = await fsPromises.readFile(DATA_FILE, "utf8");
+      return normalizeState(JSON.parse(data));
+    } catch {
+      const seedState = await loadLegacyStateSeed();
+      await writeState(seedState);
+      return seedState;
+    }
+  } else {
+    // MongoDB storage
+    const collection = stateStore.collection;
+    if (!collection) {
+      throw new Error("No storage collection available");
+    }
+    const data = await collection.findOne({ _id: STATE_DOCUMENT_ID });
+    if (!data) {
+      const seedState = await loadLegacyStateSeed();
+      return writeState(seedState);
+    }
+    return normalizeState(data);
   }
-  return normalizeState(data);
 }
 
 async function writeState(state) {
   const normalized = normalizeState(state);
-  const collection = await initializeStateCollection();
-  await collection.updateOne({ _id: STATE_DOCUMENT_ID }, { $set: normalized }, { upsert: true });
-  return normalized;
+  
+  if (stateStore.useFileStorage) {
+    // File-based storage
+    try {
+      await fsPromises.mkdir(DATA_DIR, { recursive: true });
+      await fsPromises.writeFile(DATA_FILE, JSON.stringify(normalized, null, 2), "utf8");
+      return normalized;
+    } catch (error) {
+      console.error("Failed to write state to file:", error);
+      throw error;
+    }
+  } else {
+    // MongoDB storage
+    const collection = stateStore.collection;
+    if (!collection) {
+      throw new Error("No storage collection available");
+    }
+    await collection.updateOne({ _id: STATE_DOCUMENT_ID }, { $set: normalized }, { upsert: true });
+    return normalized;
+  }
 }
 
 function buildMessageId() {
@@ -3053,6 +3117,86 @@ app.get("/", (_req, res) => {
   res.sendFile(INDEX_FILE);
 });
 
+app.get("/matches", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(MATCHES_FILE);
+});
+
+app.get(["/stream", "/live-stream"], (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(STREAM_FILE);
+});
+
+app.get("/schedule", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(SCHEDULE_FILE);
+});
+
+app.get("/stats", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(STATS_FILE);
+});
+
+app.get("/teams", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(TEAMS_FILE);
+});
+
+app.get("/teams/:code", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(TEAM_DETAIL_FILE);
+});
+
+app.get("/players", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(PLAYERS_FILE);
+});
+
+app.get("/players/:slug", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(PLAYER_FILE);
+});
+
+app.get("/news", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(NEWS_FILE);
+});
+
+app.get("/videos", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+  res.sendFile(VIDEOS_FILE);
+});
+
 // ==================== ADVANCED API ENDPOINTS ====================
 
 // Enhanced State Management with versioning
@@ -3322,6 +3466,14 @@ app.get("/api/players", async (req, res) => {
   } catch {
     res.status(500).json({ error: "Unable to load player stats" });
   }
+});
+
+// No-cache middleware for development
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
 });
 
 app.use(express.static(PUBLIC_DIR, { index: false }));
