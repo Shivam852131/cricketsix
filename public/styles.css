@@ -3717,3 +3717,404 @@ a:hover {
         margin: 0.5rem;
     }
 }
+
+/* ==================== ENHANCED STYLES FOR NEW FEATURES ==================== */
+
+/* ============================================
+   Score Display Enhancement
+   ============================================ */
+
+.score-big {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-family: 'Oswald', sans-serif;
+}
+
+.score-medium {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 700;
+    font-family: 'Oswald', sans-serif;
+}
+
+/* ============================================
+   Ball Indicator Styles
+   ============================================ */
+
+.ball-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.ball-0 { background: #64748b; }
+.ball-1 { background: #22c55e; }
+.ball-2 { background: #3b82f6; }
+.ball-3 { background: #8b5cf6; }
+.ball-4 { background: #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.5); }
+.ball-6 { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); animation: pulse-ball 1s infinite; }
+.ball-wicket { background: #dc2626; box-shadow: 0 0 12px rgba(220, 38, 38, 0.7); }
+.ball-wide, .ball-noball { background: #f97316; }
+
+@keyframes pulse-ball {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* Over Ball Display */
+.over-ball {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.over-ball:hover {
+    transform: scale(1.1);
+}
+
+/* ============================================
+   Status Badge Styles
+   ============================================ */
+
+.status-live {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    animation: pulse-live 2s infinite;
+    position: relative;
+}
+
+.status-live::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+}
+
+@keyframes pulse-live {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.status-completed {
+    background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.status-upcoming {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+/* ============================================
+   Team Color Classes
+   ============================================ */
+
+.team-mi { background: linear-gradient(135deg, #004ba0, #1e40af); }
+.team-csk { background: linear-gradient(135deg, #fcca01, #fbbf24); color: #000; }
+.team-rcb { background: linear-gradient(135deg, #d4213d, #dc2626); }
+.team-kkr { background: linear-gradient(135deg, #3a225d, #581c87); }
+.team-srh { background: linear-gradient(135deg, #ff822a, #f97316); }
+.team-dc { background: linear-gradient(135deg, #282968, #4338ca); }
+.team-pbks { background: linear-gradient(135deg, #ed1b24, #dc2626); }
+.team-gt { background: linear-gradient(135deg, #1c1c1c, #374151); }
+.team-rr { background: linear-gradient(135deg, #e73895, #db2777); }
+.team-lsg { background: linear-gradient(135deg, #a720b6, #9333ea); }
+
+/* ============================================
+   Tab Styles Enhancement
+   ============================================ */
+
+.tab-active {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
+    border-bottom: 2px solid #3b82f6;
+}
+
+.tab-btn {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.tab-btn:hover::after {
+    width: 50%;
+}
+
+.tab-btn.tab-active::after {
+    width: 100%;
+}
+
+/* ============================================
+   Scorecard Table Enhancement
+   ============================================ */
+
+.scorecard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.scorecard-table th {
+    text-align: left;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.scorecard-table td {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+}
+
+.scorecard-table tr:hover td {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+/* ============================================
+   Player Card Enhancement
+   ============================================ */
+
+.player-card {
+    transition: all 0.3s ease;
+}
+
+.player-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   Match Card Enhancement
+   ============================================ */
+
+.match-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.match-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+}
+
+/* ============================================
+   Timeline Enhancement
+   ============================================ */
+
+.timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid;
+    flex-shrink: 0;
+}
+
+.timeline-dot.wicket {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.timeline-dot.boundary {
+    border-color: #fbbf24;
+    background: rgba(251, 191, 36, 0.2);
+}
+
+.timeline-dot.milestone {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.2);
+}
+
+/* ============================================
+   Progress Bar Enhancement
+   ============================================ */
+
+.progress-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 3px;
+    transition: width 0.5s ease-out;
+}
+
+/* ============================================
+   Modal Enhancement
+   ============================================ */
+
+.modal-backdrop {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Toast Enhancement
+   ============================================ */
+
+.toast {
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================
+   Chart Container Enhancement
+   ============================================ */
+
+.chart-container {
+    position: relative;
+    height: 200px;
+    width: 100%;
+}
+
+/* ============================================
+   Gradient Text Effects
+   ============================================ */
+
+.text-gradient {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============================================
+   Responsive Enhancements
+   ============================================ */
+
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+    
+    .score-big {
+        font-size: 2rem;
+    }
+    
+    .chart-container {
+        height: 150px;
+    }
+}
+
+@media (min-width: 769px) {
+    .hide-desktop {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   Touch Optimizations
+   ============================================ */
+
+@media (pointer: coarse) {
+    button, a, input, select, textarea {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+.line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============================================
+   Loading States
+   ============================================ */
+
+.skeleton {
+    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
