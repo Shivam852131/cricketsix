@@ -1105,6 +1105,8 @@
     const liveGrid = document.getElementById("live-matches-grid");
     if (liveGrid) {
       liveGrid.innerHTML = liveMatches.length ? liveMatches.map(function(match, index) {
+        const liveMeta = formatMatchMeta(match);
+        const streamLabel = match.streamPlatform ? String(match.streamPlatform).toUpperCase() : "STREAM";
         return ""
           + '<div class="card-gradient rounded-2xl p-6 border border-slate-700 slide-in" style="animation-delay: ' + (index * 0.08) + 's">'
           + '<div class="flex flex-wrap items-start justify-between gap-2 mb-4">'
@@ -1116,6 +1118,10 @@
           + '<div class="flex flex-col items-center gap-2"><span class="text-red-400 live-pulse">LIVE</span><span class="text-lg font-bold text-slate-500">VS</span></div>'
           + '<div class="text-center min-w-0"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--lg") + '</div><span class="font-semibold text-sm leading-tight break-words ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + "</span></div>"
           + "</div>"
+          + '<div class="rounded-xl bg-slate-900/70 border border-slate-700 px-4 py-3 mb-4 text-sm text-slate-300">'
+          + '<div class="font-semibold text-white mb-1">' + escapeHtml(liveMeta) + '</div>'
+          + '<div class="text-xs text-slate-500">' + escapeHtml(match.streamUrl ? (streamLabel + ' stream ready') : 'Live card only') + '</div>'
+          + '</div>'
           + '<button onclick="showPage(\'live\')" class="w-full accent-gradient py-3 rounded-xl font-bold hover:opacity-90 transition-all">Watch Live</button>'
           + "</div>";
       }).join("") : emptyCard("No live matches published yet.");
@@ -1124,10 +1130,11 @@
     const upcomingList = document.getElementById("upcoming-mini-list");
     if (upcomingList) {
       upcomingList.innerHTML = upcomingMatches.length ? upcomingMatches.map(function(match) {
+        const scheduleMeta = formatMatchMeta(match);
         return ""
           + '<div class="card-gradient rounded-xl p-4 border border-slate-700 flex items-start gap-3 sm:items-center">'
           + '<div class="flex gap-2"><span>' + renderTeamBadge(match.team1, match.team1Flag || "T1", "team-badge--sm") + '</span><span>' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--sm") + '</span></div>'
-          + '<div class="flex-1 min-w-0"><p class="font-semibold leading-tight break-words ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + '</p><p class="text-xs leading-tight break-words ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + '</p><p class="text-xs text-slate-400">' + escapeHtml(match.date || "TBD") + "</p></div>"
+          + '<div class="flex-1 min-w-0"><p class="font-semibold leading-tight break-words ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + '</p><p class="text-xs leading-tight break-words ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + '</p><p class="text-xs text-slate-400">' + escapeHtml(scheduleMeta) + "</p></div>"
           + '<span class="shrink-0 text-xs bg-orange-500/30 text-orange-300 px-2 py-1 rounded">' + escapeHtml(match.format || match.league || "Match") + "</span>"
           + "</div>";
       }).join("") : emptyCard("Upcoming fixtures will appear here.");
@@ -3167,6 +3174,18 @@
     const date = new Date(timestamp);
     if (Number.isNaN(date.getTime())) return "now";
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function formatMatchSchedule(match) {
+    const date = new Date(match && match.matchDateTime || "");
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    }
+    return String(match && match.date || "").trim() || "Schedule pending";
+  }
+
+  function formatMatchMeta(match) {
+    return [formatMatchSchedule(match), String(match && match.venue || "").trim()].filter(Boolean).join(" · ");
   }
 
   function formatBannerTime(timestamp) {

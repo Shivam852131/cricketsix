@@ -1,6 +1,8 @@
 const express = require("express");
 const fsPromises = require("fs/promises");
+const fs = require("fs");
 const path = require("path");
+const { MongoClient } = require("mongodb");
 const WebSocket = require("ws");
 const { v4: uuidv4 } = require("uuid");
 
@@ -21,7 +23,12 @@ const CSS_FILE = path.join(PUBLIC_DIR, "styles.css");
 const SW_FILE = path.join(PUBLIC_DIR, "sw.js");
 
 const ADMIN_KEY = process.env.ADMIN_KEY || "admin";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || "cricketlive-pro";
+const STATE_COLLECTION_NAME = "app_state";
+const STATE_DOCUMENT_ID = "primary";
 const ALLOWED_STREAM_STATUS = new Set(["live", "paused", "offline"]);
+const ALLOWED_MATCH_CARD_STATUS = new Set(["live", "upcoming", "completed"]);
 const AI_BULLETIN_CHANNELS = new Set(["notification", "chat", "both"]);
 const PRESSURE_BULLETIN_CHANNELS = new Set(["notification", "timeline", "both"]);
 const SSE_HEARTBEAT_MS = 15000;
@@ -33,6 +40,7 @@ const ALLOWED_CORS_HEADERS = "Content-Type,X-Admin-Key";
 const CONFIG_FILE = path.join(DATA_DIR, "config.json");
 const LIVE_SYNC_INTERVAL_MS = Number(process.env.LIVE_SYNC_INTERVAL_MS) || 20000;
 const LIVE_SYNC_TIMEOUT_MS = 12000;
+const DEFAULT_SPORTIFY_STREAM_BASE_URL = "https://sportify-beta.pages.dev/match?id=";
 const SPORTIFY_SCHEDULE_URL = "https://binge-api.pages.dev/sportify.json?t=";
 const ESPN_LIVE_INDEX_URL = "https://www.espncricinfo.com/live-cricket-score";
 const ESPN_BASE_URL = "https://www.espncricinfo.com";
@@ -102,6 +110,11 @@ const analytics = {
   activeUsers: new Set(),
   wsMessages: 0,
   wsConnections: 0
+};
+const stateStore = {
+  client: null,
+  collection: null,
+  initPromise: null
 };
 
 // WebSocket handling
@@ -334,7 +347,7 @@ const defaultState = {
   score: {
     team1: "", team2: "", matchTitle: "", team1Score: "", team2Score: "", overs: "", batsman: "", bowler: "", runRate: "",
     team1Flag: "", team2Flag: "", venue: "", target: "", league: "", format: "", totalOvers: "", powerplayOvers: "",
-    matchDateTime: "", tossWinner: "", tossDecision: "",
+    matchDateTime: "", tossWinner: "", tossDecision: "", matchStatus: "",
     partnership: "", fow: "", pp: "", death: "", extras: "", wickets: "", reqRR: ""
   },
   chatMessages: [],
@@ -487,6 +500,41 @@ function normalizeBallFeed(rawFeed) {
   return Array.isArray(rawFeed) ? rawFeed.filter(Boolean).map(normalizeBallEvent).slice(-60) : [];
 }
 
+function normalizeMatchCard(rawMatch, fallbackStatus) {
+  const match = rawMatch && typeof rawMatch === "object" ? rawMatch : {};
+  const team1 = typeof match.team1 === "string" ? match.team1.trim().slice(0, 80) : "";
+  const team2 = typeof match.team2 === "string" ? match.team2.trim().slice(0, 80) : "";
+  const statusRaw = typeof match.status === "string" ? match.status.trim().toLowerCase() : "";
+  const status = ALLOWED_MATCH_CARD_STATUS.has(statusRaw) ? statusRaw : fallbackStatus;
+
+  return {
+    id: typeof match.id === "string" || typeof match.id === "number" ? match.id : buildMessageId(),
+    sourceMatchId: typeof match.sourceMatchId === "string" || typeof match.sourceMatchId === "number" ? String(match.sourceMatchId) : "",
+    matchTitle: typeof match.matchTitle === "string" ? match.matchTitle.trim().slice(0, 120) : "",
+    team1,
+    team2,
+    team1Flag: typeof match.team1Flag === "string" ? match.team1Flag.trim().slice(0, 24) : normalizeTeamCode(team1),
+    team2Flag: typeof match.team2Flag === "string" ? match.team2Flag.trim().slice(0, 24) : normalizeTeamCode(team2),
+    tournament: typeof match.tournament === "string" ? match.tournament.trim().slice(0, 120) : "",
+    league: typeof match.league === "string" ? match.league.trim().slice(0, 80) : "",
+    format: typeof match.format === "string" ? match.format.trim().slice(0, 32) : "",
+    status,
+    date: typeof match.date === "string" ? match.date.trim().slice(0, 120) : "",
+    matchDateTime: typeof match.matchDateTime === "string" ? match.matchDateTime.trim().slice(0, 64) : "",
+    venue: typeof match.venue === "string" ? match.venue.trim().slice(0, 120) : "",
+    streamUrl: typeof match.streamUrl === "string" ? match.streamUrl.trim().slice(0, 500) : "",
+    streamPlatform: typeof match.streamPlatform === "string" ? match.streamPlatform.trim().slice(0, 32) : "",
+    result: typeof match.result === "string" ? match.result.trim().slice(0, 160) : "",
+    score: typeof match.score === "string" ? match.score.trim().slice(0, 160) : ""
+  };
+}
+
+function normalizeMatchCards(rawMatches, fallbackStatus) {
+  return Array.isArray(rawMatches)
+    ? rawMatches.filter(Boolean).map((match) => normalizeMatchCard(match, fallbackStatus)).slice(0, 10)
+    : [];
+}
+
 function normalizeState(rawState) {
   const raw = rawState && typeof rawState === "object" ? rawState : {};
   const legacyContent = raw.content && typeof raw.content === "object" ? raw.content : {};
@@ -500,9 +548,9 @@ function normalizeState(rawState) {
     chatMessages: Array.isArray(raw.chatMessages) ? raw.chatMessages.slice(-500) : [],
     poll: normalizePoll(raw.poll),
     content: normalizeContent(raw.content),
-    liveMatches: (Array.isArray(raw.liveMatches) && raw.liveMatches.length > 0 ? raw.liveMatches : legacyLiveMatches).slice(0, 10),
-    upcomingMatches: (Array.isArray(raw.upcomingMatches) && raw.upcomingMatches.length > 0 ? raw.upcomingMatches : legacyUpcomingMatches).slice(0, 10),
-    recentResults: (Array.isArray(raw.recentResults) && raw.recentResults.length > 0 ? raw.recentResults : legacyRecentResults).slice(0, 10),
+    liveMatches: normalizeMatchCards(Array.isArray(raw.liveMatches) && raw.liveMatches.length > 0 ? raw.liveMatches : legacyLiveMatches, "live"),
+    upcomingMatches: normalizeMatchCards(Array.isArray(raw.upcomingMatches) && raw.upcomingMatches.length > 0 ? raw.upcomingMatches : legacyUpcomingMatches, "upcoming"),
+    recentResults: normalizeMatchCards(Array.isArray(raw.recentResults) && raw.recentResults.length > 0 ? raw.recentResults : legacyRecentResults, "completed"),
     ballFeed: normalizeBallFeed(raw.ballFeed),
     timelineEvents: normalizeTimelineEvents(raw.timelineEvents),
     notifications: Array.isArray(raw.notifications) ? raw.notifications.slice(-200) : [],
@@ -510,24 +558,59 @@ function normalizeState(rawState) {
   };
 }
 
-async function ensureDataFile() {
-  await fsPromises.mkdir(DATA_DIR, { recursive: true });
+async function loadLegacyStateSeed() {
   try {
-    await fsPromises.access(DATA_FILE);
+    await fsPromises.mkdir(DATA_DIR, { recursive: true });
+  } catch {}
+
+  try {
+    if (!fs.existsSync(DATA_FILE)) return normalizeState(defaultState);
+    const data = await fsPromises.readFile(DATA_FILE, "utf8");
+    return normalizeState(JSON.parse(data));
   } catch {
-    await fsPromises.writeFile(DATA_FILE, JSON.stringify(defaultState, null, 2), "utf8");
+    return normalizeState(defaultState);
   }
 }
 
+async function initializeStateCollection() {
+  if (stateStore.collection) return stateStore.collection;
+  if (!stateStore.initPromise) {
+    stateStore.initPromise = (async () => {
+      const client = new MongoClient(MONGODB_URI);
+      await client.connect();
+      const collection = client.db(MONGODB_DB_NAME).collection(STATE_COLLECTION_NAME);
+      const existingState = await collection.findOne({ _id: STATE_DOCUMENT_ID });
+      if (!existingState) {
+        const seedState = await loadLegacyStateSeed();
+        await collection.updateOne({ _id: STATE_DOCUMENT_ID }, { $set: seedState }, { upsert: true });
+      }
+      stateStore.client = client;
+      stateStore.collection = collection;
+      return collection;
+    })().catch((error) => {
+      stateStore.client = null;
+      stateStore.collection = null;
+      stateStore.initPromise = null;
+      throw error;
+    });
+  }
+  return stateStore.initPromise;
+}
+
 async function readState() {
-  await ensureDataFile();
-  const data = await fsPromises.readFile(DATA_FILE, "utf8");
-  return normalizeState(JSON.parse(data));
+  const collection = await initializeStateCollection();
+  const data = await collection.findOne({ _id: STATE_DOCUMENT_ID });
+  if (!data) {
+    const seedState = await loadLegacyStateSeed();
+    return writeState(seedState);
+  }
+  return normalizeState(data);
 }
 
 async function writeState(state) {
   const normalized = normalizeState(state);
-  await fsPromises.writeFile(DATA_FILE, JSON.stringify(normalized, null, 2), "utf8");
+  const collection = await initializeStateCollection();
+  await collection.updateOne({ _id: STATE_DOCUMENT_ID }, { $set: normalized }, { upsert: true });
   return normalized;
 }
 
@@ -622,6 +705,374 @@ function toIstDateTime(dateText, timeText) {
   const time = String(timeText || "").trim();
   if (!isoDate || !/^\d{2}:\d{2}$/.test(time)) return "";
   return isoDate + "T" + time + ":00+05:30";
+}
+
+function buildSportifyStreamUrl(matchId) {
+  const value = String(matchId || "").trim();
+  return value ? DEFAULT_SPORTIFY_STREAM_BASE_URL + value : "";
+}
+
+function getFixtureDateTime(fixture) {
+  if (!fixture || typeof fixture !== "object") return "";
+  return toIstDateTime(fixture.date, fixture.time) || (typeof fixture.matchDateTime === "string" ? fixture.matchDateTime.trim() : "");
+}
+
+function getComparableTimestamp(dateTimeValue) {
+  const timestamp = Date.parse(String(dateTimeValue || ""));
+  return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+function formatMatchScheduleLabel(matchDateTime, fallbackDateText, venue) {
+  const timestamp = getComparableTimestamp(matchDateTime);
+  const scheduleLabel = timestamp === null
+    ? String(fallbackDateText || "").trim()
+    : new Date(timestamp).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+  const venueLabel = String(venue || "").trim();
+
+  if (!scheduleLabel) return venueLabel;
+  if (!venueLabel) return scheduleLabel;
+  return scheduleLabel.toLowerCase().includes(venueLabel.toLowerCase()) ? scheduleLabel : scheduleLabel + " · " + venueLabel;
+}
+
+function inferTotalOversFromFormat(format) {
+  const descriptor = String(format || "").trim().toLowerCase();
+  if (descriptor.includes("odi")) return "50";
+  if (descriptor.includes("test")) return "90";
+  if (descriptor.includes("t10")) return "10";
+  return "20";
+}
+
+function inferPowerplayOversFromFormat(format) {
+  const descriptor = String(format || "").trim().toLowerCase();
+  if (descriptor.includes("odi")) return "10";
+  if (descriptor.includes("test")) return "";
+  return descriptor.includes("t10") ? "2" : "6";
+}
+
+function buildFixtureTournamentLabel(fixture) {
+  const order = String(fixture && (fixture.match_no || fixture.matchNo || fixture.matchNumber) || "").trim();
+  return order ? "IPL 2026 Match " + order : "IPL 2026";
+}
+
+function buildFixtureMatchTitle(fixture) {
+  if (!fixture || typeof fixture !== "object") return "";
+  const order = String(fixture.match_no || fixture.matchNo || fixture.matchNumber || "").trim();
+  const code1 = normalizeTeamCode(fixture.team1 || "Team 1") || "T1";
+  const code2 = normalizeTeamCode(fixture.team2 || "Team 2") || "T2";
+  return order ? "IPL 2026 - Match " + order + ", " + code1 + " vs " + code2 : code1 + " vs " + code2;
+}
+
+function buildMatchCardFromFixture(fixture, fallbackStatus) {
+  if (!fixture || typeof fixture !== "object") return normalizeMatchCard({}, fallbackStatus);
+  const venue = [fixture.venue, fixture.city].filter(Boolean).join(", ");
+  const matchDateTime = getFixtureDateTime(fixture);
+  return normalizeMatchCard({
+    id: "sportify-" + String(fixture.id || buildMessageId()),
+    sourceMatchId: String(fixture.id || ""),
+    matchTitle: buildFixtureMatchTitle(fixture),
+    team1: normalizeTeamName(fixture.team1),
+    team2: normalizeTeamName(fixture.team2),
+    team1Flag: normalizeTeamCode(fixture.team1),
+    team2Flag: normalizeTeamCode(fixture.team2),
+    tournament: buildFixtureTournamentLabel(fixture),
+    league: fallbackStatus === "live" ? "TODAY" : "IPL",
+    format: String(fixture.format || "T20"),
+    status: fallbackStatus,
+    date: formatMatchScheduleLabel(matchDateTime, [fixture.date, fixture.time].filter(Boolean).join(" "), venue),
+    matchDateTime,
+    venue,
+    streamUrl: buildSportifyStreamUrl(fixture.id),
+    streamPlatform: "iframe"
+  }, fallbackStatus);
+}
+
+function matchCardMatchesFixture(matchCard, fixture) {
+  const card = normalizeMatchCard(matchCard, "upcoming");
+  const cardCodes = [normalizeTeamCode(card.team1Flag || card.team1), normalizeTeamCode(card.team2Flag || card.team2)].filter(Boolean).sort().join(":");
+  const fixtureCodes = [normalizeTeamCode(fixture && fixture.team1), normalizeTeamCode(fixture && fixture.team2)].filter(Boolean).sort().join(":");
+  if (!cardCodes || !fixtureCodes || cardCodes !== fixtureCodes) return false;
+
+  const cardDate = String(card.matchDateTime || "").slice(0, 10);
+  const fixtureDate = String(getFixtureDateTime(fixture) || "").slice(0, 10) || toIsoDate(fixture && fixture.date);
+  return !cardDate || !fixtureDate || cardDate === fixtureDate;
+}
+
+function findMatchingFixtureForMatchCard(fixtures, matchCard) {
+  return Array.isArray(fixtures) ? fixtures.find((fixture) => matchCardMatchesFixture(matchCard, fixture)) || null : null;
+}
+
+function compareFixtureOrder(leftFixture, rightFixture) {
+  const leftTimestamp = getComparableTimestamp(getFixtureDateTime(leftFixture));
+  const rightTimestamp = getComparableTimestamp(getFixtureDateTime(rightFixture));
+  if (leftTimestamp !== null && rightTimestamp !== null && leftTimestamp !== rightTimestamp) {
+    return leftTimestamp - rightTimestamp;
+  }
+
+  const leftOrder = Number(leftFixture && (leftFixture.match_no || leftFixture.matchNo || leftFixture.id) || 0);
+  const rightOrder = Number(rightFixture && (rightFixture.match_no || rightFixture.matchNo || rightFixture.id) || 0);
+  if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+
+  return String(leftFixture && leftFixture.id || "").localeCompare(String(rightFixture && rightFixture.id || ""));
+}
+
+function findNextSportifyFixture(fixtures, currentFixture) {
+  if (!Array.isArray(fixtures) || !fixtures.length) return null;
+  const orderedFixtures = fixtures.filter(Boolean).slice().sort(compareFixtureOrder);
+  const currentTimestamp = getComparableTimestamp(getFixtureDateTime(currentFixture));
+  const currentOrder = Number(currentFixture && (currentFixture.match_no || currentFixture.matchNo || currentFixture.id) || 0);
+  const currentId = String(currentFixture && currentFixture.id || "");
+
+  return orderedFixtures.find((fixture) => {
+    if (!fixture) return false;
+    if (String(fixture.id || "") === currentId) return false;
+
+    const fixtureTimestamp = getComparableTimestamp(getFixtureDateTime(fixture));
+    if (currentTimestamp !== null && fixtureTimestamp !== null) return fixtureTimestamp > currentTimestamp;
+
+    const fixtureOrder = Number(fixture.match_no || fixture.matchNo || fixture.id || 0);
+    return fixtureOrder > currentOrder;
+  }) || null;
+}
+
+function isSameMatchCard(leftMatch, rightMatch) {
+  const left = normalizeMatchCard(leftMatch, "upcoming");
+  const right = normalizeMatchCard(rightMatch, "upcoming");
+
+  if (left.sourceMatchId && right.sourceMatchId) {
+    return left.sourceMatchId === right.sourceMatchId;
+  }
+
+  const leftCodes = [normalizeTeamCode(left.team1Flag || left.team1), normalizeTeamCode(left.team2Flag || left.team2)].filter(Boolean).sort().join(":");
+  const rightCodes = [normalizeTeamCode(right.team1Flag || right.team1), normalizeTeamCode(right.team2Flag || right.team2)].filter(Boolean).sort().join(":");
+  if (leftCodes && rightCodes && leftCodes === rightCodes) {
+    const leftDate = String(left.matchDateTime || "").slice(0, 10);
+    const rightDate = String(right.matchDateTime || "").slice(0, 10);
+    if (!leftDate || !rightDate || leftDate === rightDate) return true;
+  }
+
+  return Boolean(left.matchTitle && right.matchTitle && left.matchTitle.toLowerCase() === right.matchTitle.toLowerCase());
+}
+
+function buildCurrentMatchCardFromState(state, fixture) {
+  const currentLive = normalizeMatchCard((state.liveMatches || [])[0], "live");
+  const fixtureCard = fixture ? buildMatchCardFromFixture(fixture, "live") : null;
+
+  return normalizeMatchCard({
+    ...(fixtureCard || {}),
+    ...currentLive,
+    matchTitle: currentLive.matchTitle || (fixtureCard && fixtureCard.matchTitle) || (state.score && state.score.matchTitle) || "",
+    team1: currentLive.team1 || (fixtureCard && fixtureCard.team1) || (state.score && state.score.team1) || "",
+    team2: currentLive.team2 || (fixtureCard && fixtureCard.team2) || (state.score && state.score.team2) || "",
+    team1Flag: currentLive.team1Flag || (fixtureCard && fixtureCard.team1Flag) || normalizeTeamCode(state.score && (state.score.team1Flag || state.score.team1)),
+    team2Flag: currentLive.team2Flag || (fixtureCard && fixtureCard.team2Flag) || normalizeTeamCode(state.score && (state.score.team2Flag || state.score.team2)),
+    tournament: currentLive.tournament || (fixtureCard && fixtureCard.tournament) || (state.score && state.score.league) || "IPL 2026",
+    league: currentLive.league || (fixtureCard && fixtureCard.league) || "TODAY",
+    format: currentLive.format || (fixtureCard && fixtureCard.format) || (state.score && state.score.format) || "T20",
+    date: currentLive.date || (fixtureCard && fixtureCard.date) || formatMatchScheduleLabel(state.score && state.score.matchDateTime, "", state.score && state.score.venue),
+    matchDateTime: currentLive.matchDateTime || (fixtureCard && fixtureCard.matchDateTime) || (state.score && state.score.matchDateTime) || "",
+    venue: currentLive.venue || (fixtureCard && fixtureCard.venue) || (state.score && state.score.venue) || "",
+    streamUrl: currentLive.streamUrl || (state.stream && state.stream.url) || (fixtureCard && fixtureCard.streamUrl) || "",
+    streamPlatform: currentLive.streamPlatform || (state.stream && state.stream.platform) || (fixtureCard && fixtureCard.streamPlatform) || "custom",
+    status: "live"
+  }, "live");
+}
+
+function buildRecentResultCardFromState(state, fixture, statusText) {
+  const currentMatch = buildCurrentMatchCardFromState(state, fixture);
+  const scoreParts = [];
+  if (state.score && state.score.team1 && state.score.team1Score) {
+    scoreParts.push(state.score.team1 + " " + state.score.team1Score);
+  }
+  if (state.score && state.score.team2 && state.score.team2Score) {
+    scoreParts.push(state.score.team2 + " " + state.score.team2Score);
+  }
+
+  return normalizeMatchCard({
+    ...currentMatch,
+    status: "completed",
+    result: String(statusText || state.score && state.score.matchStatus || "Match completed").trim() || "Match completed",
+    score: scoreParts.join(" · ")
+  }, "completed");
+}
+
+function buildUpcomingTargetText(matchCard) {
+  const match = normalizeMatchCard(matchCard, "upcoming");
+  const scheduleLabel = formatMatchScheduleLabel(match.matchDateTime, match.date, match.venue);
+  return scheduleLabel ? "Starts " + scheduleLabel : "Build-up live soon";
+}
+
+function buildPreMatchScoreFromMatch(currentState, matchCard, fixture) {
+  const match = normalizeMatchCard(matchCard, "live");
+  const format = match.format || (fixture && fixture.format) || (currentState.score && currentState.score.format) || "T20";
+  const venue = match.venue || [fixture && fixture.venue, fixture && fixture.city].filter(Boolean).join(", ") || currentState.score.venue || "Venue pending";
+
+  return {
+    ...defaultState.score,
+    team1: match.team1,
+    team2: match.team2,
+    matchTitle: match.matchTitle || buildFixtureMatchTitle(fixture) || (match.team1 + " vs " + match.team2),
+    team1Score: "0/0",
+    team2Score: "Yet to bat",
+    overs: "0.0",
+    batsman: "Awaiting toss and final XIs",
+    bowler: "New-ball plans loading",
+    runRate: "0.00",
+    team1Flag: match.team1Flag || normalizeTeamCode(match.team1),
+    team2Flag: match.team2Flag || normalizeTeamCode(match.team2),
+    venue,
+    target: buildUpcomingTargetText(match),
+    league: match.tournament || currentState.score.league || "IPL 2026",
+    format,
+    totalOvers: inferTotalOversFromFormat(format),
+    powerplayOvers: inferPowerplayOversFromFormat(format),
+    matchDateTime: match.matchDateTime || getFixtureDateTime(fixture) || "",
+    tossWinner: "",
+    tossDecision: "",
+    matchStatus: "upcoming",
+    partnership: "No partnership yet",
+    fow: "No wickets yet",
+    pp: "Powerplay watch loads once the toss is complete.",
+    death: "Death-overs benchmark will update when the live feed starts.",
+    extras: "0",
+    wickets: "0",
+    reqRR: "--",
+    team1Captain: "",
+    team2Captain: "",
+    team1XI: [],
+    team2XI: []
+  };
+}
+
+function buildPreMatchMatchCenterPatch(matchCard) {
+  const match = normalizeMatchCard(matchCard, "live");
+  const scheduleLabel = formatMatchScheduleLabel(match.matchDateTime, match.date, "");
+  return {
+    title: "MATCH CENTRE · COUNTDOWN",
+    league: [match.tournament || "IPL 2026", "Next live match", scheduleLabel].filter(Boolean).join(" | "),
+    team2: match.team2,
+    team2Score: "Yet to bat",
+    team2Flag: match.team2Flag || normalizeTeamCode(match.team2),
+    target: buildUpcomingTargetText(match),
+    winProbabilityTeam1: 50,
+    projectedTotal: ""
+  };
+}
+
+function buildUpcomingPollQuestion(matchCard) {
+  const match = normalizeMatchCard(matchCard, "upcoming");
+  return [match.team1, match.team2].every(Boolean)
+    ? "Who wins " + match.team1 + " vs " + match.team2 + "?"
+    : "Who wins the next live match?";
+}
+
+function getResolvedMatchStatusText(match, officialSummary, fallbackState) {
+  const candidates = [
+    officialSummary && officialSummary.MatchStatus,
+    match && match.statusEng,
+    fallbackState && fallbackState.score && fallbackState.score.matchStatus,
+    fallbackState && fallbackState.content && fallbackState.content.matchCenter && fallbackState.content.matchCenter.league
+  ];
+  const statusText = candidates.find((value) => typeof value === "string" && value.trim());
+  return statusText ? statusText.trim() : "";
+}
+
+function isMatchConcluded(statusText) {
+  const normalized = String(statusText || "").trim().toLowerCase();
+  return Boolean(normalized) && /won by|beat|beats|match over|result|completed|complete|ended|tie|tied|draw|drawn|abandon|abandoned|no result|cancelled/.test(normalized);
+}
+
+async function autoAdvanceToNextMatch(currentState, options = {}) {
+  const state = normalizeState(currentState);
+  const currentFixture = options.currentFixture || null;
+  const resultStatus = String(options.statusText || state.score.matchStatus || "Match completed").trim() || "Match completed";
+  const currentMatch = buildCurrentMatchCardFromState(state, currentFixture);
+  if (!currentMatch.team1 || !currentMatch.team2) return null;
+
+  let fixtures = [];
+  try {
+    fixtures = await fetchSportifySchedule();
+  } catch {}
+
+  const queuedUpcoming = normalizeMatchCards(state.upcomingMatches, "upcoming");
+  let selectedUpcoming = queuedUpcoming[0] || null;
+  let selectedFixture = selectedUpcoming ? findMatchingFixtureForMatchCard(fixtures, selectedUpcoming) : null;
+
+  if (!selectedUpcoming && currentFixture) {
+    selectedFixture = findNextSportifyFixture(fixtures, currentFixture);
+    if (selectedFixture) selectedUpcoming = buildMatchCardFromFixture(selectedFixture, "upcoming");
+  }
+
+  if (!selectedUpcoming) return null;
+
+  const promotedMatch = normalizeMatchCard({
+    ...(selectedFixture ? buildMatchCardFromFixture(selectedFixture, "live") : {}),
+    ...selectedUpcoming,
+    league: selectedUpcoming.league || (selectedFixture ? "TODAY" : "NEXT"),
+    status: "live",
+    streamUrl: selectedUpcoming.streamUrl || (selectedFixture ? buildSportifyStreamUrl(selectedFixture.id) : ""),
+    streamPlatform: selectedUpcoming.streamPlatform || (selectedFixture ? "iframe" : state.stream.platform || "custom")
+  }, "live");
+
+  const timestamp = new Date().toISOString();
+  const timelineEvent = normalizeTimelineEvent({
+    id: "auto-next-" + buildMessageId(),
+    title: "Next live match loaded",
+    detail: promotedMatch.team1 + " vs " + promotedMatch.team2 + " is now set as the next live match.",
+    type: "update",
+    badge: "NEXT",
+    over: "Pre",
+    timestamp
+  });
+  const notification = {
+    id: buildMessageId(),
+    message: "Next live match loaded: " + promotedMatch.team1 + " vs " + promotedMatch.team2 + ".",
+    timestamp
+  };
+
+  return {
+    ...state,
+    stream: {
+      ...state.stream,
+      url: promotedMatch.streamUrl || "",
+      platform: promotedMatch.streamPlatform || state.stream.platform || "custom",
+      status: promotedMatch.streamUrl ? "live" : "offline",
+      viewerCount: 0
+    },
+    score: buildPreMatchScoreFromMatch(state, promotedMatch, selectedFixture),
+    poll: normalizePoll({ question: buildUpcomingPollQuestion(promotedMatch), votes: { team1: 0, team2: 0 } }),
+    content: mergeContent(state.content, {
+      matchCenter: buildPreMatchMatchCenterPatch(promotedMatch),
+      stats: {
+        momentum: {
+          title: "Pre-match Pulse",
+          label: buildUpcomingTargetText(promotedMatch),
+          percent: 50
+        }
+      },
+      predictions: {
+        expert: {
+          title: "Next Match Watch",
+          winner: promotedMatch.team1 + " vs " + promotedMatch.team2,
+          subtitle: "Countdown live now",
+          note: buildUpcomingTargetText(promotedMatch)
+        }
+      }
+    }),
+    liveMatches: [promotedMatch].concat(normalizeMatchCards(state.liveMatches, "live").filter((match) => !isSameMatchCard(match, currentMatch) && !isSameMatchCard(match, promotedMatch))).slice(0, 10),
+    upcomingMatches: queuedUpcoming.filter((match) => !isSameMatchCard(match, promotedMatch)).slice(0, 10),
+    recentResults: [buildRecentResultCardFromState({ ...state, score: { ...state.score, matchStatus: resultStatus } }, currentFixture, resultStatus)]
+      .concat(normalizeMatchCards(state.recentResults, "completed").filter((match) => !isSameMatchCard(match, currentMatch)))
+      .slice(0, 10),
+    ballFeed: [],
+    timelineEvents: [timelineEvent],
+    notifications: [...state.notifications, notification].slice(-200),
+    updatedAt: timestamp
+  };
 }
 
 function stripHtmlTags(value) {
@@ -723,6 +1174,11 @@ async function fetchJsonWithTimeout(url, label) {
   return JSON.parse(text);
 }
 
+async function fetchSportifySchedule() {
+  const payload = await fetchJsonWithTimeout(SPORTIFY_SCHEDULE_URL + Date.now(), "Sportify schedule");
+  return Array.isArray(payload && payload.matches) ? payload.matches : [];
+}
+
 function extractNextDataPayload(html) {
   const match = String(html || "").match(/<script id=\"__NEXT_DATA__\" type=\"application\/json\">([\s\S]*?)<\/script>/i);
   if (!match) {
@@ -732,8 +1188,7 @@ function extractNextDataPayload(html) {
 }
 
 async function fetchSportifyFixture(matchId) {
-  const payload = await fetchJsonWithTimeout(SPORTIFY_SCHEDULE_URL + Date.now(), "Sportify schedule");
-  const matches = Array.isArray(payload.matches) ? payload.matches : [];
+  const matches = await fetchSportifySchedule();
   const fixture = matches.find((entry) => String(entry && entry.id) === String(matchId));
   if (!fixture) {
     throw new Error("Sportify match " + matchId + " was not found in the schedule feed");
@@ -1304,8 +1759,10 @@ async function refreshLiveMatchSync() {
     }
 
     const patch = buildLiveSyncPatch(fixture, espnPayload, officialSummary, currentState);
+    const statusText = getResolvedMatchStatusText(espnPayload && espnPayload.match, officialSummary, currentState);
     const signature = JSON.stringify({
       score: patch.score,
+      statusText,
       matchCenter: patch.content.matchCenter,
       performers: patch.content.performers,
       ballFeed: patch.ballFeed,
@@ -1319,15 +1776,18 @@ async function refreshLiveMatchSync() {
     }
 
     liveSyncRuntime.lastSignature = signature;
-    const nextState = {
+    const syncedState = {
       ...currentState,
-      score: { ...currentState.score, ...patch.score },
+      score: { ...currentState.score, ...patch.score, matchStatus: statusText || currentState.score.matchStatus || "" },
       content: mergeContent(currentState.content, patch.content),
       ballFeed: patch.ballFeed,
       timelineEvents: patch.timelineEvents,
       notifications: Array.isArray(patch.notifications) ? patch.notifications : currentState.notifications,
       updatedAt: new Date().toISOString()
     };
+    const nextState = isMatchConcluded(statusText)
+      ? await autoAdvanceToNextMatch(syncedState, { currentFixture: fixture, statusText }) || syncedState
+      : syncedState;
     const savedState = await writeState(nextState);
     broadcastStateUpdate(savedState);
   } catch (error) {
@@ -2393,9 +2853,9 @@ app.put("/api/state", requireAdmin, async (req, res) => {
       score: body.currentScore && typeof body.currentScore === "object" ? { ...currentState.score, ...body.currentScore } : currentState.score,
       poll: body.poll && typeof body.poll === "object" ? normalizePoll({ ...currentState.poll, ...body.poll, votes: { ...currentState.poll.votes, ...(body.poll.votes || {}) } }) : currentState.poll,
       content: body.content && typeof body.content === "object" ? mergeContent(currentState.content, body.content) : currentState.content,
-      liveMatches: Array.isArray(body.liveMatches) ? body.liveMatches.slice(0, 10) : currentState.liveMatches,
-      upcomingMatches: Array.isArray(body.upcomingMatches) ? body.upcomingMatches.slice(0, 10) : currentState.upcomingMatches,
-      recentResults: Array.isArray(body.recentResults) ? body.recentResults.slice(0, 10) : currentState.recentResults,
+      liveMatches: Array.isArray(body.liveMatches) ? normalizeMatchCards(body.liveMatches, "live") : currentState.liveMatches,
+      upcomingMatches: Array.isArray(body.upcomingMatches) ? normalizeMatchCards(body.upcomingMatches, "upcoming") : currentState.upcomingMatches,
+      recentResults: Array.isArray(body.recentResults) ? normalizeMatchCards(body.recentResults, "completed") : currentState.recentResults,
       ballFeed: Array.isArray(body.ballFeed) ? normalizeBallFeed(body.ballFeed) : currentState.ballFeed,
       timelineEvents: Array.isArray(body.timelineEvents) ? normalizeTimelineEvents(body.timelineEvents) : currentState.timelineEvents,
       updatedAt: new Date().toISOString()
@@ -2406,6 +2866,42 @@ app.put("/api/state", requireAdmin, async (req, res) => {
     res.json({ ok: true, state: applyRealtimeViewerMetrics(savedState) });
   } catch {
     res.status(500).json({ error: "Unable to update state" });
+  }
+});
+
+app.post("/api/admin/end-match", requireAdmin, async (req, res) => {
+  try {
+    const currentState = await readState();
+    const sportifyMatchId = extractSportifyMatchId(currentState.stream && currentState.stream.url);
+    let currentFixture = null;
+
+    if (sportifyMatchId) {
+      try {
+        currentFixture = await fetchSportifyFixture(sportifyMatchId);
+      } catch {}
+    }
+
+    const statusText = typeof req.body?.statusText === "string" && req.body.statusText.trim()
+      ? req.body.statusText.trim().slice(0, 160)
+      : currentState.score.matchStatus || "Match completed";
+    const nextState = await autoAdvanceToNextMatch({
+      ...currentState,
+      score: {
+        ...currentState.score,
+        matchStatus: statusText
+      }
+    }, { currentFixture, statusText });
+
+    if (!nextState) {
+      res.status(400).json({ error: "No upcoming match is available to auto-load." });
+      return;
+    }
+
+    const savedState = await writeState(nextState);
+    broadcastStateUpdate(savedState);
+    res.json({ ok: true, state: applyRealtimeViewerMetrics(savedState) });
+  } catch {
+    res.status(500).json({ error: "Unable to end the match and load the next fixture" });
   }
 });
 
@@ -3189,20 +3685,31 @@ app.get("/*path", (_req, res) => {
 });
 
 // Graceful shutdown
+async function closeStateCollection() {
+  if (!stateStore.client) return;
+  try {
+    await stateStore.client.close();
+  } finally {
+    stateStore.client = null;
+    stateStore.collection = null;
+    stateStore.initPromise = null;
+  }
+}
+
 process.on("SIGTERM", async () => {
   console.log("SIGTERM received, shutting down gracefully");
-  await ensureDataFile();
+  await closeStateCollection();
   process.exit(0);
 });
 
 process.on("SIGINT", async () => {
   console.log("SIGINT received, shutting down gracefully");
-  await ensureDataFile();
+  await closeStateCollection();
   process.exit(0);
 });
 
 async function initializeApp() {
-  await ensureDataFile();
+  await initializeStateCollection();
   await refreshLiveMatchSync();
   console.log("CricketLive Pro server initialized on http://localhost:" + PORT);
 }

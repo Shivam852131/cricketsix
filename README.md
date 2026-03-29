@@ -7,6 +7,7 @@ A full-stack cricket streaming platform with real-time updates, AI insights, and
 ### Prerequisites
 - Node.js (v18 or higher)
 - npm or yarn
+- MongoDB (local or remote)
 
 ### Installation & Running
 
@@ -21,6 +22,8 @@ npm install
 cd backend
 node server.js
 ```
+
+Set `MONGODB_URI` first if you are not using local MongoDB at `mongodb://127.0.0.1:27017`.
 
 3. **Access the websites:**
 - User Website: http://localhost:3000
@@ -67,7 +70,8 @@ node server.js
 ### Backend Features
 - **Real-time Updates**: Server-Sent Events (SSE) for live data
 - **AI Insights**: Rule-based match analysis and predictions
-- **State Management**: Persistent application state
+- **State Management**: Persistent application state in MongoDB
+- **Auto Match Advance**: Loads the next live match automatically after a completed match
 - **Rate Limiting**: Protection against excessive requests
 
 ## 🔗 API Endpoints
@@ -99,7 +103,7 @@ The admin panel requires an admin key for authentication. The default key is `ad
 
 ## 📊 Data Structure
 
-The application state is stored in `backend/data/app-state.json` with the following structure:
+The application state is stored in MongoDB. On first boot, the server imports the existing `backend/data/app-state.json` seed if the database is empty.
 
 ```json
 {
@@ -193,6 +197,8 @@ node test-connection.js
 |----------|---------|-------------|
 | `PORT` | 3000 | Server port |
 | `ADMIN_KEY` | admin | Admin authentication key |
+| `MONGODB_URI` | `mongodb://127.0.0.1:27017` | MongoDB connection string |
+| `MONGODB_DB_NAME` | `cricketlive-pro` | MongoDB database name |
 
 ## 🔒 Security Notes
 

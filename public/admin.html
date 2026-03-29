@@ -1686,7 +1686,10 @@
                         </div>
                     </div>
                 </div>
-                <button onclick="saveMatch()" class="accent-gradient w-full py-3 rounded-lg font-bold">💾 Save Match Settings & XIs</button>
+                <div class="grid gap-3 md:grid-cols-2">
+                    <button onclick="saveMatch()" class="accent-gradient w-full py-3 rounded-lg font-bold">💾 Save Match Settings & XIs</button>
+                    <button onclick="endMatchAndLoadNext()" class="w-full py-3 rounded-lg font-bold border border-emerald-500/40 bg-emerald-500/10 text-emerald-300">🏁 End Match & Load Next</button>
+                </div>
             </div>
 
             <!-- Live Score Tab -->
@@ -2196,7 +2199,7 @@
                 <!-- Live Matches -->
                 <div class="glass rounded-xl p-6">
                     <h3 class="font-bold text-xl mb-4">🔴 Live Matches (Home Page)</h3>
-                    <p class="text-sm text-slate-400 mb-4">Manage matches displayed on home page</p>
+                    <p class="text-sm text-slate-400 mb-4">Manage featured live matches, venue, start time, and stream source</p>
                     <div id="live-matches-list" class="space-y-4"></div>
                     <button onclick="addLiveMatch()" class="mt-3 bg-red-600/20 border border-red-600 text-red-400 hover:bg-red-600/30 px-4 py-2 rounded-lg text-sm">+ Add Live Match</button>
                 </div>
@@ -2204,7 +2207,7 @@
                 <!-- Upcoming Matches -->
                 <div class="glass rounded-xl p-6">
                     <h3 class="font-bold text-xl mb-4">📅 Upcoming Matches</h3>
-                    <p class="text-sm text-slate-400 mb-4">Manage upcoming matches</p>
+                    <p class="text-sm text-slate-400 mb-4">Manage the next fixtures with start time, venue, and stream fallback</p>
                     <div id="upcoming-matches-list" class="space-y-4"></div>
                     <button onclick="addUpcomingMatch()" class="mt-3 bg-orange-600/20 border border-orange-600 text-orange-400 hover:bg-orange-600/30 px-4 py-2 rounded-lg text-sm">+ Add Upcoming Match</button>
                 </div>
@@ -2454,6 +2457,27 @@
             if (!date || Number.isNaN(date.getTime())) return '';
             const pad = number => String(number).padStart(2, '0');
             return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        }
+
+        function renderStreamPlatformOptions(selectedValue) {
+            const selected = String(selectedValue || 'iframe').toLowerCase();
+            return [
+                ['iframe', 'Iframe'],
+                ['custom', 'Custom'],
+                ['mobile', 'Mobile'],
+                ['youtube', 'YouTube'],
+                ['kick', 'Kick'],
+                ['twitch', 'Twitch'],
+                ['jioembed', 'JioEmbed']
+            ].map(([value, label]) => `<option value="${value}" ${selected === value ? 'selected' : ''}>${label}</option>`).join('');
+        }
+
+        function formatSchedulePreview(match = {}) {
+            const dateTime = match.matchDateTime ? new Date(match.matchDateTime) : null;
+            const schedule = dateTime && !Number.isNaN(dateTime.getTime())
+                ? dateTime.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                : (match.date || 'Schedule pending');
+            return [schedule, match.venue].filter(Boolean).join(' · ');
         }
 
         function hydrateScoreEditor(score = {}, feed = []) {
@@ -4374,6 +4398,23 @@
             logActivity('Match settings updated');
         }
 
+        async function endMatchAndLoadNext() {
+            try {
+                const response = await apiCall('/admin/end-match', {
+                    method: 'POST'
+                });
+                if (!response || response.error) {
+                    throw new Error(response?.error || 'Unable to auto-load next match');
+                }
+                await loadState();
+                logActivity('Current match ended and next live match loaded', 'success');
+                showToast('Next live match loaded', 'success');
+            } catch (error) {
+                console.error('Failed to end match and load next fixture:', error);
+                showToast(error.message || 'Could not load the next match', 'error');
+            }
+        }
+
         async function loadOpeningNightSimulation() {
             const sim = MATCH_DAY_SIMULATION;
             document.getElementById('match-team1').value = sim.score.team1;
@@ -4935,17 +4976,29 @@
             const container = document.getElementById('live-matches-list');
             container.innerHTML = (window.liveMatchesData || []).map((m, i) => `
                 <div class="p-4 bg-slate-800 rounded-lg">
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-2">
-                        <input type="text" value="${m.team1}" onchange="updateLiveMatch(${i}, 'team1', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Team 1">
-                        <input type="text" value="${m.team2}" onchange="updateLiveMatch(${i}, 'team2', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Team 2">
-                        <input type="text" value="${m.team1Flag}" onchange="updateLiveMatch(${i}, 'team1Flag', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Flag 1">
-                        <input type="text" value="${m.team2Flag}" onchange="updateLiveMatch(${i}, 'team2Flag', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Flag 2">
-                        <input type="text" value="${m.tournament}" onchange="updateLiveMatch(${i}, 'tournament', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Tournament">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <div>
+                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">Live Match ${i + 1}</div>
+                            <div class="text-sm text-slate-400 mt-1">${escapeHtml(formatSchedulePreview(m))}</div>
+                        </div>
+                        <button onclick="removeLiveMatch(${i})" class="bg-red-600/20 border border-red-600 text-red-400 px-3 py-2 rounded text-sm">Remove</button>
                     </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="text" value="${m.league}" onchange="updateLiveMatch(${i}, 'league', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="League">
-                        <input type="text" value="${m.format}" onchange="updateLiveMatch(${i}, 'format', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Format">
-                        <button onclick="removeLiveMatch(${i})" class="bg-red-600/20 border border-red-600 text-red-400 px-2 py-1 rounded text-sm">Remove</button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mb-2">
+                        <input type="text" value="${escapeHtml(m.team1 || '')}" onchange="updateLiveMatch(${i}, 'team1', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Team 1">
+                        <input type="text" value="${escapeHtml(m.team2 || '')}" onchange="updateLiveMatch(${i}, 'team2', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Team 2">
+                        <input type="text" value="${escapeHtml(m.matchTitle || '')}" onchange="updateLiveMatch(${i}, 'matchTitle', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Match Title">
+                        <input type="text" value="${escapeHtml(m.team1Flag || '')}" onchange="updateLiveMatch(${i}, 'team1Flag', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Flag 1">
+                        <input type="text" value="${escapeHtml(m.team2Flag || '')}" onchange="updateLiveMatch(${i}, 'team2Flag', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Flag 2">
+                        <input type="text" value="${escapeHtml(m.tournament || '')}" onchange="updateLiveMatch(${i}, 'tournament', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Tournament">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                        <input type="text" value="${escapeHtml(m.league || '')}" onchange="updateLiveMatch(${i}, 'league', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="League chip">
+                        <input type="text" value="${escapeHtml(m.format || '')}" onchange="updateLiveMatch(${i}, 'format', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Format">
+                        <input type="datetime-local" value="${formatDateTimeLocal(m.matchDateTime)}" onchange="updateLiveMatch(${i}, 'matchDateTime', this.value ? new Date(this.value).toISOString() : '')" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm">
+                        <input type="text" value="${escapeHtml(m.venue || '')}" onchange="updateLiveMatch(${i}, 'venue', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Venue">
+                        <input type="text" value="${escapeHtml(m.date || '')}" onchange="updateLiveMatch(${i}, 'date', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm lg:col-span-2" placeholder="Display schedule note (optional)">
+                        <input type="text" value="${escapeHtml(m.streamUrl || '')}" onchange="updateLiveMatch(${i}, 'streamUrl', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm lg:col-span-2" placeholder="Stream URL">
+                        <select onchange="updateLiveMatch(${i}, 'streamPlatform', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm">${renderStreamPlatformOptions(m.streamPlatform)}</select>
                     </div>
                 </div>
             `).join('');
@@ -4953,7 +5006,7 @@
 
         function addLiveMatch() {
             window.liveMatchesData = window.liveMatchesData || [];
-            window.liveMatchesData.push({ id: Date.now(), team1: 'Team 1', team2: 'Team 2', team1Flag: '🏏', team2Flag: '⚡', tournament: 'Tournament', league: 'League', format: 'T20', status: 'live' });
+            window.liveMatchesData.push({ id: Date.now(), team1: 'Team 1', team2: 'Team 2', matchTitle: '', team1Flag: 'T1', team2Flag: 'T2', tournament: 'Tournament', league: 'LIVE', format: 'T20', date: '', matchDateTime: '', venue: '', streamUrl: '', streamPlatform: 'iframe', status: 'live' });
             renderLiveMatches();
         }
 
@@ -4972,17 +5025,29 @@
             const container = document.getElementById('upcoming-matches-list');
             container.innerHTML = (window.upcomingMatchesData || []).map((m, i) => `
                 <div class="p-4 bg-slate-800 rounded-lg">
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-2">
-                        <input type="text" value="${m.team1}" onchange="updateUpcomingMatch(${i}, 'team1', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Team 1">
-                        <input type="text" value="${m.team2}" onchange="updateUpcomingMatch(${i}, 'team2', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Team 2">
-                        <input type="text" value="${m.team1Flag}" onchange="updateUpcomingMatch(${i}, 'team1Flag', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Flag 1">
-                        <input type="text" value="${m.team2Flag}" onchange="updateUpcomingMatch(${i}, 'team2Flag', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Flag 2">
-                        <input type="text" value="${m.date}" onchange="updateUpcomingMatch(${i}, 'date', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Date">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <div>
+                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">Upcoming Match ${i + 1}</div>
+                            <div class="text-sm text-slate-400 mt-1">${escapeHtml(formatSchedulePreview(m))}</div>
+                        </div>
+                        <button onclick="removeUpcomingMatch(${i})" class="bg-red-600/20 border border-red-600 text-red-400 px-3 py-2 rounded text-sm">Remove</button>
                     </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="text" value="${m.tournament}" onchange="updateUpcomingMatch(${i}, 'tournament', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Tournament">
-                        <input type="text" value="${m.league}" onchange="updateUpcomingMatch(${i}, 'league', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="League">
-                        <button onclick="removeUpcomingMatch(${i})" class="bg-red-600/20 border border-red-600 text-red-400 px-2 py-1 rounded text-sm">Remove</button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mb-2">
+                        <input type="text" value="${escapeHtml(m.team1 || '')}" onchange="updateUpcomingMatch(${i}, 'team1', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Team 1">
+                        <input type="text" value="${escapeHtml(m.team2 || '')}" onchange="updateUpcomingMatch(${i}, 'team2', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Team 2">
+                        <input type="text" value="${escapeHtml(m.matchTitle || '')}" onchange="updateUpcomingMatch(${i}, 'matchTitle', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Match Title">
+                        <input type="text" value="${escapeHtml(m.team1Flag || '')}" onchange="updateUpcomingMatch(${i}, 'team1Flag', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Flag 1">
+                        <input type="text" value="${escapeHtml(m.team2Flag || '')}" onchange="updateUpcomingMatch(${i}, 'team2Flag', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Flag 2">
+                        <input type="text" value="${escapeHtml(m.tournament || '')}" onchange="updateUpcomingMatch(${i}, 'tournament', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Tournament">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                        <input type="text" value="${escapeHtml(m.league || '')}" onchange="updateUpcomingMatch(${i}, 'league', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="League chip">
+                        <input type="text" value="${escapeHtml(m.format || '')}" onchange="updateUpcomingMatch(${i}, 'format', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Format">
+                        <input type="datetime-local" value="${formatDateTimeLocal(m.matchDateTime)}" onchange="updateUpcomingMatch(${i}, 'matchDateTime', this.value ? new Date(this.value).toISOString() : '')" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm">
+                        <input type="text" value="${escapeHtml(m.venue || '')}" onchange="updateUpcomingMatch(${i}, 'venue', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm" placeholder="Venue">
+                        <input type="text" value="${escapeHtml(m.date || '')}" onchange="updateUpcomingMatch(${i}, 'date', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm lg:col-span-2" placeholder="Display schedule note (optional)">
+                        <input type="text" value="${escapeHtml(m.streamUrl || '')}" onchange="updateUpcomingMatch(${i}, 'streamUrl', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm lg:col-span-2" placeholder="Fallback stream URL">
+                        <select onchange="updateUpcomingMatch(${i}, 'streamPlatform', this.value)" class="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm">${renderStreamPlatformOptions(m.streamPlatform)}</select>
                     </div>
                 </div>
             `).join('');
@@ -4990,7 +5055,7 @@
 
         function addUpcomingMatch() {
             window.upcomingMatchesData = window.upcomingMatchesData || [];
-            window.upcomingMatchesData.push({ id: Date.now(), team1: 'Team 1', team2: 'Team 2', team1Flag: '🏏', team2Flag: '⚡', date: 'TBD', tournament: 'Tournament', league: 'League', format: 'T20' });
+            window.upcomingMatchesData.push({ id: Date.now(), team1: 'Team 1', team2: 'Team 2', matchTitle: '', team1Flag: 'T1', team2Flag: 'T2', date: '', matchDateTime: '', venue: '', tournament: 'Tournament', league: 'NEXT', format: 'T20', streamUrl: '', streamPlatform: 'iframe', status: 'upcoming' });
             renderUpcomingMatches();
         }
 
