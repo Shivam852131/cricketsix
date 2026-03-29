@@ -93,6 +93,7 @@
             notifications: appState.notifications
           }));
           scheduleAiRefresh();
+          schedulePressureRefresh();
         }
         break;
       case "chat-message":
@@ -150,9 +151,11 @@
     "stats",
     "predictions",
     "scenario",
+    "pressure",
     "highlights",
     "analytics"
   ]);
+  const MOBILE_NAV_PAGES = new Set(["home", "live", "stats", "scenario"]);
 
   const FALLBACK_STATE = {
     stream: {
@@ -244,7 +247,11 @@
       analytics: {
         battingRows: [],
         bowlingRows: [],
-        geo: []
+        geo: [],
+        seasonTable: [],
+        fixtureList: [],
+        storylines: [],
+        seasonPulse: []
       }
     },
     liveMatches: [],
@@ -262,29 +269,90 @@
   let runrateChart = null;
   let wicketChart = null;
   let scenarioChart = null;
+  let pressureCenterData = null;
   let scenarioAutoSeed = true;
   let renderedStreamKey = "";
   let aiRefreshTimer = null;
+  let pressureRefreshTimer = null;
   let systemNotice = null;
   let systemNoticeTimer = null;
   let matchCountdownTimer = null;
   const reactionCounts = Object.create(null);
   const TEAM_META = {
     rcb: {
-      names: ["royal challengers bengaluru", "royal challengers bangalore", "royal challengers"],
+      names: ["royal challengers bengaluru", "royal challengers bangalore", "bengaluru", "rcb"],
       code: "RCB",
       badgeClass: "team-badge--rcb",
       textClass: "team-text--rcb",
       lineupClass: "team-lineup-card--rcb"
     },
     srh: {
-      names: ["sunrisers hyderabad", "sunrisers"],
+      names: ["sunrisers hyderabad", "hyderabad", "srh"],
       code: "SRH",
       badgeClass: "team-badge--srh",
       textClass: "team-text--srh",
       lineupClass: "team-lineup-card--srh"
+    },
+    mi: {
+      names: ["mumbai indians", "mumbai", "mi"],
+      code: "MI",
+      badgeClass: "team-badge--mi",
+      textClass: "team-text--mi",
+      lineupClass: "team-lineup-card--mi"
+    },
+    kkr: {
+      names: ["kolkata knight riders", "kolkata", "kkr"],
+      code: "KKR",
+      badgeClass: "team-badge--kkr",
+      textClass: "team-text--kkr",
+      lineupClass: "team-lineup-card--kkr"
+    },
+    csk: {
+      names: ["chennai super kings", "chennai", "csk"],
+      code: "CSK",
+      badgeClass: "team-badge--csk",
+      textClass: "team-text--csk",
+      lineupClass: "team-lineup-card--csk"
+    },
+    dc: {
+      names: ["delhi capitals", "delhi", "dc"],
+      code: "DC",
+      badgeClass: "team-badge--dc",
+      textClass: "team-text--dc",
+      lineupClass: "team-lineup-card--dc"
+    },
+    gt: {
+      names: ["gujarat titans", "gujarat", "gt"],
+      code: "GT",
+      badgeClass: "team-badge--gt",
+      textClass: "team-text--gt",
+      lineupClass: "team-lineup-card--gt"
+    },
+    lsg: {
+      names: ["lucknow super giants", "lucknow", "lsg"],
+      code: "LSG",
+      badgeClass: "team-badge--lsg",
+      textClass: "team-text--lsg",
+      lineupClass: "team-lineup-card--lsg"
+    },
+    pbks: {
+      names: ["punjab kings", "punjab", "pbks"],
+      code: "PBKS",
+      badgeClass: "team-badge--pbks",
+      textClass: "team-text--pbks",
+      lineupClass: "team-lineup-card--pbks"
+    },
+    rr: {
+      names: ["rajasthan royals", "rajasthan", "rr"],
+      code: "RR",
+      badgeClass: "team-badge--rr",
+      textClass: "team-text--rr",
+      lineupClass: "team-lineup-card--rr"
     }
   };
+  const TEAM_TEXT_CLASSES = Object.freeze(Object.keys(TEAM_META).map(function(key) {
+    return TEAM_META[key].textClass;
+  }).filter(Boolean));
   const fanAlias = getFanAlias();
 
   window.addEventListener("load", init);
@@ -342,6 +410,7 @@
     else if (command.includes("predictions")) showPage('predictions');
     else if (command.includes("highlights")) showPage('highlights');
     else if (command.includes("analytics")) showPage('analytics');
+    else if (command.includes("pressure") || command.includes("momentum")) showPage('pressure');
     else if (command.includes("refresh") || command.includes("reload")) location.reload();
     
     // Chat commands
@@ -462,6 +531,7 @@
       fetchJson("/state").then(function(state) {
         if (state) {
           applyFullState(state);
+          schedulePressureRefresh();
         }
       }).catch(function() {});
     }, 10000);
@@ -511,6 +581,9 @@
         fetchJson("/state"),
         fetchJson("/ai/insights").catch(function() {
           return null;
+        }),
+        fetchJson("/match/pressure-center").catch(function() {
+          return null;
         })
       ]);
 
@@ -521,6 +594,10 @@
         renderPredictions();
         renderMatchCentre();
         updateCharts();
+      }
+      if (results[2] && results[2].pressureCenter) {
+        pressureCenterData = results[2].pressureCenter;
+        renderPressureCenter();
       }
       clearSystemNotice();
     } catch (error) {
@@ -576,6 +653,7 @@
           notifications: appState.notifications
         }));
         scheduleAiRefresh();
+        schedulePressureRefresh();
         // Force immediate render of all dynamic sections
         renderAll();
         renderLiveScore();
@@ -621,6 +699,13 @@
     aiRefreshTimer = setTimeout(function() {
       void refreshAiInsights();
     }, 300);
+  }
+
+  function schedulePressureRefresh() {
+    clearTimeout(pressureRefreshTimer);
+    pressureRefreshTimer = setTimeout(function() {
+      void refreshPressureCenter();
+    }, 350);
   }
 
   let lastUpdateTime = null;
@@ -680,6 +765,17 @@
     }
   }
 
+  async function refreshPressureCenter() {
+    try {
+      const payload = await fetchJson("/match/pressure-center");
+      if (!payload || !payload.pressureCenter) return;
+      pressureCenterData = payload.pressureCenter;
+      renderPressureCenter();
+    } catch (error) {
+      console.error("Failed to refresh pressure center:", error);
+    }
+  }
+
   function showPage(page, options) {
     const nextPage = PAGE_NAMES.has(page) ? page : "getstarted";
     const pageElement = document.getElementById(nextPage + "-page");
@@ -689,6 +785,10 @@
       element.classList.add("hidden");
     });
     pageElement.classList.remove("hidden");
+    syncMobileNavigation(nextPage);
+    if (typeof window.closeMobileMenu === "function") {
+      window.closeMobileMenu();
+    }
 
     if (!options || options.syncHash !== false) {
       const nextLocation = nextPage === "getstarted" ? window.location.pathname : "#" + nextPage;
@@ -697,7 +797,20 @@
 
     if (nextPage === "live") renderStreamPlayer();
     if (nextPage === "scenario") renderScenarioLab();
+    if (nextPage === "pressure") renderPressureCenter();
     if (nextPage === "analytics") updateCharts();
+  }
+
+  function syncMobileNavigation(page) {
+    const activePage = String(page || "").toLowerCase();
+    document.querySelectorAll("[data-mobile-nav-page]").forEach(function(button) {
+      const targetPage = String(button.getAttribute("data-mobile-nav-page") || "").toLowerCase();
+      const isShortcut = MOBILE_NAV_PAGES.has(activePage);
+      const isActive = targetPage === activePage || (targetPage === "menu" && !isShortcut);
+      button.classList.toggle("active", isActive);
+      if (isActive) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    });
   }
 
   function applyFullState(nextState) {
@@ -751,7 +864,11 @@
         analytics: {
           battingRows: resolveCollection((content.analytics || {}).battingRows, null, FALLBACK_STATE.content.analytics.battingRows, 12),
           bowlingRows: resolveCollection((content.analytics || {}).bowlingRows, null, FALLBACK_STATE.content.analytics.bowlingRows, 12),
-          geo: resolveCollection((content.analytics || {}).geo, null, FALLBACK_STATE.content.analytics.geo, 6)
+          geo: resolveCollection((content.analytics || {}).geo, null, FALLBACK_STATE.content.analytics.geo, 6),
+          seasonTable: resolveCollection((content.analytics || {}).seasonTable, null, FALLBACK_STATE.content.analytics.seasonTable, 12),
+          fixtureList: resolveCollection((content.analytics || {}).fixtureList, null, FALLBACK_STATE.content.analytics.fixtureList, 12),
+          storylines: resolveCollection((content.analytics || {}).storylines, null, FALLBACK_STATE.content.analytics.storylines, 8),
+          seasonPulse: resolveCollection((content.analytics || {}).seasonPulse, null, FALLBACK_STATE.content.analytics.seasonPulse, 6)
         }
       },
       liveMatches: resolveCollection(raw.liveMatches, content.liveMatches, FALLBACK_STATE.liveMatches, 10),
@@ -779,6 +896,7 @@
     renderStats();
     renderPredictions();
     renderScenarioLab();
+    renderPressureCenter();
     renderHighlights();
     renderAnalyticsTables();
     renderNotifications();
@@ -951,7 +1069,7 @@
     const venueText = venue === "Venue pending" ? "the broadcast desk" : venue;
     const storyTitle = aiInsights && aiInsights.briefing && aiInsights.briefing.phase
       ? String(aiInsights.briefing.phase) + " Brief"
-      : (status.indexOf("LIVE") >= 0 ? "Live Pulse" : "Opening Night Pulse");
+      : (status.indexOf("LIVE") >= 0 ? "Live Pulse" : "Match Day Pulse");
     const storyBody = aiInsights && aiInsights.summary
       ? aiInsights.summary
       : (score.team1 || score.team2
@@ -989,14 +1107,14 @@
       liveGrid.innerHTML = liveMatches.length ? liveMatches.map(function(match, index) {
         return ""
           + '<div class="card-gradient rounded-2xl p-6 border border-slate-700 slide-in" style="animation-delay: ' + (index * 0.08) + 's">'
-          + '<div class="flex items-center justify-between mb-4">'
+          + '<div class="flex flex-wrap items-start justify-between gap-2 mb-4">'
           + '<span class="text-xs text-slate-400 uppercase tracking-wider">' + escapeHtml(match.tournament || "Live Fixture") + "</span>"
           + '<div class="flex gap-2"><span class="text-xs bg-red-500/30 text-red-300 px-2 py-1 rounded">' + escapeHtml(match.league || "LIVE") + '</span><span class="text-xs bg-orange-500/30 text-orange-300 px-2 py-1 rounded">' + escapeHtml(match.format || "T20") + "</span></div>"
           + "</div>"
-          + '<div class="flex items-center justify-between mb-6">'
-          + '<div class="text-center"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team1, match.team1Flag || "T1", "team-badge--lg") + '</div><span class="font-semibold text-sm ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + "</span></div>"
+          + '<div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3 mb-6">'
+          + '<div class="text-center min-w-0"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team1, match.team1Flag || "T1", "team-badge--lg") + '</div><span class="font-semibold text-sm leading-tight break-words ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + "</span></div>"
           + '<div class="flex flex-col items-center gap-2"><span class="text-red-400 live-pulse">LIVE</span><span class="text-lg font-bold text-slate-500">VS</span></div>'
-          + '<div class="text-center"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--lg") + '</div><span class="font-semibold text-sm ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + "</span></div>"
+          + '<div class="text-center min-w-0"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--lg") + '</div><span class="font-semibold text-sm leading-tight break-words ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + "</span></div>"
           + "</div>"
           + '<button onclick="showPage(\'live\')" class="w-full accent-gradient py-3 rounded-xl font-bold hover:opacity-90 transition-all">Watch Live</button>'
           + "</div>";
@@ -1007,10 +1125,10 @@
     if (upcomingList) {
       upcomingList.innerHTML = upcomingMatches.length ? upcomingMatches.map(function(match) {
         return ""
-          + '<div class="card-gradient rounded-xl p-4 border border-slate-700 flex items-center gap-3">'
+          + '<div class="card-gradient rounded-xl p-4 border border-slate-700 flex items-start gap-3 sm:items-center">'
           + '<div class="flex gap-2"><span>' + renderTeamBadge(match.team1, match.team1Flag || "T1", "team-badge--sm") + '</span><span>' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--sm") + '</span></div>'
-          + '<div class="flex-1"><p class="font-semibold ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + '</p><p class="text-xs ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + '</p><p class="text-xs text-slate-400">' + escapeHtml(match.date || "TBD") + "</p></div>"
-          + '<span class="text-xs bg-orange-500/30 text-orange-300 px-2 py-1 rounded">' + escapeHtml(match.format || match.league || "Match") + "</span>"
+          + '<div class="flex-1 min-w-0"><p class="font-semibold leading-tight break-words ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + '</p><p class="text-xs leading-tight break-words ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + '</p><p class="text-xs text-slate-400">' + escapeHtml(match.date || "TBD") + "</p></div>"
+          + '<span class="shrink-0 text-xs bg-orange-500/30 text-orange-300 px-2 py-1 rounded">' + escapeHtml(match.format || match.league || "Match") + "</span>"
           + "</div>";
       }).join("") : emptyCard("Upcoming fixtures will appear here.");
     }
@@ -1020,11 +1138,11 @@
       resultsGrid.innerHTML = recentResults.length ? recentResults.map(function(match, index) {
         return ""
           + '<div class="card-gradient rounded-2xl p-6 border border-slate-700 slide-in" style="animation-delay: ' + (index * 0.08) + 's">'
-          + '<div class="flex items-center justify-between mb-4"><span class="text-xs text-slate-400">' + escapeHtml(match.league || "Result") + '</span><span class="text-xs bg-orange-500/30 text-orange-300 px-2 py-1 rounded">' + escapeHtml(match.format || "Match") + "</span></div>"
-          + '<div class="flex items-center justify-between mb-4">'
-          + '<div class="text-center"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team1, match.team1Flag || "T1", "team-badge--sm") + '</div><span class="font-semibold text-sm ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + "</span></div>"
+          + '<div class="flex flex-wrap items-start justify-between gap-2 mb-4"><span class="text-xs text-slate-400">' + escapeHtml(match.league || "Result") + '</span><span class="text-xs bg-orange-500/30 text-orange-300 px-2 py-1 rounded">' + escapeHtml(match.format || "Match") + "</span></div>"
+          + '<div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3 mb-4">'
+          + '<div class="text-center min-w-0"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team1, match.team1Flag || "T1", "team-badge--sm") + '</div><span class="font-semibold text-sm leading-tight break-words ' + getTeamTextClass(match.team1) + '">' + escapeHtml(match.team1 || "Team 1") + "</span></div>"
           + '<span class="text-lg font-bold text-slate-500">VS</span>'
-          + '<div class="text-center"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--sm") + '</div><span class="font-semibold text-sm ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + "</span></div>"
+          + '<div class="text-center min-w-0"><div class="mb-2 flex justify-center">' + renderTeamBadge(match.team2, match.team2Flag || "T2", "team-badge--sm") + '</div><span class="font-semibold text-sm leading-tight break-words ' + getTeamTextClass(match.team2) + '">' + escapeHtml(match.team2 || "Team 2") + "</span></div>"
           + "</div>"
           + '<div class="text-center"><p class="text-green-400 font-semibold text-sm mb-1">' + escapeHtml(match.result || "Result pending") + '</p><p class="text-slate-500 text-xs">' + escapeHtml(match.score || "") + "</p></div>"
           + "</div>";
@@ -1039,10 +1157,11 @@
     const batsmenList = document.getElementById("performers-batsmen-list");
     if (batsmenList) {
       batsmenList.innerHTML = performers.batsmen.length ? performers.batsmen.map(function(player, index) {
-        return '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-6 text-center">'
+        return '<div class="flex items-center justify-between gap-3"><span class="flex min-w-0 items-center gap-2"><span class="w-6 shrink-0 text-center">'
           + escapeHtml(String(player.rank || index + 1))
-          + "</span> "
+          + '</span><span class="min-w-0 leading-tight">'
           + escapeHtml((player.name || "Player") + " (" + (player.team || "TEAM") + ")")
+          + "</span>"
           + '</span><span class="font-bold '
           + (index === 0 ? "text-green-400" : "")
           + '">'
@@ -1054,10 +1173,11 @@
     const bowlersList = document.getElementById("performers-bowlers-list");
     if (bowlersList) {
       bowlersList.innerHTML = performers.bowlers.length ? performers.bowlers.map(function(player, index) {
-        return '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-6 text-center">'
+        return '<div class="flex items-center justify-between gap-3"><span class="flex min-w-0 items-center gap-2"><span class="w-6 shrink-0 text-center">'
           + escapeHtml(String(player.rank || index + 1))
-          + "</span> "
+          + '</span><span class="min-w-0 leading-tight">'
           + escapeHtml((player.name || "Player") + " (" + (player.team || "TEAM") + ")")
+          + "</span>"
           + '</span><span class="font-bold '
           + (index === 0 ? "text-red-400" : "")
           + '">'
@@ -1551,20 +1671,20 @@
 
     container.innerHTML = ""
       + '<div class="bg-slate-800 rounded-xl p-4">'
-      + '<div class="flex items-center justify-between gap-3 mb-3"><div class="flex items-center gap-3"><span>' + renderTeamBadge(score.team1, score.team1Flag || "T1", "team-badge--sm") + '</span><span class="font-semibold ' + getTeamTextClass(score.team1) + '">' + escapeHtml(score.team1 || "Team 1") + '</span></div><span class="text-2xl font-bold text-green-400">' + escapeHtml(score.team1Score || "--") + "</span></div>"
-      + '<div class="flex items-center justify-between text-sm"><span class="text-slate-400">Overs: ' + escapeHtml(score.overs || "0.0") + '</span><span class="text-orange-400 font-semibold">RR: ' + escapeHtml(score.runRate || "0.00") + "</span></div>"
+      + '<div class="flex flex-col gap-3 mb-3 sm:flex-row sm:items-center sm:justify-between"><div class="flex min-w-0 items-center gap-3"><span>' + renderTeamBadge(score.team1, score.team1Flag || "T1", "team-badge--sm") + '</span><span class="font-semibold leading-tight ' + getTeamTextClass(score.team1) + '">' + escapeHtml(score.team1 || "Team 1") + '</span></div><span class="text-2xl font-bold text-green-400">' + escapeHtml(score.team1Score || "--") + "</span></div>"
+      + '<div class="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between"><span class="text-slate-400">Overs: ' + escapeHtml(score.overs || "0.0") + '</span><span class="text-orange-400 font-semibold">RR: ' + escapeHtml(score.runRate || "0.00") + "</span></div>"
       + "</div>"
-      + '<div class="grid grid-cols-2 gap-3">'
+      + '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">'
       + '<div class="bg-slate-800 rounded-xl p-3"><p class="text-xs text-slate-400 mb-1">🏏 Batsmen</p><p class="font-semibold text-sm">' + escapeHtml(score.batsman || "Awaiting update") + "</p></div>"
       + '<div class="bg-slate-800 rounded-xl p-3"><p class="text-xs text-slate-400 mb-1">🎯 Bowler</p><p class="font-semibold text-sm">' + escapeHtml(score.bowler || "Awaiting update") + "</p></div>"
       + "</div>"
-      + '<div class="grid grid-cols-2 gap-3">'
+      + '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">'
       + '<div class="bg-slate-800 rounded-xl p-3"><p class="text-xs text-slate-400 mb-1">Opposition</p><p class="font-semibold text-sm">' + escapeHtml((score.team2 || "Team 2") + ": " + oppositionScore) + "</p></div>"
       + '<div class="bg-slate-800 rounded-xl p-3"><p class="text-xs text-slate-400 mb-1">🎯 Target</p><p class="font-semibold text-sm">' + escapeHtml(target) + "</p></div>"
       + "</div>"
       + (score.partnership ? '<div class="bg-slate-800 rounded-xl p-3"><p class="text-xs text-slate-400 mb-1">🤝 Partnership</p><p class="font-semibold text-sm text-purple-400">' + escapeHtml(score.partnership) + "</p></div>" : "")
       + (score.fow ? '<div class="bg-slate-800 rounded-xl p-3"><p class="text-xs text-slate-400 mb-1">📉 Fall of Wickets</p><p class="font-semibold text-sm text-red-400">' + escapeHtml(score.fow) + "</p></div>" : "")
-      + '<div class="grid grid-cols-3 gap-2 mt-2">'
+      + '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">'
       + '<div class="bg-slate-800 rounded-lg p-2 text-center"><p class="text-[10px] text-slate-400">Extras</p><p class="font-bold text-sm">' + escapeHtml(score.extras || "0") + "</p></div>"
       + '<div class="bg-slate-800 rounded-lg p-2 text-center"><p class="text-[10px] text-slate-400">Req RR</p><p class="font-bold text-sm text-blue-400">' + escapeHtml(score.reqRR || "--") + "</p></div>"
       + '<div class="bg-slate-800 rounded-lg p-2 text-center"><p class="text-[10px] text-slate-400">PP</p><p class="font-bold text-sm text-purple-400">' + escapeHtml(score.pp || "--") + "</p></div>"
@@ -1580,19 +1700,20 @@
     const tossSummary = buildTossSummary(score);
     const team1XI = normalizeTeamList(score.team1XI);
     const team2XI = normalizeTeamList(score.team2XI);
+    const lineupLabel = isPreMatchLineup(score, appState.ballFeed) ? "Probable XI" : "Playing XI";
 
     container.innerHTML = ""
-      + '<div class="flex items-center justify-between bg-slate-800 rounded-xl p-4 gap-4">'
-      + '<div class="text-center flex-1"><div class="mb-2 flex justify-center">' + renderTeamBadge(score.team1, score.team1Flag || "T1", "team-badge--lg") + '</div><span class="font-bold ' + getTeamTextClass(score.team1) + '">' + escapeHtml(score.team1 || "Team 1") + "</span></div>"
-      + '<div class="text-center flex-1"><span class="text-sm text-slate-400">' + escapeHtml(details || "Live fixture") + '</span><span class="text-2xl font-bold block my-2 text-red-400">VS</span><span class="text-xs text-slate-500">Broadcast synced with admin dashboard</span></div>'
-      + '<div class="text-center flex-1"><div class="mb-2 flex justify-center">' + renderTeamBadge(score.team2, score.team2Flag || "T2", "team-badge--lg") + '</div><span class="font-bold ' + getTeamTextClass(score.team2) + '">' + escapeHtml(score.team2 || "Team 2") + "</span></div>"
+      + '<div class="flex flex-col gap-4 bg-slate-800 rounded-xl p-4 sm:flex-row sm:items-center sm:justify-between">'
+      + '<div class="text-center flex-1 min-w-0"><div class="mb-2 flex justify-center">' + renderTeamBadge(score.team1, score.team1Flag || "T1", "team-badge--lg") + '</div><span class="font-bold leading-tight break-words ' + getTeamTextClass(score.team1) + '">' + escapeHtml(score.team1 || "Team 1") + "</span></div>"
+      + '<div class="text-center flex-1 min-w-0 order-first sm:order-none"><span class="text-sm text-slate-400">' + escapeHtml(details || "Live fixture") + '</span><span class="text-2xl font-bold block my-2 text-red-400">VS</span><span class="text-xs text-slate-500">Broadcast synced with admin dashboard</span></div>'
+      + '<div class="text-center flex-1 min-w-0"><div class="mb-2 flex justify-center">' + renderTeamBadge(score.team2, score.team2Flag || "T2", "team-badge--lg") + '</div><span class="font-bold leading-tight break-words ' + getTeamTextClass(score.team2) + '">' + escapeHtml(score.team2 || "Team 2") + "</span></div>"
       + "</div>"
       + '<div class="grid gap-3 mt-4 md:grid-cols-3">'
       + '<div class="rounded-xl bg-slate-800 p-4"><div class="text-[11px] uppercase tracking-[0.2em] text-slate-500 mb-1">Toss</div><div class="text-sm text-slate-200">' + escapeHtml(tossSummary) + "</div></div>"
       + '<div class="rounded-xl bg-slate-800 p-4"><div class="text-[11px] uppercase tracking-[0.2em] text-slate-500 mb-1">Captains</div><div class="text-sm text-slate-200">' + escapeHtml((score.team1Captain || score.team1 || "Team 1") + ' / ' + (score.team2Captain || score.team2 || "Team 2")) + "</div></div>"
       + '<div class="rounded-xl bg-slate-800 p-4"><div class="text-[11px] uppercase tracking-[0.2em] text-slate-500 mb-1">Match Feed</div><div class="text-sm text-slate-200">Venue: ' + escapeHtml(score.venue || "Venue updates live") + '<br>Stream status: ' + escapeHtml(appState.stream.status || "offline") + "</div></div>"
       + "</div>"
-      + renderLineupGrid(score.team1, score.team2, team1XI, team2XI);
+      + renderLineupGrid(score.team1, score.team2, team1XI, team2XI, lineupLabel);
   }
 
   function renderLiveBallFeed() {
@@ -1726,7 +1847,7 @@
 
       return ""
         + '<div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">'
-        + '<div class="flex items-start justify-between gap-3 mb-2">'
+        + '<div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-2">'
         + '<div><div class="flex items-center gap-2 flex-wrap"><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.2em] ' + theme.badge + '">' + escapeHtml(event.badge || event.type || "UPDATE") + '</span><h5 class="font-semibold text-white">' + escapeHtml(event.title || "Match event") + "</h5></div></div>"
         + '<span class="text-xs text-slate-500 whitespace-nowrap">' + escapeHtml(metaParts.join(" | ")) + "</span>"
         + "</div>"
@@ -2278,6 +2399,144 @@
   window.applyScenarioPreset = applyScenarioPreset;
   window.renderScenarioLab = renderScenarioLab;
 
+  function getPressureToneClass(tone) {
+    switch (String(tone || "").toLowerCase()) {
+      case "green":
+      case "emerald":
+        return "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20";
+      case "orange":
+      case "amber":
+        return "bg-orange-500/15 text-orange-300 border border-orange-500/20";
+      case "rose":
+      case "red":
+        return "bg-rose-500/15 text-rose-300 border border-rose-500/20";
+      case "blue":
+      case "sky":
+        return "bg-sky-500/15 text-sky-300 border border-sky-500/20";
+      default:
+        return "bg-slate-700 text-slate-200 border border-slate-600";
+    }
+  }
+
+  function getPressureLaneToneClass(id) {
+    switch (String(id || "").toLowerCase()) {
+      case "stabilize":
+        return getPressureToneClass("emerald");
+      case "launch":
+        return getPressureToneClass("sky");
+      default:
+        return getPressureToneClass("orange");
+    }
+  }
+
+  function renderPressureCenter() {
+    const page = document.getElementById("pressure-page");
+    if (!page) return;
+
+    const data = pressureCenterData;
+    const lanesContainer = document.getElementById("pressure-lanes");
+    const leversContainer = document.getElementById("pressure-levers");
+    const windowsContainer = document.getElementById("pressure-windows");
+
+    if (!data) {
+      setText("pressure-title", "Pressure Center");
+      setText("pressure-summary", "The live pressure engine is syncing with the match feed.");
+      setText("pressure-mode", "SYNCING");
+      setText("pressure-phase", "Awaiting live state");
+      setText("pressure-control-span", "Loading windows");
+      setText("pressure-index", "--");
+      setText("pressure-index-note", "Pressure score will appear here");
+      setText("pressure-win", "--");
+      setText("pressure-win-note", "Win swing will update from the live model");
+      setText("pressure-benchmark", "--");
+      setText("pressure-benchmark-note", "Current rate vs benchmark");
+      setText("pressure-wickets", "--");
+      setText("pressure-wickets-note", "Wickets and overs remaining");
+      setText("pressure-focus", "Waiting for the next-over plan from the pressure engine.");
+      setText("pressure-trend", "- ");
+      setText("pressure-urgency", "- ");
+      setText("pressure-recent", "No recent balls yet");
+      if (lanesContainer) lanesContainer.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">Pressure lanes will appear as soon as live score context is available.</div>';
+      if (leversContainer) leversContainer.innerHTML = "";
+      if (windowsContainer) windowsContainer.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">Pressure windows are loading.</div>';
+      return;
+    }
+
+    const paceMargin = Number(data.pace && data.pace.margin);
+    const paceMarginLabel = Number.isFinite(paceMargin)
+      ? ((paceMargin > 0 ? "+" : "") + paceMargin.toFixed(2) + " RR")
+      : "--";
+    const recentBallsLabel = data.assistant && Array.isArray(data.assistant.recentBalls) && data.assistant.recentBalls.length
+      ? data.assistant.recentBalls.join(" ")
+      : "No recent balls logged";
+
+    setText("pressure-title", data.mode || "Pressure Center");
+    setText("pressure-summary", data.summary || "Pressure summary unavailable.");
+    setText("pressure-mode", (data.pressureLabel || "Live").toUpperCase());
+    setText("pressure-phase", data.phase || "Live");
+    setText("pressure-control-span", data.controlSpanLabel || "Live window");
+    setText("pressure-index", String(data.pressureIndex || 0));
+    setText("pressure-index-note", data.scoreline || "Live score");
+    setText("pressure-win", data.winSwing && data.winSwing.label ? data.winSwing.label : "Match balanced");
+    setText("pressure-win-note", data.winSwing ? (data.winSwing.team1Percent + "% vs " + data.winSwing.team2Percent + "%") : "Win swing unavailable");
+    setText("pressure-benchmark", formatRate(data.pace && data.pace.currentRate) + " vs " + formatRate(data.pace && data.pace.benchmarkRate));
+    setText("pressure-benchmark-note", (data.pace && data.pace.benchmarkLabel ? data.pace.benchmarkLabel : "Benchmark") + " · " + paceMarginLabel);
+    setText("pressure-wickets", String(data.wicketsInHand || 0));
+    setText("pressure-wickets-note", (data.oversRemaining || "0.0") + " overs left");
+    setText("pressure-focus", data.focusLine || "Pressure focus unavailable.");
+    setText("pressure-trend", data.assistant && data.assistant.trendLabel ? data.assistant.trendLabel : "Live");
+    setText("pressure-urgency", data.assistant && data.assistant.urgency ? data.assistant.urgency : "Steady");
+    setText("pressure-recent", recentBallsLabel);
+
+    if (lanesContainer) {
+      lanesContainer.innerHTML = (data.lanes || []).map(function(lane) {
+        return ''
+          + '<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">'
+          + '<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">'
+          + '<div class="min-w-0">'
+          + '<div class="flex items-center gap-2 flex-wrap"><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.2em] ' + getPressureLaneToneClass(lane.id) + '">' + escapeHtml((lane.title || 'Lane').toUpperCase()) + '</span><span class="text-xs text-slate-400">' + escapeHtml((lane.risk || 'Managed') + ' risk') + '</span></div>'
+          + '<p class="text-sm text-slate-300 mt-3 leading-6">' + escapeHtml(lane.note || 'Live lane guidance.') + '</p>'
+          + '<p class="text-xs text-slate-500 mt-2">' + escapeHtml((lane.finishLabel || '') + ' · ' + (lane.swingLabel || '')) + '</p>'
+          + '</div>'
+          + '<div class="grid grid-cols-3 gap-3 lg:w-[320px]">'
+          + '<div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Burst</div><div class="text-lg font-bold text-white mt-1">' + escapeHtml(String(lane.overTarget || 0)) + '</div></div>'
+          + '<div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Projection</div><div class="text-lg font-bold text-white mt-1">' + escapeHtml(String(lane.projected || 0)) + '</div></div>'
+          + '<div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Win</div><div class="text-lg font-bold text-white mt-1">' + escapeHtml(String(lane.winChance || 0)) + '%</div></div>'
+          + '</div>'
+          + '</div>'
+          + '<div class="mt-4 flex flex-wrap gap-2">'
+          + ((lane.sequence || []).map(function(ball) {
+              return '<span class="inline-flex min-w-[2.25rem] justify-center rounded-full border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-semibold text-white">' + escapeHtml(ball) + '</span>';
+            }).join('') || '<span class="text-sm text-slate-500">No ball-by-ball lane needed right now.</span>')
+          + '</div>'
+          + '</div>';
+      }).join('') || '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">No live pressure lanes are available yet.</div>';
+    }
+
+    if (leversContainer) {
+      leversContainer.innerHTML = (data.levers || []).map(function(item) {
+        return ''
+          + '<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">'
+          + '<div class="flex items-center justify-between gap-3 mb-3"><span class="text-xs uppercase tracking-[0.18em] text-slate-400">' + escapeHtml(item.label || 'Lever') + '</span><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ' + getPressureToneClass(item.tone) + '">' + escapeHtml(item.value || '-') + '</span></div>'
+          + '<p class="text-sm text-slate-300 leading-6">' + escapeHtml(item.note || 'Live trigger.') + '</p>'
+          + '</div>';
+      }).join('');
+    }
+
+    if (windowsContainer) {
+      windowsContainer.innerHTML = (data.windows || []).map(function(windowItem) {
+        return ''
+          + '<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">'
+          + '<div class="flex items-start justify-between gap-3 mb-3"><div><h4 class="font-semibold text-white">' + escapeHtml(windowItem.title || 'Window') + '</h4><p class="text-xs text-slate-500 mt-1">' + escapeHtml(windowItem.subtitle || '') + '</p></div><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ' + getPressureToneClass(windowItem.risk === 'High' ? 'rose' : windowItem.risk === 'Medium' ? 'orange' : 'emerald') + '">' + escapeHtml(windowItem.risk || 'Managed') + '</span></div>'
+          + '<div class="grid grid-cols-2 gap-3 mb-3"><div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Target</div><div class="text-base font-bold text-white mt-1">' + escapeHtml(windowItem.target || '-') + '</div></div><div class="rounded-xl bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Swing</div><div class="text-base font-bold text-white mt-1">' + escapeHtml(windowItem.swingLabel || '-') + '</div></div></div>'
+          + '<p class="text-sm text-slate-300 leading-6">' + escapeHtml(windowItem.note || 'Pressure note unavailable.') + '</p>'
+          + '</div>';
+      }).join('') || '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">No pressure windows available.</div>';
+    }
+  }
+
+  window.renderPressureCenter = renderPressureCenter;
+
   function renderHighlights() {
     const highlights = appState.content.highlights || FALLBACK_STATE.content.highlights;
     const featured = highlights.featured || FALLBACK_STATE.content.highlights.featured;
@@ -2300,7 +2559,7 @@
         const description = escapeHtml(item.description || "Watch the moment");
         return ""
           + '<div class="card-gradient rounded-xl p-4 border border-slate-700 cursor-pointer hover:border-orange-500 transition-all" onclick=\'playHighlight(' + JSON.stringify(item.title || "Highlight") + ', ' + JSON.stringify(item.description || "Watch the moment") + ', ' + JSON.stringify(item.videoUrl || featured.videoUrl || "") + ')\'>'
-          + '<div class="flex gap-4"><div class="w-20 h-20 bg-slate-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">' + escapeHtml(item.icon || "🎬") + '</div><div class="flex-1"><p class="font-semibold">' + title + '</p><p class="text-sm text-slate-400">' + description + '</p><span class="text-xs text-orange-400">' + escapeHtml(item.time || "Just now") + '</span></div></div>'
+          + '<div class="flex flex-col gap-4 sm:flex-row"><div class="w-20 h-20 bg-slate-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">' + escapeHtml(item.icon || "🎬") + '</div><div class="flex-1 min-w-0"><p class="font-semibold">' + title + '</p><p class="text-sm text-slate-400">' + description + '</p><span class="text-xs text-orange-400">' + escapeHtml(item.time || "Just now") + '</span></div></div>'
           + "</div>";
       }).join("") || '<div class="text-sm text-slate-400">No highlight clips configured yet.</div>';
     }
@@ -2342,6 +2601,64 @@
         const percent = clampPercent(item.value || 0);
         return '<div class="flex items-center justify-between bg-slate-800 rounded-lg p-3"><span>' + escapeHtml(item.label || "Region") + '</span><div class="flex items-center gap-2"><div class="w-24 bg-slate-700 rounded-full h-2"><div class="' + escapeHtml(getGeoBarClass(item.tone)) + ' h-2 rounded-full" style="width:' + percent + '%"></div></div><span class="text-sm font-bold">' + percent + '%</span></div></div>';
       }).join("") || '<div class="text-sm text-slate-400">No geographic distribution configured.</div>';
+    }
+
+    const seasonTableBody = document.getElementById("analytics-season-table-body");
+    if (seasonTableBody) {
+      seasonTableBody.innerHTML = (analytics.seasonTable || []).map(function(row, index) {
+        const teamName = row.team || row.code || "Team";
+        const rank = row.pos || index + 1;
+        return ''
+          + '<tr class="' + (index < (analytics.seasonTable.length - 1) ? 'border-b border-slate-700 ' : '') + 'hover:bg-slate-800/70">'
+          + '<td class="py-3 px-4 text-slate-500">' + escapeHtml(String(rank)) + '</td>'
+          + '<td class="py-3 px-4"><div class="flex items-center gap-3"><span>' + renderTeamBadge(teamName, row.code || abbreviateTeam(teamName), "team-badge--sm") + '</span><span class="font-semibold ' + getTeamTextClass(teamName) + '">' + escapeHtml(teamName) + '</span></div></td>'
+          + '<td class="py-3 px-4 text-center">' + escapeHtml(String(row.played != null ? row.played : 0)) + '</td>'
+          + '<td class="py-3 px-4 text-center text-green-400">' + escapeHtml(String(row.won != null ? row.won : 0)) + '</td>'
+          + '<td class="py-3 px-4 text-center text-rose-400">' + escapeHtml(String(row.lost != null ? row.lost : 0)) + '</td>'
+          + '<td class="py-3 px-4 text-center font-semibold text-orange-300">' + escapeHtml(String(row.points != null ? row.points : 0)) + '</td>'
+          + '<td class="py-3 px-4 text-right text-slate-300">' + escapeHtml(String(row.nrr || "0.000")) + '</td>'
+          + '</tr>';
+      }).join("") || '<tr><td colspan="7" class="py-4 px-4 text-center text-slate-400">Season table will appear here.</td></tr>';
+    }
+
+    const seasonPulse = document.getElementById("analytics-season-pulse");
+    if (seasonPulse) {
+      seasonPulse.innerHTML = (analytics.seasonPulse || []).map(function(item) {
+        return ''
+          + '<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">'
+          + '<div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">' + escapeHtml(item.label || 'Metric') + '</div>'
+          + '<div class="mt-2 text-xl font-bold ' + getMetricToneClass(item.tone) + '">' + escapeHtml(item.value || '--') + '</div>'
+          + '<div class="mt-2 text-sm text-slate-400 leading-6">' + escapeHtml(item.note || 'Season note unavailable.') + '</div>'
+          + '</div>';
+      }).join("") || '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">Season pulse cards are not configured yet.</div>';
+    }
+
+    const fixtureList = document.getElementById("analytics-fixture-list");
+    if (fixtureList) {
+      fixtureList.innerHTML = (analytics.fixtureList || []).map(function(item) {
+        const team1 = item.team1 || "Team 1";
+        const team2 = item.team2 || "Team 2";
+        return ''
+          + '<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">'
+          + '<div class="flex items-start justify-between gap-3 mb-3"><div><p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">' + escapeHtml(item.match || 'Fixture') + '</p><h4 class="font-semibold text-white mt-1">' + escapeHtml(team1 + ' vs ' + team2) + '</h4></div><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold bg-slate-800 text-slate-200 border border-slate-700">' + escapeHtml(item.tag || 'Radar') + '</span></div>'
+          + '<div class="flex items-center gap-2 mb-3"><span>' + renderTeamBadge(team1, item.team1Flag || abbreviateTeam(team1), "team-badge--sm") + '</span><span>' + renderTeamBadge(team2, item.team2Flag || abbreviateTeam(team2), "team-badge--sm") + '</span><span class="text-sm text-slate-400">' + escapeHtml(item.date || 'TBD') + '</span></div>'
+          + '<p class="text-sm text-slate-300">' + escapeHtml(item.venue || 'Venue TBA') + '</p>'
+          + '<p class="text-sm text-slate-500 mt-2 leading-6">' + escapeHtml(item.focus || 'Fixture note unavailable.') + '</p>'
+          + '</div>';
+      }).join("") || '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">Fixture radar is empty.</div>';
+    }
+
+    const storylines = document.getElementById("analytics-storylines");
+    if (storylines) {
+      storylines.innerHTML = (analytics.storylines || []).map(function(item) {
+        const title = item && typeof item === "object" ? item.title : item;
+        const detail = item && typeof item === "object" ? item.detail : "";
+        return ''
+          + '<div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">'
+          + '<div class="flex items-center gap-2 mb-2"><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ' + getPressureToneClass(item && item.tone) + '">' + escapeHtml((item && item.tone ? item.tone : 'watch').toUpperCase()) + '</span><h4 class="font-semibold text-white">' + escapeHtml(title || 'Match storyline') + '</h4></div>'
+          + '<p class="text-sm text-slate-400 leading-6">' + escapeHtml(detail || 'Storyline note unavailable.') + '</p>'
+          + '</div>';
+      }).join("") || '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">No storylines configured.</div>';
     }
   }
 
@@ -2773,7 +3090,9 @@
   function applyTeamTextTone(id, name) {
     const element = document.getElementById(id);
     if (!element) return;
-    element.classList.remove("team-text--rcb", "team-text--srh");
+    TEAM_TEXT_CLASSES.forEach(function(className) {
+      element.classList.remove(className);
+    });
     const meta = getTeamMeta(name);
     if (meta && meta.textClass) element.classList.add(meta.textClass);
   }
@@ -2795,21 +3114,27 @@
     return score.tossWinner + " won the toss" + (score.tossDecision ? " and chose to " + score.tossDecision : "") + ".";
   }
 
-  function renderLineupGrid(team1, team2, team1XI, team2XI) {
+  function isPreMatchLineup(score, ballFeed) {
+    const innings = parseScore((score && score.team1Score) || "0/0");
+    const overs = parseCricketOvers((score && score.overs) || "0.0");
+    return innings.runs === 0 && innings.wickets === 0 && overs.ballsTotal === 0 && !(Array.isArray(ballFeed) && ballFeed.length);
+  }
+
+  function renderLineupGrid(team1, team2, team1XI, team2XI, label) {
     if (!team1XI.length && !team2XI.length) return "";
     return ""
       + '<div class="team-lineup-grid mt-4">'
-      + renderLineupCard(team1, team1XI)
-      + renderLineupCard(team2, team2XI)
+      + renderLineupCard(team1, team1XI, label)
+      + renderLineupCard(team2, team2XI, label)
       + "</div>";
   }
 
-  function renderLineupCard(teamName, players) {
+  function renderLineupCard(teamName, players, label) {
     if (!players.length) return "";
     const meta = getTeamMeta(teamName);
     return ""
       + '<div class="team-lineup-card ' + escapeHtml(meta ? meta.lineupClass : "") + '">'
-      + '<div class="flex items-center gap-3 mb-3"><span>' + renderTeamBadge(teamName, abbreviateTeam(teamName), "team-badge--sm") + '</span><div><div class="text-xs uppercase tracking-[0.2em] text-slate-500">Playing XI</div><div class="font-semibold ' + getTeamTextClass(teamName) + '">' + escapeHtml(teamName || "Team") + "</div></div></div>"
+      + '<div class="flex items-center gap-3 mb-3"><span>' + renderTeamBadge(teamName, abbreviateTeam(teamName), "team-badge--sm") + '</span><div><div class="text-xs uppercase tracking-[0.2em] text-slate-500">' + escapeHtml(label || "Playing XI") + '</div><div class="font-semibold ' + getTeamTextClass(teamName) + '">' + escapeHtml(teamName || "Team") + "</div></div></div>"
       + '<div class="text-sm text-slate-300 leading-6">' + escapeHtml(players.join(" | ")) + "</div>"
       + "</div>";
   }
@@ -3120,7 +3445,7 @@
       
       // Horizontal swipe - change pages
       if (Math.abs(diffX) > 100 && Math.abs(diffX) > Math.abs(diffY)) {
-        const pages = ['home', 'live', 'stats', 'predictions', 'scenario', 'highlights', 'analytics'];
+        const pages = ['home', 'live', 'stats', 'predictions', 'scenario', 'pressure', 'highlights', 'analytics'];
         const currentPage = document.querySelector('.page:not(.hidden)');
         
         if (currentPage) {
@@ -3393,6 +3718,7 @@
     state: appState,
     showPage: window.showPage,
     openScenarioLab: function() { window.showPage('scenario'); },
+    openPressureCenter: function() { window.showPage('pressure'); },
     refreshData: window.refreshData,
     getAppState: window.getAppState,
     shareMatch: window.shareMatch,
@@ -3525,6 +3851,7 @@
         console.log('Voice command:', command);
         
         if (command.includes('scenario') || command.includes('what if') || command.includes('scenario lab')) window.showPage('scenario');
+        else if (command.includes('pressure') || command.includes('momentum')) window.showPage('pressure');
         else if (command.includes('home')) window.showPage('home');
         else if (command.includes('live')) window.showPage('live');
         else if (command.includes('stats')) window.showPage('stats');

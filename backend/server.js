@@ -23,6 +23,7 @@ const SW_FILE = path.join(PUBLIC_DIR, "sw.js");
 const ADMIN_KEY = process.env.ADMIN_KEY || "admin";
 const ALLOWED_STREAM_STATUS = new Set(["live", "paused", "offline"]);
 const AI_BULLETIN_CHANNELS = new Set(["notification", "chat", "both"]);
+const PRESSURE_BULLETIN_CHANNELS = new Set(["notification", "timeline", "both"]);
 const SSE_HEARTBEAT_MS = 15000;
 const sseClients = new Set();
 const wsClients = new Map(); // ws client management: ws -> {id, type, authenticated}
@@ -71,6 +72,17 @@ const SPORTIFY_MATCH_SOURCE_MAP = {
     lineups: {
       RCB: ["Phil Salt", "Virat Kohli", "Devdutt Padikkal", "Rajat Patidar (c)", "Jitesh Sharma (wk)", "Tim David", "Krunal Pandya", "Romario Shepherd", "Bhuvneshwar Kumar", "Suyash Sharma", "Jacob Duffy"],
       SRH: ["Abhishek Sharma", "Travis Head", "Ishan Kishan (c/wk)", "Heinrich Klaasen", "Nitish Kumar Reddy", "Liam Livingstone", "Aniket Verma", "Harshal Patel", "Jaydev Unadkat", "Harsh Dubey", "Eshan Malinga"]
+    }
+  },
+  "2602": {
+    espnUrl: "https://www.espncricinfo.com/series/ipl-2026-1510719/mumbai-indians-vs-kolkata-knight-riders-2nd-match-1527675/live-cricket-score",
+    captains: {
+      MI: "Hardik Pandya (c)",
+      KKR: "Ajinkya Rahane (c)"
+    },
+    lineups: {
+      MI: ["Rohit Sharma", "Quinton de Kock (wk)", "Tilak Varma", "Suryakumar Yadav", "Hardik Pandya (c)", "Naman Dhir", "Sherfane Rutherford", "Deepak Chahar", "AM Ghazanfar", "Jasprit Bumrah", "Ashwani Kumar", "Trent Boult"],
+      KKR: ["Finn Allen (wk)", "Ajinkya Rahane (c)", "Angkrish Raghuvanshi", "Cameron Green", "Rinku Singh", "Anukul Roy", "Ramandeep Singh", "Sunil Narine", "Vaibhav Arora", "Varun Chakravarthy", "Blessing Muzarabani", "Umran Malik / Kartik Tyagi"]
     }
   }
 };
@@ -354,7 +366,11 @@ const defaultState = {
     analytics: {
       battingRows: [],
       bowlingRows: [],
-      geo: []
+      geo: [],
+      seasonTable: [],
+      fixtureList: [],
+      storylines: [],
+      seasonPulse: []
     }
   },
   liveMatches: [],
@@ -423,7 +439,11 @@ function normalizeContent(rawContent) {
     analytics: {
       battingRows: Array.isArray(analytics.battingRows) ? analytics.battingRows.slice(0, 12) : defaultState.content.analytics.battingRows.slice(0, 12),
       bowlingRows: Array.isArray(analytics.bowlingRows) ? analytics.bowlingRows.slice(0, 12) : defaultState.content.analytics.bowlingRows.slice(0, 12),
-      geo: Array.isArray(analytics.geo) ? analytics.geo.slice(0, 6) : defaultState.content.analytics.geo.slice(0, 6)
+      geo: Array.isArray(analytics.geo) ? analytics.geo.slice(0, 6) : defaultState.content.analytics.geo.slice(0, 6),
+      seasonTable: Array.isArray(analytics.seasonTable) ? analytics.seasonTable.slice(0, 12) : defaultState.content.analytics.seasonTable.slice(0, 12),
+      fixtureList: Array.isArray(analytics.fixtureList) ? analytics.fixtureList.slice(0, 12) : defaultState.content.analytics.fixtureList.slice(0, 12),
+      storylines: Array.isArray(analytics.storylines) ? analytics.storylines.slice(0, 8) : defaultState.content.analytics.storylines.slice(0, 8),
+      seasonPulse: Array.isArray(analytics.seasonPulse) ? analytics.seasonPulse.slice(0, 6) : defaultState.content.analytics.seasonPulse.slice(0, 6)
     }
   };
 }
@@ -1371,6 +1391,324 @@ function summarizeBallFeed(ballFeed) {
   };
 }
 
+function formatBallsAsOvers(balls) {
+  const safeBalls = Math.max(0, Math.round(Number(balls) || 0));
+  return Math.floor(safeBalls / 6) + "." + (safeBalls % 6);
+}
+
+function parseTargetContext(targetText, currentRuns, defaultBallsRemaining, fallbackRequiredRR, benchmarkRate) {
+  const text = String(targetText || "").trim();
+  const fallbackRate = Number.parseFloat(String(fallbackRequiredRR || "")) || 0;
+
+  if (!text) {
+    return {
+      mode: "build",
+      targetScore: null,
+      requiredRuns: null,
+      ballsRemaining: defaultBallsRemaining,
+      benchmarkRate,
+      benchmarkLabel: "Par RR"
+    };
+  }
+
+  let match = text.match(/need\s+(\d+)\s+from\s+(\d+)\s+balls?/i);
+  if (match) {
+    const requiredRuns = Number.parseInt(match[1], 10) || 0;
+    const ballsRemaining = Number.parseInt(match[2], 10) || defaultBallsRemaining;
+    return {
+      mode: "chase",
+      targetScore: currentRuns + requiredRuns,
+      requiredRuns,
+      ballsRemaining,
+      benchmarkRate: ballsRemaining > 0 ? requiredRuns / (ballsRemaining / 6) : requiredRuns,
+      benchmarkLabel: "Required RR"
+    };
+  }
+
+  match = text.match(/need\s+(\d+)\s+from\s+(\d+)(?:\.(\d))?\s+overs?/i);
+  if (match) {
+    const requiredRuns = Number.parseInt(match[1], 10) || 0;
+    const ballsRemaining = parseOversBreakdown(match[2] + "." + (match[3] || "0")).totalBalls || defaultBallsRemaining;
+    return {
+      mode: "chase",
+      targetScore: currentRuns + requiredRuns,
+      requiredRuns,
+      ballsRemaining,
+      benchmarkRate: ballsRemaining > 0 ? requiredRuns / (ballsRemaining / 6) : requiredRuns,
+      benchmarkLabel: "Required RR"
+    };
+  }
+
+  match = text.match(/need\s+(\d+)\s+to\s+win/i);
+  if (match) {
+    const requiredRuns = Number.parseInt(match[1], 10) || 0;
+    return {
+      mode: "chase",
+      targetScore: currentRuns + requiredRuns,
+      requiredRuns,
+      ballsRemaining: defaultBallsRemaining,
+      benchmarkRate: fallbackRate > 0 ? fallbackRate : (defaultBallsRemaining > 0 ? requiredRuns / (defaultBallsRemaining / 6) : requiredRuns),
+      benchmarkLabel: "Required RR"
+    };
+  }
+
+  match = text.match(/\btarget(?:\s+of)?\s+(\d+)\b/i)
+    || text.match(/\bchasing?\s+(\d+)\b/i);
+  if (match) {
+    const targetScore = Number.parseInt(match[1], 10) || 0;
+    const requiredRuns = Math.max(0, targetScore - currentRuns);
+    return {
+      mode: "chase",
+      targetScore,
+      requiredRuns,
+      ballsRemaining: defaultBallsRemaining,
+      benchmarkRate: fallbackRate > 0 ? fallbackRate : (defaultBallsRemaining > 0 ? requiredRuns / (defaultBallsRemaining / 6) : requiredRuns),
+      benchmarkLabel: "Required RR"
+    };
+  }
+
+  if (fallbackRate > 0) {
+    const estimatedRequiredRuns = Math.max(0, Math.round((fallbackRate / 6) * defaultBallsRemaining));
+    return {
+      mode: "chase",
+      targetScore: estimatedRequiredRuns > 0 ? currentRuns + estimatedRequiredRuns : null,
+      requiredRuns: estimatedRequiredRuns,
+      ballsRemaining: defaultBallsRemaining,
+      benchmarkRate: fallbackRate,
+      benchmarkLabel: "Required RR"
+    };
+  }
+
+  return {
+    mode: "build",
+    targetScore: null,
+    requiredRuns: null,
+    ballsRemaining: defaultBallsRemaining,
+    benchmarkRate,
+    benchmarkLabel: "Par RR"
+  };
+}
+
+function getPressureMeta(pressureIndex) {
+  if (pressureIndex >= 80) return { label: "Red Zone", tone: "rose" };
+  if (pressureIndex >= 65) return { label: "High Heat", tone: "orange" };
+  if (pressureIndex >= 45) return { label: "Live Tension", tone: "amber" };
+  if (pressureIndex >= 25) return { label: "Managed", tone: "emerald" };
+  return { label: "Cruise Control", tone: "sky" };
+}
+
+function buildIntentSequence(targetRuns, balls, wicketsInHand, style) {
+  if (!balls) return [];
+
+  let template;
+  if (style === "launch" || targetRuns >= 13) {
+    template = ["2", "4", "1", "6", "1", "1"];
+  } else if (style === "balanced" || targetRuns >= 9) {
+    template = ["1", "2", "1", "4", "0", "1"];
+  } else {
+    template = ["1", "1", "0", "2", "1", "1"];
+  }
+
+  if (wicketsInHand <= 3) {
+    template = template.map((ball) => (ball === "6" ? "2" : ball));
+    if (style !== "launch") {
+      template = ["1", "1", "0", "1", "2", "1"];
+    }
+  }
+
+  return template.slice(0, balls);
+}
+
+function createPressureCenter(state) {
+  const insights = createAiInsights(state);
+  const winProbability = calculateWinProbability(state);
+  const score = parseScoreBreakdown(state.score && state.score.team1Score);
+  const overs = parseOversBreakdown(state.score && state.score.overs);
+  const inningsLength = inferInningsLength(state, overs.completedOvers);
+  const totalBalls = inningsLength * 6;
+  const defaultBallsRemaining = Math.max(0, totalBalls - overs.totalBalls);
+  const currentRuns = score.runs;
+  const wicketsInHand = Math.max(0, 10 - score.wickets);
+  const currentRunRate = overs.completedOvers > 0
+    ? currentRuns / overs.completedOvers
+    : (Number.parseFloat(String(state.score && state.score.runRate || "0")) || 0);
+  const benchmarkRate = inningsLength >= 45 ? 6.2 : 8.4;
+  const targetContext = parseTargetContext(
+    state.score && state.score.target,
+    currentRuns,
+    defaultBallsRemaining,
+    state.score && state.score.reqRR,
+    benchmarkRate
+  );
+  const ballsRemaining = Math.max(0, targetContext.ballsRemaining);
+  const controlSpanBalls = Math.min(6, ballsRemaining);
+  const projection = predictFinalScore(state);
+  const ballFeedSummary = summarizeBallFeed(state.ballFeed);
+  const pressureIndex = clamp(
+    Math.round(
+      ((insights.prediction && insights.prediction.pressureIndex) || 0)
+      + ballFeedSummary.recentWickets * 6
+      - ballFeedSummary.recentBoundaries * 2
+      + Math.max(0, ballFeedSummary.recentDots - 2) * 3
+    ),
+    5,
+    99
+  );
+  const pressureMeta = getPressureMeta(pressureIndex);
+  const swingLeader = winProbability.team1WinProbability >= winProbability.team2WinProbability
+    ? (state.score && state.score.team1) || "Team 1"
+    : (state.score && state.score.team2) || "Team 2";
+  const swingMargin = Math.abs(winProbability.team1WinProbability - winProbability.team2WinProbability);
+  const windowRate = targetContext.benchmarkRate || benchmarkRate;
+  const stabilizeRuns = controlSpanBalls > 0 ? clamp(Math.round((windowRate / 6) * controlSpanBalls) - 2, 2, 14) : 0;
+  const balancedRuns = controlSpanBalls > 0 ? clamp(Math.round((windowRate / 6) * controlSpanBalls), 3, 16) : 0;
+  const launchRuns = controlSpanBalls > 0 ? clamp(Math.round((windowRate / 6) * controlSpanBalls) + 3, 4, 20) : 0;
+  const projectionFlex = Math.max(6, Math.round(Math.max(1, ballsRemaining / 6) * 3.2));
+  const baseProjected = projection.projectedScore;
+  const targetScore = targetContext.targetScore;
+  const dotBallLimit = pressureIndex >= 75 ? 1 : pressureIndex >= 55 ? 2 : pressureIndex >= 35 ? 3 : 4;
+  const wicketTax = Math.round(8 + (pressureIndex / 6) + (ballsRemaining <= 12 ? 4 : 0));
+  const boundariesNeeded = controlSpanBalls > 0 ? Math.max(1, Math.ceil(balancedRuns / 4)) : 0;
+  const fanEdgeTeam = winProbability.team1WinProbability >= 50
+    ? ((state.score && state.score.team1) || "Team 1")
+    : ((state.score && state.score.team2) || "Team 2");
+  const fanEdgeValue = Math.abs(winProbability.team1WinProbability - 50);
+  const focusLine = insights.tactical && insights.tactical.nextOverPlan
+    ? insights.tactical.nextOverPlan
+    : ballFeedSummary.smartCall;
+
+  function createLane(id, title, overTarget, projected, delta, risk) {
+    const laneWinChance = clamp(winProbability.team1WinProbability + delta, 1, 99);
+    const margin = targetScore !== null ? projected - targetScore : null;
+
+    return {
+      id,
+      title,
+      overTarget,
+      projected,
+      winChance: laneWinChance,
+      risk,
+      swingLabel: (delta > 0 ? "+" : "") + delta + "% swing",
+      finishLabel: targetScore !== null
+        ? (margin >= 0 ? (margin === 0 ? "Level with chase line" : "+" + margin + " above chase line") : Math.abs(margin) + " short of chase line")
+        : "Projected finish " + projected,
+      sequence: buildIntentSequence(overTarget, controlSpanBalls, wicketsInHand, id),
+      note: id === "stabilize"
+        ? "Protect the set batter and keep the over alive until the release ball arrives."
+        : id === "balanced"
+          ? "This is the default lane: rotation first, boundary second, panic never."
+          : "Use only if the matchup is in your favor or the benchmark is slipping away."
+    };
+  }
+
+  const lanes = [
+    createLane("stabilize", "Stabilize", stabilizeRuns, Math.max(currentRuns, baseProjected - projectionFlex), -4, "Low"),
+    createLane("balanced", "Balanced", balancedRuns, Math.max(currentRuns, baseProjected), 2, "Medium"),
+    createLane("launch", "Launch", launchRuns, Math.max(currentRuns, baseProjected + projectionFlex), 8, wicketsInHand <= 3 ? "High" : "Elevated")
+  ];
+
+  const windowSpecs = [
+    { title: "Pivot Burst", balls: Math.min(6, ballsRemaining), multiplier: 1.02, note: "One clean over flips the control line immediately." },
+    { title: "Bridge Phase", balls: Math.min(12, Math.max(0, ballsRemaining - 6)), multiplier: 1, note: "This block decides whether the finish is calm or chaotic." },
+    { title: "Finish Zone", balls: Math.max(0, ballsRemaining - 18), multiplier: 1.08, note: "Execution matters more than intent once the finish shrinks." }
+  ].filter((entry) => entry.balls > 0);
+
+  const windows = windowSpecs.map((entry, index) => {
+    const targetRuns = Math.max(1, Math.round((windowRate / 6) * entry.balls * entry.multiplier));
+    const swingValue = index === 0 ? 6 : index === 1 ? 4 : 8;
+    return {
+      title: entry.title,
+      subtitle: entry.balls + " balls · " + formatBallsAsOvers(entry.balls) + " overs",
+      target: targetRuns + " runs",
+      risk: pressureIndex >= 70 || (index === 0 && ballFeedSummary.recentWickets > 0)
+        ? "High"
+        : pressureIndex >= 45 ? "Medium" : "Managed",
+      swingLabel: (targetContext.mode === "chase" ? "+" : "Up to ") + swingValue + "% if won",
+      note: entry.note
+    };
+  });
+
+  return {
+    generatedAt: new Date().toISOString(),
+    mode: targetContext.mode === "chase" ? "Chase Pressure" : (isPreMatchBuildUp(state) ? "Preview Pressure" : "Innings Pressure"),
+    phase: insights.matchup && insights.matchup.phase ? insights.matchup.phase : "Live",
+    pressureIndex,
+    pressureLabel: pressureMeta.label,
+    pressureTone: pressureMeta.tone,
+    scoreline: ((state.score && state.score.team1Score) || "0/0") + " · " + ((state.score && state.score.overs) || "0.0") + " ov",
+    oversRemaining: formatBallsAsOvers(ballsRemaining),
+    wicketsInHand,
+    controlSpanLabel: controlSpanBalls > 0 ? (controlSpanBalls === 6 ? "Next over" : "Next " + controlSpanBalls + " balls") : "Innings complete",
+    summary: ((state.score && state.score.team1) || "The batting side") + " sit in " + pressureMeta.label.toLowerCase() + " at " + (((state.score && state.score.team1Score) || "0/0"))
+      + ". " + (targetContext.mode === "chase"
+        ? "The chase asks for " + windowRate.toFixed(2) + " RR, and a balanced " + (controlSpanBalls || 0) + "-ball lane of " + balancedRuns + " keeps the finish alive."
+        : "The benchmark sits at " + windowRate.toFixed(2) + " RR, and a balanced " + (controlSpanBalls || 0) + "-ball lane of " + balancedRuns + " keeps the projection on track."),
+    focusLine,
+    winSwing: {
+      team1: (state.score && state.score.team1) || "Team 1",
+      team2: (state.score && state.score.team2) || "Team 2",
+      team1Percent: winProbability.team1WinProbability,
+      team2Percent: winProbability.team2WinProbability,
+      leader: swingLeader,
+      margin: swingMargin,
+      label: swingLeader + " +" + swingMargin + "%"
+    },
+    pace: {
+      currentRate: Number(currentRunRate.toFixed(2)),
+      benchmarkRate: Number(windowRate.toFixed(2)),
+      benchmarkLabel: targetContext.benchmarkLabel,
+      margin: Number((currentRunRate - windowRate).toFixed(2))
+    },
+    levers: [
+      {
+        label: "Boundary Need",
+        value: boundariesNeeded > 0 ? boundariesNeeded + " this " + (controlSpanBalls === 6 ? "over" : "burst") : "Set line",
+        note: "Keep at least one release shot in the over plan.",
+        tone: "orange"
+      },
+      {
+        label: "Dot-Ball Ceiling",
+        value: "Max " + dotBallLimit,
+        note: "Too many dots turn the lane from tactical to desperate.",
+        tone: "blue"
+      },
+      {
+        label: "Wicket Tax",
+        value: "+" + wicketTax + " runs",
+        note: "One wicket now normally adds a full over of pressure.",
+        tone: "rose"
+      },
+      {
+        label: "Crowd Pulse",
+        value: fanEdgeTeam + " +" + fanEdgeValue + "%",
+        note: "Fan edge is blended from poll and live win swing.",
+        tone: "green"
+      }
+    ],
+    windows,
+    lanes,
+    assistant: {
+      trendLabel: insights.assistant && insights.assistant.trendLabel ? insights.assistant.trendLabel : "Live",
+      urgency: insights.assistant && insights.assistant.urgency ? insights.assistant.urgency : "Steady",
+      smartCall: insights.assistant && insights.assistant.smartCall ? insights.assistant.smartCall : focusLine,
+      recentBalls: insights.assistant && Array.isArray(insights.assistant.recentBalls) ? insights.assistant.recentBalls : []
+    }
+  };
+}
+
+function createPressureBulletinMessage(state, pressureCenter) {
+  const leader = pressureCenter && pressureCenter.winSwing ? pressureCenter.winSwing.label : "Match balanced";
+  const summary = pressureCenter && pressureCenter.summary ? pressureCenter.summary : "Pressure board is waiting for live match data.";
+  const focus = pressureCenter && pressureCenter.focusLine ? pressureCenter.focusLine : "";
+  const parts = [
+    "Pressure Alert:",
+    summary,
+    "Win swing: " + leader + ".",
+    focus
+  ].filter(Boolean);
+  return parts.join(" ").slice(0, 500);
+}
+
 function createAiInsights(state) {
   const ballFeedSummary = summarizeBallFeed(state && state.ballFeed);
   const generatedAt = new Date().toISOString();
@@ -1520,7 +1858,7 @@ function createAiInsights(state) {
         keyInsights: [
           "Projected par: " + projectedLow + "-" + projectedHigh,
           "Venue trend: short square boundaries and fast scoring potential.",
-          "Recent edge: RCB lead the last five meetings 3-2.",
+          "Recent edge: MI lead the last five meetings 3-2.",
           "Opening night still looks toss sensitive despite the batting depth on both sides."
         ],
         watchouts,
@@ -1739,7 +2077,11 @@ function mergeContent(currentContent, patch) {
       ...(nextContent.analytics || {}),
       battingRows: Array.isArray(((nextContent.analytics || {}).battingRows)) ? nextContent.analytics.battingRows : currentContent.analytics.battingRows,
       bowlingRows: Array.isArray(((nextContent.analytics || {}).bowlingRows)) ? nextContent.analytics.bowlingRows : currentContent.analytics.bowlingRows,
-      geo: Array.isArray(((nextContent.analytics || {}).geo)) ? nextContent.analytics.geo : currentContent.analytics.geo
+      geo: Array.isArray(((nextContent.analytics || {}).geo)) ? nextContent.analytics.geo : currentContent.analytics.geo,
+      seasonTable: Array.isArray(((nextContent.analytics || {}).seasonTable)) ? nextContent.analytics.seasonTable : currentContent.analytics.seasonTable,
+      fixtureList: Array.isArray(((nextContent.analytics || {}).fixtureList)) ? nextContent.analytics.fixtureList : currentContent.analytics.fixtureList,
+      storylines: Array.isArray(((nextContent.analytics || {}).storylines)) ? nextContent.analytics.storylines : currentContent.analytics.storylines,
+      seasonPulse: Array.isArray(((nextContent.analytics || {}).seasonPulse)) ? nextContent.analytics.seasonPulse : currentContent.analytics.seasonPulse
     }
   });
 }
@@ -1988,6 +2330,52 @@ app.post("/api/ai/bulletin", requireAdmin, async (req, res) => {
   }
 });
 
+app.post("/api/admin/pressure-bulletin", requireAdmin, async (req, res) => {
+  try {
+    const channelRaw = req.body && typeof req.body.channel === "string" ? req.body.channel.trim().toLowerCase() : "notification";
+    const channel = PRESSURE_BULLETIN_CHANNELS.has(channelRaw) ? channelRaw : "notification";
+    const state = applyRealtimeViewerMetrics(await readState());
+    const pressureCenter = createPressureCenter(state);
+    const bulletin = createPressureBulletinMessage(state, pressureCenter);
+    const timestamp = new Date().toISOString();
+    let savedState = state;
+    let notification = null;
+    let timelineEvent = null;
+
+    if (channel === "notification" || channel === "both") {
+      notification = { id: buildMessageId(), message: bulletin, timestamp };
+      savedState = await writeState({
+        ...savedState,
+        notifications: [...savedState.notifications, notification].slice(-200),
+        updatedAt: timestamp
+      });
+      broadcastSseEvent("notification", { notification });
+    }
+
+    if (channel === "timeline" || channel === "both") {
+      timelineEvent = normalizeTimelineEvent({
+        id: buildMessageId(),
+        title: "Pressure swing update",
+        detail: bulletin,
+        type: "alert",
+        badge: "SWING",
+        over: state.score && state.score.overs ? state.score.overs : "",
+        timestamp
+      });
+      savedState = await writeState({
+        ...savedState,
+        timelineEvents: [timelineEvent, ...(savedState.timelineEvents || [])].slice(0, 100),
+        updatedAt: timestamp
+      });
+      broadcastStateUpdate(savedState);
+    }
+
+    res.status(201).json({ ok: true, channel, bulletin, pressureCenter, notification, timelineEvent });
+  } catch {
+    res.status(500).json({ error: "Unable to publish pressure bulletin" });
+  }
+});
+
 app.put("/api/state", requireAdmin, async (req, res) => {
   try {
     const body = req.body && typeof req.body === "object" ? req.body : {};
@@ -2217,6 +2605,16 @@ app.get("/api/match/stats", async (_req, res) => {
     res.json({ ok: true, stats });
   } catch {
     res.status(500).json({ error: "Unable to fetch match stats" });
+  }
+});
+
+app.get("/api/match/pressure-center", async (_req, res) => {
+  try {
+    const state = applyRealtimeViewerMetrics(await readState());
+    const pressureCenter = createPressureCenter(state);
+    res.json({ ok: true, pressureCenter });
+  } catch {
+    res.status(500).json({ error: "Unable to load pressure center" });
   }
 });
 

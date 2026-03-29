@@ -1,137 +1,189 @@
 {
   "stream": {
-    "url": "https://sportify-beta.pages.dev/match?id=2601",
+    "url": "https://sportify-beta.pages.dev/match?id=2602",
     "platform": "iframe",
     "status": "live",
     "viewerCount": 0
   },
   "score": {
-    "team1": "Sunrisers Hyderabad",
-    "team2": "Royal Challengers Bengaluru",
-    "matchTitle": "IPL 2026 - Match 1, RCB vs SRH",
-    "team1Score": "137/4",
+    "team1": "Mumbai Indians",
+    "team2": "Kolkata Knight Riders",
+    "matchTitle": "IPL 2026 - Match 2, MI vs KKR",
+    "team1Score": "0/0",
     "team2Score": "Yet to bat",
-    "overs": "14.2",
-    "batsman": "Ishan Kishan 74* (36) | Salil Arora 9 (5)",
-    "bowler": "Suyash Sharma 2.2-0-23-0",
-    "runRate": "9.56",
-    "team1Flag": "SRH",
-    "team2Flag": "RCB",
-    "venue": "M Chinnaswamy Stadium, Bengaluru",
-    "target": "Projected finish: 191-205",
+    "overs": "0.0",
+    "batsman": "Awaiting toss and final XIs",
+    "bowler": "New-ball plans loading",
+    "runRate": "0.00",
+    "team1Flag": "MI",
+    "team2Flag": "KKR",
+    "venue": "Wankhede Stadium, Mumbai",
+    "target": "Starts at 7:30 PM IST",
     "league": "IPL 2026",
     "format": "T20",
     "totalOvers": "20",
     "powerplayOvers": "6",
-    "matchDateTime": "2026-03-28T19:30:00+05:30",
-    "tossWinner": "Royal Challengers Bengaluru",
-    "tossDecision": "field",
-    "partnership": "Ishan Kishan / Salil Arora: 0 runs",
-    "fow": "4-137 (14.2)",
-    "pp": "Powerplay benchmark: 50+ keeps pressure on the fielding side",
-    "death": "Projected finish: 191-205",
-    "extras": "Live extras updating",
-    "wickets": "4",
-    "reqRR": "-",
-    "team1Captain": "Ishan Kishan (c)",
-    "team2Captain": "Rajat Patidar (c)",
+    "matchDateTime": "2026-03-29T19:30:00+05:30",
+    "tossWinner": "",
+    "tossDecision": "",
+    "partnership": "No partnership yet",
+    "fow": "No wickets yet",
+    "pp": "Powerplay watch: Rohit vs Narine and Boult/Chahar vs Finn Allen can define the night",
+    "death": "Wankhede benchmark: anything close to 200 is the safe first-innings zone",
+    "extras": "0",
+    "wickets": "0",
+    "reqRR": "--",
+    "team1Captain": "Hardik Pandya (c)",
+    "team2Captain": "Ajinkya Rahane (c)",
     "team1XI": [
-      "Abhishek Sharma",
-      "Travis Head",
-      "Ishan Kishan (c/wk)",
-      "Heinrich Klaasen",
-      "Nitish Kumar Reddy",
-      "Liam Livingstone",
-      "Aniket Verma",
-      "Harshal Patel",
-      "Jaydev Unadkat",
-      "Harsh Dubey",
-      "Eshan Malinga"
+      "Rohit Sharma",
+      "Quinton de Kock (wk)",
+      "Tilak Varma",
+      "Suryakumar Yadav",
+      "Hardik Pandya (c)",
+      "Naman Dhir",
+      "Sherfane Rutherford",
+      "Deepak Chahar",
+      "AM Ghazanfar",
+      "Jasprit Bumrah",
+      "Trent Boult"
     ],
     "team2XI": [
-      "Phil Salt",
-      "Virat Kohli",
-      "Devdutt Padikkal",
-      "Rajat Patidar (c)",
-      "Jitesh Sharma (wk)",
-      "Tim David",
-      "Krunal Pandya",
-      "Romario Shepherd",
-      "Bhuvneshwar Kumar",
-      "Suyash Sharma",
-      "Jacob Duffy"
-    ]
+      "Finn Allen (wk)",
+      "Ajinkya Rahane (c)",
+      "Angkrish Raghuvanshi",
+      "Cameron Green",
+      "Rinku Singh",
+      "Ramandeep Singh",
+      "Sunil Narine",
+      "Anukul Roy",
+      "Vaibhav Arora",
+      "Varun Chakravarthy",
+      "Blessing Muzarabani"
+    ],
+    "headToHead": {
+      "totalMatches": 35,
+      "miWins": 24,
+      "kkrWins": 11,
+      "noResult": 0,
+      "lastMeeting": "KKR beat MI in IPL 2025",
+      "venueRecord": "KKR have won only 2 of 12 games against MI at Wankhede",
+      "formGuide": {
+        "MI": "Have not won an IPL opener since 2012",
+        "KKR": "New leadership cycle under Ajinkya Rahane"
+      }
+    },
+    "teamStats": {
+      "mi": {
+        "avgScore": "Wankhede par sits near 200",
+        "highestScore": "234",
+        "lowestScore": "118",
+        "winRate": "Strong at home",
+        "powerplayAvg": "54.8",
+        "deathOversAvg": "53.2"
+      },
+      "kkr": {
+        "avgScore": "Explosive but unsettled start",
+        "highestScore": "232",
+        "lowestScore": "101",
+        "winRate": "Road challenge tonight",
+        "powerplayAvg": "49.6",
+        "deathOversAvg": "56.8"
+      }
+    },
+    "keyBattles": [
+      "Rohit Sharma vs Sunil Narine",
+      "Jasprit Bumrah vs Cameron Green",
+      "Trent Boult vs Finn Allen",
+      "Varun Chakravarthy vs Suryakumar Yadav"
+    ],
+    "weather": {
+      "condition": "Warm and humid",
+      "temperature": "30C",
+      "humidity": "67%",
+      "windSpeed": "11 km/h",
+      "dewFactor": "Minimal dew expected"
+    },
+    "pitchReport": {
+      "surface": "True Wankhede batting strip",
+      "bounce": "Even pace and carry",
+      "spin": "Grip only if the seamers take pace off",
+      "pace": "New ball can create early wickets",
+      "scoringPattern": "Around 200 is the safer first-innings total",
+      "averageFirstInnings": "196",
+      "chasingRecord": "Teams winning the toss chased in each of the last 20 night T20s here, but won only 9"
+    }
   },
   "chatMessages": [
     {
       "id": "seed-1",
-      "username": "RCBArmy",
-      "content": "Kohli has paced this brilliantly. 200 is right there if RCB nail the last 16 balls.",
-      "timestamp": "2026-03-28T21:38:00+05:30"
+      "username": "WankhedeWire",
+      "content": "Bumrah being available changes the entire MI shape. That middle-overs control is massive.",
+      "timestamp": "2026-03-29T18:22:00+05:30"
     },
     {
       "id": "seed-2",
-      "username": "OrangeWave",
-      "content": "Harshal needs one smart over. SRH still keep this under control if they close with yorkers.",
-      "timestamp": "2026-03-28T21:40:00+05:30"
+      "username": "KnightShift",
+      "content": "KKR's pace resources are stretched, but Allen and Green can flip the game in 20 balls.",
+      "timestamp": "2026-03-29T18:24:00+05:30"
     },
     {
       "id": "seed-3",
-      "username": "PitchRadar",
-      "content": "The toss call already looks right. Dew plus these boundaries means SRH will back the chase hard.",
-      "timestamp": "2026-03-28T21:42:00+05:30"
+      "username": "PowerplayLab",
+      "content": "If MI get through Narine cleanly, the chase or first-innings pace could get brutal fast.",
+      "timestamp": "2026-03-29T18:28:00+05:30"
     },
     {
       "id": "seed-4",
-      "username": "NeutralAnalyst",
-      "content": "RCB have recovered well after 122/3. The Patidar-Kohli stand has reset the launch pad.",
-      "timestamp": "2026-03-28T21:44:00+05:30"
+      "username": "SeasonTracker",
+      "content": "RCB already set the opening-week benchmark by chasing 202 in 15.4. That is the new pressure line.",
+      "timestamp": "2026-03-29T18:31:00+05:30"
     }
   ],
   "poll": {
-    "question": "Opening-night pick: who closes stronger from here?",
+    "question": "Who starts IPL 2026 Match 2 with points on the board?",
     "votes": {
-      "team1": 18240,
-      "team2": 16790
+      "team1": 31240,
+      "team2": 28910
     }
   },
   "content": {
     "hero": {
-      "badge": "IPL 2026 OPENING NIGHT",
-      "title": "RCB vs SRH\nLive Match Command Centre",
-      "subtitle": "Track the season opener with toss context, playing XIs, live score pressure points, and AI-driven match intelligence from Bengaluru.",
-      "ctaPrimary": "Watch Live Feed",
-      "ctaSecondary": "See Match Edge",
-      "liveMatches": "",
-      "upcomingMatches": "",
-      "fansOnline": "Opening-night buzz across India"
+      "badge": "TODAY · IPL 2026 MATCH 2",
+      "title": "MI vs KKR\nWankhede Countdown",
+      "subtitle": "Bumrah is back, Rahane's new-look KKR arrive with questions, and MI are chasing a first opening-night win since 2012.",
+      "ctaPrimary": "Enter Match Centre",
+      "ctaSecondary": "Open Analytics",
+      "liveMatches": "1 featured match",
+      "upcomingMatches": "5 fixtures loaded",
+      "fansOnline": "Wankhede build-up in full voice"
     },
     "matchCenter": {
-      "title": "MATCH CENTRE · LIVE",
-      "league": "IPL 2026 | Match 1 | Live",
-      "team2": "Royal Challengers Bengaluru",
+      "title": "MATCH CENTRE · COUNTDOWN",
+      "league": "IPL 2026 | Match 2 | Starts 7:30 PM IST",
+      "team2": "Kolkata Knight Riders",
       "team2Score": "Yet to bat",
-      "team2Flag": "RCB",
-      "target": "Projected finish: 191-205",
-      "winProbabilityTeam1": 50,
-      "projectedTotal": 194
+      "team2Flag": "KKR",
+      "target": "Toss at 7:00 PM IST · Build-up live now",
+      "winProbabilityTeam1": 52,
+      "projectedTotal": 198
     },
     "quickActions": {
-      "scorecard": "Playing XIs",
-      "analytics": "Phase Split",
-      "highlights": "Live Moments"
+      "scorecard": "Probable XIs",
+      "analytics": "Season Table",
+      "highlights": "Preview Deck"
     },
     "sections": {
-      "liveMatchesTitle": "OPENING NIGHT LIVE",
-      "upcomingTitle": "IPL 2026 NEXT UP",
-      "resultsTitle": "2025 FORM GUIDE",
-      "performersTitle": "RCB vs SRH MATCH LEADERS"
+      "liveMatchesTitle": "TODAY AT WANKHEDE",
+      "upcomingTitle": "NEXT IPL FIXTURES",
+      "resultsTitle": "OPENING WEEK RESULTS",
+      "performersTitle": "IPL 2026 TRENDING PERFORMERS"
     },
     "promo": {
-      "title": "GET IPL 2026 MATCH ALERTS",
-      "subtitle": "Track toss, playing XIs, phase shifts, and late-innings surges all season long.",
-      "primaryLabel": "Season Alerts",
-      "secondaryLabel": "Squad Tracker"
+      "title": "TRACK EVERY IPL 2026 SWING",
+      "subtitle": "Season table, fixture radar, live win swings, and pressure models for every major match-night pivot.",
+      "primaryLabel": "Season Pulse",
+      "secondaryLabel": "Fixture Radar"
     },
     "performers": {
       "batsmen": [
@@ -139,242 +191,583 @@
           "rank": 1,
           "name": "Ishan Kishan",
           "team": "SRH",
-          "runs": 74
+          "runs": 80,
+          "avg": "80.0",
+          "sr": "210.5"
         },
         {
           "rank": 2,
-          "name": "Salil Arora",
-          "team": "SRH",
-          "runs": 9
+          "name": "Virat Kohli",
+          "team": "RCB",
+          "runs": 69,
+          "avg": "69.0",
+          "sr": "181.6"
+        },
+        {
+          "rank": 3,
+          "name": "Devdutt Padikkal",
+          "team": "RCB",
+          "runs": 61,
+          "avg": "61.0",
+          "sr": "234.6"
         }
       ],
       "bowlers": [
         {
           "rank": 1,
-          "name": "Suyash Sharma",
+          "name": "Jacob Duffy",
           "team": "RCB",
-          "wickets": 0
+          "wickets": 3,
+          "economy": "5.5",
+          "avg": "7.3"
+        },
+        {
+          "rank": 2,
+          "name": "Romario Shepherd",
+          "team": "RCB",
+          "wickets": 3,
+          "economy": "13.5",
+          "avg": "18.0"
+        },
+        {
+          "rank": 3,
+          "name": "David Payne",
+          "team": "SRH",
+          "wickets": 2,
+          "economy": "11.7",
+          "avg": "17.5"
         }
       ]
     },
     "stats": {
       "highestScore": {
-        "label": "Top live batter",
-        "value": "74",
-        "subtitle": "Ishan Kishan leading the innings"
+        "label": "Season top score",
+        "value": "80",
+        "subtitle": "Ishan Kishan vs RCB"
       },
       "bestBowling": {
-        "label": "Current bowler",
-        "value": "2.2-0-23-0",
-        "subtitle": "Suyash Sharma operating now"
+        "label": "Season best spell",
+        "value": "3/22",
+        "subtitle": "Jacob Duffy vs SRH"
       },
       "keyMetrics": [
         {
-          "label": "Live score",
-          "value": "137/4",
+          "label": "Safe first-innings total",
+          "value": "195-205",
           "tone": "orange"
         },
         {
-          "label": "Overs",
-          "value": "14.2",
-          "tone": "yellow"
-        },
-        {
-          "label": "Run rate",
-          "value": "9.56",
-          "tone": "green"
-        },
-        {
-          "label": "Projected",
-          "value": "194",
+          "label": "Wankhede toss chases",
+          "value": "9 wins in last 20",
           "tone": "blue"
         },
         {
-          "label": "Wickets in hand",
-          "value": "6",
+          "label": "MI opener drought",
+          "value": "Since 2012",
           "tone": "red"
+        },
+        {
+          "label": "KKR wins vs MI at Wankhede",
+          "value": "2 of 12",
+          "tone": "yellow"
+        },
+        {
+          "label": "Bumrah middle-overs eco (2025)",
+          "value": "4.89",
+          "tone": "green"
         }
       ],
       "momentum": {
-        "title": "Live Momentum",
-        "label": "Live - SRH at 137/4",
-        "percent": 50
+        "title": "Pre-match Pulse",
+        "label": "Opener pressure on MI, squad puzzle on KKR",
+        "percent": 74
       }
     },
     "predictions": {
       "expert": {
-        "title": "Live Match Edge",
-        "winner": "SRH driving the current phase",
-        "subtitle": "SRH set the pace in the first innings",
-        "note": "Projected finish: 191-205"
+        "title": "Pre-match Edge",
+        "winner": "MI slight favorites at home",
+        "subtitle": "Bumrah's return and Wankhede history keep Mumbai ahead by a shade",
+        "note": "Anything below 195 can be vulnerable on this surface"
       },
       "playerForm": [
         {
-          "name": "Ishan Kishan",
-          "status": "Striker",
-          "tone": "green",
-          "detail": "74 from 36 balls"
-        },
-        {
-          "name": "Salil Arora",
-          "status": "Non-striker",
-          "tone": "orange",
-          "detail": "9 from 5 balls"
-        },
-        {
-          "name": "Suyash Sharma",
-          "status": "Bowling watch",
+          "name": "Rohit Sharma",
+          "status": "Opening tempo watch",
           "tone": "blue",
-          "detail": "2.2-0-23-0"
+          "detail": "Strike rate of 149.28 in IPL 2025"
+        },
+        {
+          "name": "Jasprit Bumrah",
+          "status": "Back and available",
+          "tone": "green",
+          "detail": "2025 middle-overs economy: 4.89"
+        },
+        {
+          "name": "Finn Allen",
+          "status": "Six-hitting wildcard",
+          "tone": "orange",
+          "detail": "50 T20 sixes in 2026 before IPL"
+        },
+        {
+          "name": "Varun Chakravarthy",
+          "status": "Matchup threat",
+          "tone": "yellow",
+          "detail": "Top-ranked T20I bowler entering the season"
         }
       ],
       "scoreLines": [
         {
-          "label": "SRH total",
-          "value": "191-205"
+          "label": "Wankhede par",
+          "value": "195-205"
         },
         {
-          "label": "RCB chase",
-          "value": "Projected finish: 191-205"
+          "label": "Narine vs Rohit",
+          "value": "10 dismissals in 26 T20 innings"
         },
         {
-          "label": "Match status",
-          "value": "Live"
+          "label": "Result swing",
+          "value": "MI need a clean start to end the opener jinx"
         },
         {
           "label": "Venue",
-          "value": "M Chinnaswamy Stadium, Bengaluru"
+          "value": "Wankhede Stadium, Mumbai"
         }
       ]
     },
     "highlights": {
       "featured": {
         "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
-        "title": "Kohli-Patidar Rebuild the RCB Finish",
-        "description": "RCB surge back after 122/3, using placement and clean boundary hitting to force SRH into reactive bowling.",
-        "likes": "26.4K",
-        "comments": "3.8K",
-        "favorites": "11.2K"
+        "title": "MI vs KKR Preview Deck",
+        "description": "Bumrah's return, KKR's pace shortage, and why 200 remains the Wankhede benchmark tonight.",
+        "likes": "51.2K",
+        "comments": "6.8K",
+        "favorites": "21.4K"
       },
       "items": [
         {
-          "title": "Toss Call Lands",
-          "description": "SRH win the toss and choose to bowl first under lights.",
-          "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
-          "icon": "🪙",
-          "time": "Pre-match"
-        },
-        {
-          "title": "Playing XIs Confirmed",
-          "description": "RCB trust Salt-Kohli at the top while SRH stack power through Kishan and Klaasen.",
-          "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
-          "icon": "📋",
-          "time": "Lineups"
-        },
-        {
-          "title": "Powerplay Surge",
-          "description": "RCB reach 63/1 in six overs and force SRH to burn through matchups early.",
+          "title": "RCB set the benchmark",
+          "description": "RCB chased 202 in 15.4 overs against SRH to open IPL 2026 with a statement",
           "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
           "icon": "⚡",
-          "time": "6.0 overs"
+          "time": "Match 1"
         },
         {
-          "title": "17th Over Burst",
-          "description": "A boundary-heavy over pushes the projection line back above 200.",
+          "title": "Bumrah available",
+          "description": "Mumbai's attack lifts immediately with Bumrah cleared for the opener",
           "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
-          "icon": "🔥",
-          "time": "17.2 overs"
+          "icon": "🎯",
+          "time": "Team News"
+        },
+        {
+          "title": "KKR pace squeeze",
+          "description": "Mustafizur, Akash Deep, Pathirana and Harshit Rana are all unavailable or ruled out",
+          "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
+          "icon": "📉",
+          "time": "Selection Watch"
+        },
+        {
+          "title": "Wankhede pressure line",
+          "description": "Preview analysis says teams want something close to 200 to feel safe tonight",
+          "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4",
+          "icon": "🏏",
+          "time": "Pitch Report"
         }
       ],
       "stats": [
         {
-          "label": "Toss",
-          "value": "SRH bowl first"
+          "label": "Opening result",
+          "value": "RCB won by 6 wickets"
         },
         {
-          "label": "Current score",
-          "value": "176/3"
+          "label": "Orange cap leader",
+          "value": "Ishan Kishan - 80"
         },
         {
-          "label": "Projected finish",
-          "value": "206"
+          "label": "Purple cap leader",
+          "value": "Jacob Duffy - 3/22"
         },
         {
-          "label": "Set batter",
-          "value": "Kohli 68*"
+          "label": "Tonight's benchmark",
+          "value": "200 around par"
         }
       ],
       "trending": [
         {
-          "title": "Toss value",
-          "value": "Hyderabad chose the chase path immediately"
+          "title": "MI opener jinx",
+          "value": "Mumbai are chasing a first season-opening win since 2012"
         },
         {
-          "title": "Set-batter control",
-          "value": "Kohli is dictating tempo into the death phase"
+          "title": "Narine matchup",
+          "value": "Rohit has fallen to Narine 10 times in T20 cricket"
         },
         {
-          "title": "Death-over pressure",
-          "value": "Harshal vs Patidar-Kohli is the swing battle"
-        },
-        {
-          "title": "Chase fear factor",
-          "value": "Head-Abhishek-Kishan keep SRH alive even at 205+"
+          "title": "Allen wildcard",
+          "value": "Few players in world cricket arrive hotter in the powerplay"
         }
       ]
     },
     "analytics": {
-      "battingRows": [],
-      "bowlingRows": [],
+      "battingRows": [
+        {
+          "name": "Ishan Kishan",
+          "runs": "80",
+          "balls": "38",
+          "strikeRate": "210.52",
+          "fours": "8",
+          "sixes": "5"
+        },
+        {
+          "name": "Virat Kohli",
+          "runs": "69",
+          "balls": "38",
+          "strikeRate": "181.57",
+          "fours": "5",
+          "sixes": "5"
+        },
+        {
+          "name": "Devdutt Padikkal",
+          "runs": "61",
+          "balls": "26",
+          "strikeRate": "234.61",
+          "fours": "7",
+          "sixes": "4"
+        },
+        {
+          "name": "Aniket Verma",
+          "runs": "43",
+          "balls": "18",
+          "strikeRate": "238.88",
+          "fours": "3",
+          "sixes": "4"
+        },
+        {
+          "name": "Heinrich Klaasen",
+          "runs": "31",
+          "balls": "22",
+          "strikeRate": "140.90",
+          "fours": "2",
+          "sixes": "1"
+        },
+        {
+          "name": "Rajat Patidar",
+          "runs": "31",
+          "balls": "12",
+          "strikeRate": "258.33",
+          "fours": "2",
+          "sixes": "3"
+        }
+      ],
+      "bowlingRows": [
+        {
+          "name": "Jacob Duffy",
+          "overs": "4",
+          "runs": "22",
+          "wickets": "3",
+          "economy": "5.50"
+        },
+        {
+          "name": "Romario Shepherd",
+          "overs": "4",
+          "runs": "54",
+          "wickets": "3",
+          "economy": "13.50"
+        },
+        {
+          "name": "David Payne",
+          "overs": "3",
+          "runs": "35",
+          "wickets": "2",
+          "economy": "11.66"
+        },
+        {
+          "name": "Bhuvneshwar Kumar",
+          "overs": "4",
+          "runs": "31",
+          "wickets": "1",
+          "economy": "7.75"
+        },
+        {
+          "name": "Suyash Sharma",
+          "overs": "3",
+          "runs": "28",
+          "wickets": "1",
+          "economy": "9.33"
+        },
+        {
+          "name": "Harsh Dubey",
+          "overs": "3",
+          "runs": "35",
+          "wickets": "1",
+          "economy": "11.66"
+        }
+      ],
       "geo": [
         {
-          "label": "Bengaluru watch parties",
+          "label": "Mumbai live base",
           "value": 34,
-          "tone": "green"
-        },
-        {
-          "label": "Hyderabad watch parties",
-          "value": 24,
-          "tone": "red"
-        },
-        {
-          "label": "Mumbai neutral traffic",
-          "value": 14,
           "tone": "blue"
         },
         {
-          "label": "Overseas viewers",
-          "value": 10,
+          "label": "Kolkata watch base",
+          "value": 29,
           "tone": "yellow"
+        },
+        {
+          "label": "Bengaluru carry-over buzz",
+          "value": 18,
+          "tone": "red"
+        },
+        {
+          "label": "Pan-India neutral traffic",
+          "value": 14,
+          "tone": "green"
+        },
+        {
+          "label": "Overseas cricket rooms",
+          "value": 5,
+          "tone": "orange"
+        }
+      ],
+      "seasonTable": [
+        {
+          "pos": 1,
+          "team": "Royal Challengers Bengaluru",
+          "code": "RCB",
+          "played": 1,
+          "won": 1,
+          "lost": 0,
+          "points": 2,
+          "nrr": "+2.907"
+        },
+        {
+          "pos": 2,
+          "team": "Sunrisers Hyderabad",
+          "code": "SRH",
+          "played": 1,
+          "won": 0,
+          "lost": 1,
+          "points": 0,
+          "nrr": "-2.907"
+        },
+        {
+          "pos": 3,
+          "team": "Chennai Super Kings",
+          "code": "CSK",
+          "played": 0,
+          "won": 0,
+          "lost": 0,
+          "points": 0,
+          "nrr": "0.000"
+        },
+        {
+          "pos": 4,
+          "team": "Delhi Capitals",
+          "code": "DC",
+          "played": 0,
+          "won": 0,
+          "lost": 0,
+          "points": 0,
+          "nrr": "0.000"
+        },
+        {
+          "pos": 5,
+          "team": "Gujarat Titans",
+          "code": "GT",
+          "played": 0,
+          "won": 0,
+          "lost": 0,
+          "points": 0,
+          "nrr": "0.000"
+        },
+        {
+          "pos": 6,
+          "team": "Kolkata Knight Riders",
+          "code": "KKR",
+          "played": 0,
+          "won": 0,
+          "lost": 0,
+          "points": 0,
+          "nrr": "0.000"
+        },
+        {
+          "pos": 7,
+          "team": "Lucknow Super Giants",
+          "code": "LSG",
+          "played": 0,
+          "won": 0,
+          "lost": 0,
+          "points": 0,
+          "nrr": "0.000"
+        },
+        {
+          "pos": 8,
+          "team": "Mumbai Indians",
+          "code": "MI",
+          "played": 0,
+          "won": 0,
+          "lost": 0,
+          "points": 0,
+          "nrr": "0.000"
+        },
+        {
+          "pos": 9,
+          "team": "Punjab Kings",
+          "code": "PBKS",
+          "played": 0,
+          "won": 0,
+          "lost": 0,
+          "points": 0,
+          "nrr": "0.000"
+        },
+        {
+          "pos": 10,
+          "team": "Rajasthan Royals",
+          "code": "RR",
+          "played": 0,
+          "won": 0,
+          "lost": 0,
+          "points": 0,
+          "nrr": "0.000"
+        }
+      ],
+      "fixtureList": [
+        {
+          "match": "Match 2",
+          "team1": "Mumbai Indians",
+          "team2": "Kolkata Knight Riders",
+          "team1Flag": "MI",
+          "team2Flag": "KKR",
+          "date": "Today · 7:30 PM IST",
+          "venue": "Wankhede Stadium, Mumbai",
+          "focus": "MI try to break the opener jinx while KKR patch together a depleted pace unit.",
+          "tag": "Today"
+        },
+        {
+          "match": "Match 3",
+          "team1": "Rajasthan Royals",
+          "team2": "Chennai Super Kings",
+          "team1Flag": "RR",
+          "team2Flag": "CSK",
+          "date": "Mar 30 · 7:30 PM IST",
+          "venue": "Guwahati",
+          "focus": "First read on RR's powerplay ceiling and CSK's spin control template.",
+          "tag": "Next"
+        },
+        {
+          "match": "Match 4",
+          "team1": "Punjab Kings",
+          "team2": "Gujarat Titans",
+          "team1Flag": "PBKS",
+          "team2Flag": "GT",
+          "date": "Mar 31 · 7:30 PM IST",
+          "venue": "New Chandigarh",
+          "focus": "Fresh middle-order combinations come under pressure early in the season.",
+          "tag": "Next"
+        },
+        {
+          "match": "Match 5",
+          "team1": "Lucknow Super Giants",
+          "team2": "Delhi Capitals",
+          "team1Flag": "LSG",
+          "team2Flag": "DC",
+          "date": "Apr 1 · 7:30 PM IST",
+          "venue": "Lucknow",
+          "focus": "Surface pace and matchup flexibility will set the tone.",
+          "tag": "Watch"
+        },
+        {
+          "match": "Match 6",
+          "team1": "Kolkata Knight Riders",
+          "team2": "Sunrisers Hyderabad",
+          "team1Flag": "KKR",
+          "team2Flag": "SRH",
+          "date": "Apr 2 · 7:30 PM IST",
+          "venue": "Eden Gardens",
+          "focus": "An early table swing spot for KKR after tonight's opener.",
+          "tag": "Early swing"
+        },
+        {
+          "match": "Match 7",
+          "team1": "Chennai Super Kings",
+          "team2": "Punjab Kings",
+          "team1Flag": "CSK",
+          "team2Flag": "PBKS",
+          "date": "Apr 3 · 7:30 PM IST",
+          "venue": "Chennai",
+          "focus": "Control-game conditions and slower-ball discipline should dominate.",
+          "tag": "Radar"
+        }
+      ],
+      "storylines": [
+        {
+          "title": "Mumbai's opener drought",
+          "detail": "MI have not won their first IPL game of a season since 2012, despite repeatedly entering as contenders.",
+          "tone": "red"
+        },
+        {
+          "title": "Bumrah changes the balance",
+          "detail": "With Bumrah available, MI reclaim their best middle-overs and death-overs controller before ball one.",
+          "tone": "green"
+        },
+        {
+          "title": "KKR rebuilt but short on pace",
+          "detail": "Mustafizur Rahman, Akash Deep, Matheesha Pathirana and Harshit Rana are unavailable or ruled out, forcing KKR into a thinner attack.",
+          "tone": "orange"
+        },
+        {
+          "title": "Wankhede is not a toss shortcut",
+          "detail": "Teams winning the toss have chased in each of the last 20 night T20s here, but only nine of those chases won.",
+          "tone": "blue"
+        },
+        {
+          "title": "RCB already raised the bar",
+          "detail": "The season opened with a 202 chase completed in 15.4 overs, so par expectations for batting groups are already inflated.",
+          "tone": "yellow"
+        }
+      ],
+      "seasonPulse": [
+        {
+          "label": "Table leader",
+          "value": "RCB",
+          "note": "2 points and +2.907 NRR after a 202 chase in Bengaluru.",
+          "tone": "green"
+        },
+        {
+          "label": "Orange cap line",
+          "value": "Ishan 80",
+          "note": "The best score of the season so far came in a losing cause for SRH.",
+          "tone": "orange"
+        },
+        {
+          "label": "Purple cap line",
+          "value": "Duffy 3/22",
+          "note": "Dream opening-night spell and Player of the Match for RCB.",
+          "tone": "blue"
+        },
+        {
+          "label": "Benchmark chase",
+          "value": "203 in 15.4",
+          "note": "RCB logged the fastest successful 200-plus chase in IPL history.",
+          "tone": "red"
         }
       ]
     }
   },
   "liveMatches": [
     {
-      "id": 1,
-      "team1": "Royal Challengers Bengaluru",
-      "team2": "Sunrisers Hyderabad",
-      "team1Flag": "RCB",
-      "team2Flag": "SRH",
-      "tournament": "IPL 2026 Opening Night",
-      "league": "LIVE",
-      "format": "T20",
-      "status": "live"
-    }
-  ],
-  "upcomingMatches": [
-    {
       "id": 2,
       "team1": "Mumbai Indians",
       "team2": "Kolkata Knight Riders",
       "team1Flag": "MI",
       "team2Flag": "KKR",
-      "date": "Mar 29, 7:30 PM · Mumbai",
-      "tournament": "IPL 2026",
-      "league": "IPL",
-      "format": "T20"
-    },
+      "tournament": "IPL 2026 Match 2",
+      "league": "TODAY",
+      "format": "T20",
+      "status": "live"
+    }
+  ],
+  "upcomingMatches": [
     {
       "id": 3,
       "team1": "Rajasthan Royals",
@@ -407,116 +800,116 @@
       "tournament": "IPL 2026",
       "league": "IPL",
       "format": "T20"
-    }
-  ],
-  "recentResults": [
-    {
-      "id": 20,
-      "team1": "Royal Challengers Bengaluru",
-      "team2": "Punjab Kings",
-      "team1Flag": "RCB",
-      "team2Flag": "PBKS",
-      "result": "RCB won by 6 runs",
-      "score": "Final 2025 · RCB 190/9 vs PBKS 184/7",
-      "league": "IPL 2025",
-      "format": "T20"
     },
     {
-      "id": 21,
-      "team1": "Punjab Kings",
-      "team2": "Royal Challengers Bengaluru",
-      "team1Flag": "PBKS",
-      "team2Flag": "RCB",
-      "result": "RCB won by 8 wickets",
-      "score": "Qualifier 1 · PBKS 101 vs RCB 106/2",
-      "league": "IPL 2025",
-      "format": "T20"
-    },
-    {
-      "id": 22,
+      "id": 6,
       "team1": "Kolkata Knight Riders",
       "team2": "Sunrisers Hyderabad",
       "team1Flag": "KKR",
       "team2Flag": "SRH",
-      "result": "SRH won by 110 runs",
-      "score": "25 May 2025 · season-end statement win",
-      "league": "IPL 2025",
+      "date": "Apr 2, 7:30 PM · Kolkata",
+      "tournament": "IPL 2026",
+      "league": "IPL",
       "format": "T20"
     },
     {
-      "id": 23,
+      "id": 7,
+      "team1": "Chennai Super Kings",
+      "team2": "Punjab Kings",
+      "team1Flag": "CSK",
+      "team2Flag": "PBKS",
+      "date": "Apr 3, 7:30 PM · Chennai",
+      "tournament": "IPL 2026",
+      "league": "IPL",
+      "format": "T20"
+    }
+  ],
+  "recentResults": [
+    {
+      "id": 1,
       "team1": "Royal Challengers Bengaluru",
       "team2": "Sunrisers Hyderabad",
       "team1Flag": "RCB",
       "team2Flag": "SRH",
-      "result": "SRH won by 42 runs",
-      "score": "23 May 2025 · last meeting before opening night",
-      "league": "IPL 2025",
+      "result": "RCB won by 6 wickets",
+      "score": "Match 1 · RCB 203/4 chased 202 in 15.4 overs",
+      "league": "IPL 2026",
       "format": "T20"
     }
   ],
-  "ballFeed": [
-    {
-      "id": "synthetic-1774711087318",
-      "type": "run",
-      "label": "+8",
-      "runs": 8,
-      "wickets": 0,
-      "legal": true,
-      "over": "14.0",
-      "timestamp": "2026-03-28T15:18:07.318Z"
-    },
-    {
-      "id": "synthetic-1774711169941",
-      "type": "run",
-      "label": "+2",
-      "runs": 2,
-      "wickets": 0,
-      "legal": true,
-      "over": "14.2",
-      "timestamp": "2026-03-28T15:19:29.941Z"
-    }
-  ],
+  "ballFeed": [],
   "timelineEvents": [
     {
-      "id": "toss-2601",
-      "title": "Toss",
-      "detail": "Royal Challengers Bengaluru Won The Toss And Elected To Field",
+      "id": "opening-benchmark",
+      "title": "Opening benchmark",
+      "detail": "RCB's 203/4 chase in 15.4 overs has pushed the season's batting expectations higher before Match 2 even begins.",
       "type": "milestone",
-      "badge": "TOSS",
+      "badge": "MATCH 1",
       "over": "Pre",
-      "timestamp": "2026-03-28T19:30:00+05:30"
+      "timestamp": "2026-03-29T17:55:00+05:30"
     },
     {
-      "id": "xi-2601",
-      "title": "Playing XIs",
-      "detail": "Royal Challengers Bengaluru and Sunrisers Hyderabad confirm their lineups for the live feed.",
+      "id": "mi-jinx",
+      "title": "MI opener jinx",
+      "detail": "Mumbai have not won their first IPL game of a season since 2012. Tonight is another chance to break it.",
+      "type": "alert",
+      "badge": "TREND",
+      "over": "Pre",
+      "timestamp": "2026-03-29T18:05:00+05:30"
+    },
+    {
+      "id": "bumrah-available",
+      "title": "Bumrah available",
+      "detail": "Jasprit Bumrah is available for selection, while MI are still without Will Jacks and Mitchell Santner.",
+      "type": "milestone",
+      "badge": "TEAM",
+      "over": "Pre",
+      "timestamp": "2026-03-29T18:12:00+05:30"
+    },
+    {
+      "id": "kkr-pace",
+      "title": "KKR pace squeeze",
+      "detail": "KKR open their campaign with a stretched pace unit after multiple injury and availability setbacks.",
+      "type": "alert",
+      "badge": "SQUAD",
+      "over": "Pre",
+      "timestamp": "2026-03-29T18:18:00+05:30"
+    },
+    {
+      "id": "probable-xi",
+      "title": "Probable XIs loaded",
+      "detail": "MI likely back Bumrah, Boult and Chahar; KKR's new-look top order is expected to start with Finn Allen and Ajinkya Rahane.",
       "type": "alert",
       "badge": "XI",
       "over": "Pre",
-      "timestamp": "2026-03-28T19:30:00+05:30"
+      "timestamp": "2026-03-29T18:26:00+05:30"
     },
     {
-      "id": "synthetic-timeline-synthetic-1774711169941",
-      "title": "Live update",
-      "detail": "Score moved to the latest live state at 14.2.",
-      "type": "run",
-      "badge": "+2",
-      "over": "14.2",
-      "timestamp": "2026-03-28T15:19:29.941Z"
+      "id": "pitch-watch",
+      "title": "Pitch and conditions",
+      "detail": "The surface should stay true for batting, dew is expected to be limited, and around 200 remains the comfort line.",
+      "type": "milestone",
+      "badge": "PITCH",
+      "over": "Pre",
+      "timestamp": "2026-03-29T18:34:00+05:30"
     }
   ],
   "notifications": [
     {
-      "id": "live-sync-2601",
-      "message": "SRH are 137/4 after 14.2 overs.",
-      "timestamp": "2026-03-28T15:19:29.943Z"
+      "id": "match-day-2",
+      "message": "IPL 2026 Match 2: MI vs KKR starts at 7:30 PM IST at Wankhede Stadium.",
+      "timestamp": "2026-03-29T10:00:00+05:30"
     },
     {
-      "id": "live-target-2601",
-      "message": "Projected finish: 191-205",
-      "timestamp": "2026-03-28T15:19:29.943Z"
+      "id": "season-benchmark",
+      "message": "Opening-night benchmark set: RCB chased 202 in 15.4 overs and moved to the top of the table.",
+      "timestamp": "2026-03-29T17:58:00+05:30"
+    },
+    {
+      "id": "bumrah-alert",
+      "message": "Bumrah is available for MI's opener; KKR arrive with a thinner pace attack than planned.",
+      "timestamp": "2026-03-29T18:14:00+05:30"
     }
   ],
-  "updatedAt": "2026-03-28T15:19:29.944Z"
+  "updatedAt": "2026-03-29T18:55:00+05:30"
 }
