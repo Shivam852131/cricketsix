@@ -2,7 +2,7 @@
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -329,6 +329,220 @@
             transition: stroke-dashoffset 0.35s;
             transform-origin: 50% 50%;
         }
+
+        :root {
+            --mobile-safe-top: env(safe-area-inset-top, 0px);
+            --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        .mobile-bottom-nav__btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            min-height: 3.4rem;
+            padding: 0.65rem 0.4rem;
+            border-radius: 1rem;
+            color: #94a3b8;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .mobile-bottom-nav__btn:hover {
+            color: #fff;
+            background: rgba(148, 163, 184, 0.08);
+        }
+
+        .mobile-bottom-nav__btn.active {
+            color: #fff;
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.92), rgba(220, 38, 38, 0.88) 52%, rgba(249, 115, 22, 0.84));
+            box-shadow: 0 12px 26px rgba(220, 38, 38, 0.24);
+        }
+
+        .mobile-bottom-nav__icon {
+            font-size: 1.05rem;
+            line-height: 1;
+        }
+
+        .mobile-bottom-nav__label {
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 1023px) {
+            body {
+                padding-bottom: calc(5.75rem + var(--mobile-safe-bottom));
+            }
+
+            nav.sticky {
+                top: 0;
+                padding-top: var(--mobile-safe-top);
+            }
+
+            #toast-container {
+                left: 0.75rem;
+                right: 0.75rem;
+                bottom: calc(6rem + var(--mobile-safe-bottom));
+            }
+
+            #toast-container > * {
+                margin-left: auto;
+                max-width: min(100%, 24rem);
+            }
+
+            #pwa-prompt {
+                left: 0.75rem;
+                right: 0.75rem;
+                bottom: calc(6rem + var(--mobile-safe-bottom));
+                max-width: none;
+            }
+
+            #advanced-menu {
+                align-items: flex-end;
+                padding: 0.75rem;
+            }
+
+            #advanced-menu > div {
+                width: 100%;
+                max-width: none;
+                max-height: calc(100vh - 1.5rem);
+                overflow-y: auto;
+                border-radius: 1.5rem;
+                padding-bottom: calc(1.5rem + var(--mobile-safe-bottom));
+            }
+
+            .mobile-bottom-nav {
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                position: fixed;
+                left: 0.75rem;
+                right: 0.75rem;
+                bottom: calc(0.75rem + var(--mobile-safe-bottom));
+                z-index: 60;
+                padding: 0.5rem;
+                border-radius: 1.4rem;
+                background: rgba(2, 6, 23, 0.88);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border: 1px solid rgba(148, 163, 184, 0.16);
+                box-shadow: 0 18px 45px rgba(2, 6, 23, 0.45);
+                transition: transform 0.2s ease, opacity 0.2s ease;
+            }
+
+            .mobile-nav-open .mobile-bottom-nav {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(1rem);
+            }
+
+            .mobile-nav-open [data-mobile-nav-page="menu"] {
+                color: #fff;
+                background: rgba(220, 38, 38, 0.22);
+            }
+        }
+
+        @media (max-width: 767px) {
+            .broadcast-chip {
+                white-space: normal;
+                text-align: center;
+                justify-content: center;
+                line-height: 1.35;
+            }
+
+            .section-kicker {
+                letter-spacing: 0.18em;
+            }
+
+            #quick-action-strip {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+
+            #quick-action-buttons {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.75rem;
+                width: 100%;
+            }
+
+            #quick-action-buttons > button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            #quick-action-strip > div:last-child {
+                width: 100%;
+                justify-content: center;
+            }
+
+            #match-details > div:first-child {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            #match-details > div:first-child > div {
+                width: 100%;
+            }
+
+            #match-details > div:first-child > div:nth-child(2) {
+                order: -1;
+            }
+
+            #timeline-live-list .rounded-xl > div:first-child {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            #video-container {
+                width: 100%;
+                min-height: 0 !important;
+            }
+
+            #mobile-stream-controls {
+                opacity: 1;
+                padding: 0.75rem;
+            }
+
+            #mobile-stream-controls > div {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 639px) {
+            #live-score-display > .grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            #live-score-display > .grid:last-child {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 479px) {
+            #quick-action-buttons {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            #live-score-display > .grid:last-child {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .broadcast-panel,
+            .control-hero,
+            .card-gradient {
+                border-radius: 1.25rem;
+            }
+        }
     </style>
 </head>
 <body class="h-full gradient-bg text-white overflow-auto">
@@ -371,6 +585,7 @@
                     <button onclick="showPage('stats')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Stats</button>
                     <button onclick="showPage('predictions')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Predictions</button>
                     <button onclick="showPage('scenario')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Scenario Lab</button>
+                    <button onclick="showPage('pressure')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Pressure Center</button>
                     <button onclick="showPage('highlights')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Highlights</button>
                     <button onclick="showPage('analytics')" class="nav-btn px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-all font-semibold text-sm">Analytics</button>
                     
@@ -414,6 +629,7 @@
                 <button onclick="showPage('stats'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">📊 Stats</button>
                 <button onclick="showPage('predictions'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">🎯 Predictions</button>
                 <button onclick="showPage('scenario'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">🧪 Scenario Lab</button>
+                <button onclick="showPage('pressure'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">🎛️ Pressure Center</button>
                 <button onclick="showPage('highlights'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">🎬 Highlights</button>
                 <button onclick="showPage('analytics'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700/50 transition-all font-semibold">📈 Analytics</button>
                 <div class="flex items-center justify-between pt-2 border-t border-slate-700/50">
@@ -425,25 +641,29 @@
     </nav>
 
     <script>
-        function toggleMobileMenu() {
+        function setMobileMenuState(isOpen) {
             const menu = document.getElementById('mobile-menu');
-            const menuBtn = document.getElementById('mobile-menu-btn');
             const menuIcon = document.getElementById('menu-icon');
             const closeIcon = document.getElementById('close-icon');
-            
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                menuIcon.classList.add('hidden');
-                closeIcon.classList.remove('hidden');
-                document.body.classList.add('mobile-nav-open');
-            } else {
-                menu.classList.add('hidden');
-                menuIcon.classList.remove('hidden');
-                closeIcon.classList.add('hidden');
-                document.body.classList.remove('mobile-nav-open');
-            }
+            if (!menu || !menuIcon || !closeIcon) return;
+
+            menu.classList.toggle('hidden', !isOpen);
+            menuIcon.classList.toggle('hidden', isOpen);
+            closeIcon.classList.toggle('hidden', !isOpen);
+            document.body.classList.toggle('mobile-nav-open', isOpen);
         }
-        
+
+        function toggleMobileMenu(forceState) {
+            const menu = document.getElementById('mobile-menu');
+            if (!menu) return;
+            const isOpen = typeof forceState === 'boolean' ? forceState : menu.classList.contains('hidden');
+            setMobileMenuState(isOpen);
+        }
+
+        function closeMobileMenu() {
+            setMobileMenuState(false);
+        }
+            
         // Sync last updated between desktop and mobile
         const lastUpdatedEl = document.getElementById('last-updated');
         const lastUpdatedMobileEl = document.getElementById('last-updated-mobile');
@@ -647,12 +867,13 @@
         </div>
 
         <!-- Quick Action Strip -->
-        <div class="max-w-7xl mx-auto px-4 py-8 flex flex-wrap gap-3 justify-between items-center">
-                <div class="flex gap-3 flex-wrap">
+        <div id="quick-action-strip" class="max-w-7xl mx-auto px-4 py-8 flex flex-wrap gap-3 justify-between items-center">
+                <div id="quick-action-buttons" class="flex gap-3 flex-wrap">
                     <button onclick="showPage('stats')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>📊</span> <span id="quick-action-scorecard">Full Scorecard</span></button>
                     <button onclick="showPage('analytics')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>📈</span> <span id="quick-action-analytics">Analytics</span></button>
                     <button onclick="showPage('highlights')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>🎬</span> <span id="quick-action-highlights">Highlights</span></button>
                     <button onclick="showPage('scenario')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>🧪</span> Scenario Lab</button>
+                    <button onclick="showPage('pressure')" class="bg-slate-800 hover:bg-slate-700 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>🎛️</span> Pressure Center</button>
                     <button onclick="shareMatch()" class="bg-blue-600/80 hover:bg-blue-600 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>📤</span> Share</button>
                     <button onclick="toggleVoiceControl()" class="bg-purple-600/80 hover:bg-purple-600 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2" title="Voice Control"><span>🎤</span> Voice</button>
                     <button onclick="showAdvancedMenu()" class="bg-slate-700/80 hover:bg-slate-600 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"><span>⚡</span> More</button>
@@ -842,7 +1063,7 @@
                 <!-- Video Player Section -->
                 <div class="lg:col-span-2 space-y-4 sm:space-y-6">
                     <div class="card-gradient rounded-2xl overflow-hidden border border-slate-700">
-                        <div class="video-container relative" id="video-container" style="aspect-ratio: 16/9; min-height: 300px;">
+                        <div class="video-container relative" id="video-container" style="aspect-ratio: 16/9;">
                             <!-- No Stream Message -->
                             <div id="no-stream-message" class="absolute inset-0 flex items-center justify-center flex-col gap-3 sm:gap-4 bg-slate-900 z-10">
                                 <span class="text-5xl sm:text-6xl">📺</span>
@@ -942,7 +1163,7 @@
                             <div class="p-3 bg-slate-800 rounded-lg"><div class="text-xs text-slate-400 mb-1 uppercase tracking-wider">Pressure</div><div id="ai-pressure" class="text-lg font-semibold text-red-300">-</div></div>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                             <div class="p-3 bg-slate-800 rounded-lg">
                                 <div class="text-xs text-slate-400 mb-2 uppercase tracking-wider">🏏 Projection Range</div>
                                 <div id="ai-range" class="text-xl font-bold text-emerald-400">-</div>
@@ -959,7 +1180,7 @@
 
                         <div class="p-4 bg-gradient-to-r from-purple-900/30 to-slate-900 rounded-lg mb-4">
                             <div class="text-xs text-purple-400 uppercase tracking-wider mb-2">⭐ Player Spotlight</div>
-                            <div class="grid grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div><span class="text-slate-400 text-sm">Name:</span> <span id="ai-player-name" class="text-white font-semibold">-</span></div>
                                 <div><span class="text-slate-400 text-sm">Impact:</span> <span id="ai-player-impact" class="text-white">-</span></div>
                                 <div><span class="text-slate-400 text-sm">Form:</span> <span id="ai-player-form" class="text-green-300">-</span></div>
@@ -971,7 +1192,7 @@
                             <p id="ai-turning-point" class="text-slate-200">-</p>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div class="p-4 bg-slate-800 rounded-lg">
                                 <div class="text-xs text-slate-400 mb-2 uppercase tracking-wider">🎯 Batting Strategy</div>
                                 <p id="ai-batting" class="text-sm text-slate-200 mb-2">-</p>
@@ -987,7 +1208,7 @@
                             <div id="ai-game-changers" class="flex flex-wrap gap-2"></div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="p-4 bg-slate-800 rounded-lg">
                                 <div class="text-xs text-slate-400 mb-2 uppercase tracking-wider">💡 Key Insights</div>
                                 <ul id="ai-signals" class="space-y-1 text-sm text-slate-300"></ul>
@@ -1307,6 +1528,113 @@
         </div>
     </div>
 
+    <!-- Pressure Center Page -->
+    <div id="pressure-page" class="page hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="control-hero p-5 sm:p-6 mb-6">
+                <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
+                    <div class="space-y-4 xl:max-w-3xl">
+                        <div>
+                            <p class="section-kicker">Live Pressure Engine</p>
+                            <h2 id="pressure-title" class="font-display text-3xl md:text-4xl font-bold mt-2">Pressure Center</h2>
+                            <p id="pressure-summary" class="text-slate-300 mt-3 text-base leading-7">Real-time pressure windows, burst targets, and swing lanes will load here.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <span id="pressure-mode" class="broadcast-chip">SYNCING</span>
+                            <span id="pressure-phase" class="broadcast-chip">Awaiting live state</span>
+                            <span id="pressure-control-span" class="broadcast-chip">Loading windows</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 xl:w-[520px]">
+                        <div class="metric-card">
+                            <span>Pressure Index</span>
+                            <strong id="pressure-index">--</strong>
+                            <small id="pressure-index-note">Pressure score will appear here</small>
+                        </div>
+                        <div class="metric-card">
+                            <span>Win Swing</span>
+                            <strong id="pressure-win">--</strong>
+                            <small id="pressure-win-note">Live swing model</small>
+                        </div>
+                        <div class="metric-card">
+                            <span>Benchmark Pace</span>
+                            <strong id="pressure-benchmark">--</strong>
+                            <small id="pressure-benchmark-note">Current rate vs benchmark</small>
+                        </div>
+                        <div class="metric-card">
+                            <span>Wickets In Hand</span>
+                            <strong id="pressure-wickets">--</strong>
+                            <small id="pressure-wickets-note">Overs remaining</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid xl:grid-cols-[1.05fr_0.95fr] gap-6">
+                <div class="space-y-6">
+                    <div class="card-gradient rounded-2xl p-6 border border-slate-700">
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <div>
+                                <p class="section-kicker">Pressure Lanes</p>
+                                <h3 class="font-display text-xl font-bold mt-2">Pick the burst you can actually hold</h3>
+                            </div>
+                        </div>
+                        <div id="pressure-lanes" class="space-y-4"></div>
+                    </div>
+
+                    <div class="card-gradient rounded-2xl p-6 border border-slate-700">
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <div>
+                                <p class="section-kicker">Trigger Board</p>
+                                <h3 class="font-display text-xl font-bold mt-2">The pressure levers right now</h3>
+                            </div>
+                        </div>
+                        <div id="pressure-levers" class="grid md:grid-cols-2 gap-4"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="card-gradient rounded-2xl p-6 border border-slate-700">
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <div>
+                                <p class="section-kicker">Pressure Windows</p>
+                                <h3 class="font-display text-xl font-bold mt-2">Where the match can flip</h3>
+                            </div>
+                        </div>
+                        <div id="pressure-windows" class="space-y-4"></div>
+                    </div>
+
+                    <div class="control-hero p-5 sm:p-6">
+                        <div>
+                            <p class="section-kicker">AI Control Note</p>
+                            <h3 class="font-display text-xl font-bold mt-2">Next Ball Focus</h3>
+                            <p id="pressure-focus" class="text-slate-200 mt-4 leading-7">Waiting for the pressure engine to sync the next-over plan.</p>
+                        </div>
+
+                        <div class="grid sm:grid-cols-3 gap-3 mt-5">
+                            <div class="metric-card">
+                                <span>Trend</span>
+                                <strong id="pressure-trend">-</strong>
+                                <small>Live scoring trend</small>
+                            </div>
+                            <div class="metric-card">
+                                <span>Urgency</span>
+                                <strong id="pressure-urgency">-</strong>
+                                <small>Current alert level</small>
+                            </div>
+                            <div class="metric-card">
+                                <span>Recent Balls</span>
+                                <strong id="pressure-recent">-</strong>
+                                <small>Latest pressure pattern</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Highlights Page -->
     <div id="highlights-page" class="page hidden">
         <div class="max-w-7xl mx-auto px-4 py-8">
@@ -1315,13 +1643,13 @@
                 <!-- Highlights Gallery -->
                 <div class="lg:col-span-2 space-y-6">
                     <div class="card-gradient rounded-2xl overflow-hidden border border-slate-700">
-                        <div class="relative h-96 bg-slate-900">
+                        <div class="relative h-64 sm:h-80 lg:h-96 bg-slate-900">
                             <video id="highlight-video" class="w-full h-full object-cover" controls src="https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4"></video>
                         </div>
                         <div class="p-6">
                             <h3 id="highlight-title" class="font-display text-2xl font-bold mb-2">Amazing Catch!</h3>
                             <p id="highlight-desc" class="text-slate-400 mb-4">Watch this incredible moment from the match</p>
-                            <div class="flex items-center gap-4"><span id="highlight-likes" class="text-orange-400">👍 2.4K</span><span id="highlight-comments" class="text-blue-400">💬 342</span><span id="highlight-favorites" class="text-red-400">❤️ 1.2K</span></div>
+                            <div class="flex flex-wrap items-center gap-4"><span id="highlight-likes" class="text-orange-400">👍 2.4K</span><span id="highlight-comments" class="text-blue-400">💬 342</span><span id="highlight-favorites" class="text-red-400">❤️ 1.2K</span></div>
                         </div>
                     </div>
                     <!-- Highlights List -->
@@ -1982,6 +2310,29 @@
 </script>
 </div>
 
+<nav id="mobile-bottom-nav" class="mobile-bottom-nav lg:hidden" aria-label="Mobile quick navigation">
+    <button type="button" class="mobile-bottom-nav__btn" data-mobile-nav-page="home" onclick="showPage('home')">
+        <span class="mobile-bottom-nav__icon">🏠</span>
+        <span class="mobile-bottom-nav__label">Home</span>
+    </button>
+    <button type="button" class="mobile-bottom-nav__btn" data-mobile-nav-page="live" onclick="showPage('live')">
+        <span class="mobile-bottom-nav__icon">🔴</span>
+        <span class="mobile-bottom-nav__label">Live</span>
+    </button>
+    <button type="button" class="mobile-bottom-nav__btn" data-mobile-nav-page="stats" onclick="showPage('stats')">
+        <span class="mobile-bottom-nav__icon">📊</span>
+        <span class="mobile-bottom-nav__label">Stats</span>
+    </button>
+    <button type="button" class="mobile-bottom-nav__btn" data-mobile-nav-page="scenario" onclick="showPage('scenario')">
+        <span class="mobile-bottom-nav__icon">🧪</span>
+        <span class="mobile-bottom-nav__label">Lab</span>
+    </button>
+    <button type="button" class="mobile-bottom-nav__btn" data-mobile-nav-page="menu" onclick="toggleMobileMenu()">
+        <span class="mobile-bottom-nav__icon">☰</span>
+        <span class="mobile-bottom-nav__label">Menu</span>
+    </button>
+</nav>
+
 <!-- Optional: Add a minimal footer or remove entirely -->
 
 <!-- Toast -->
@@ -2047,6 +2398,7 @@
 </div>
 
 <script src="app.js?v=20260312"></script>
+<script src="responsive.js"></script>
 
 <!-- Suppress YouTube compute-pressure warning -->
 <script>

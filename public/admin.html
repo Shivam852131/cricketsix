@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -25,6 +28,7 @@
                 radial-gradient(circle at 80% 0%, rgba(249, 115, 22, 0.12), transparent 18%),
                 linear-gradient(180deg, #020617 0%, #0f172a 46%, #111827 100%);
             color: #e2e8f0;
+            overflow-x: hidden;
         }
         .glass {
             background: rgba(15, 23, 42, 0.84);
@@ -136,6 +140,375 @@
         .status-dot.is-live { background: #22c55e; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45); animation: pulse 2s infinite; }
         .status-dot.is-warn { background: #f59e0b; }
         .status-dot.is-offline { background: #64748b; }
+        #admin-tabs {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-snap-type: x proximity;
+        }
+        #admin-tabs::-webkit-scrollbar { display: none; }
+        #admin-tabs .tab-btn {
+            scroll-snap-align: start;
+            flex: 0 0 auto;
+        }
+        @media (max-width: 1023px) {
+            #admin-dashboard header .max-w-7xl,
+            #admin-dashboard nav .max-w-7xl,
+            #admin-dashboard main.max-w-7xl {
+                width: 100%;
+                max-width: none;
+            }
+            .glass,
+            .control-hero {
+                border-radius: 1.25rem;
+            }
+        }
+        @media (max-width: 767px) {
+            .broadcast-chip {
+                white-space: normal;
+                text-align: center;
+                justify-content: center;
+                line-height: 1.35;
+            }
+            .section-kicker {
+                letter-spacing: 0.18em;
+            }
+            #admin-dashboard main.max-w-7xl {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+                padding-top: 1.25rem;
+                padding-bottom: 1.5rem;
+            }
+            #admin-dashboard [class*=" grid-cols-2"],
+            #admin-dashboard [class*=" grid-cols-3"],
+            #admin-dashboard [class*=" grid-cols-4"],
+            #admin-dashboard [class*=" grid-cols-5"],
+            #admin-dashboard [class*=" grid-cols-8"],
+            #admin-dashboard [class^="grid-cols-2"],
+            #admin-dashboard [class^="grid-cols-3"],
+            #admin-dashboard [class^="grid-cols-4"],
+            #admin-dashboard [class^="grid-cols-5"],
+            #admin-dashboard [class^="grid-cols-8"] {
+                grid-template-columns: minmax(0, 1fr);
+            }
+            #admin-dashboard .command-strip,
+            #admin-dashboard .flex.gap-2,
+            #admin-dashboard .flex.gap-3,
+            #admin-dashboard .flex.items-center.gap-4,
+            #admin-dashboard .flex.items-center.justify-between,
+            #admin-dashboard .flex.justify-between.items-center {
+                flex-wrap: wrap;
+            }
+            #tab-dashboard > .glass > .flex,
+            #tab-stream > .glass > .flex.items-center.justify-between,
+            #tab-score .bg-gradient-to-r.from-slate-800.to-slate-900 > .flex.items-center.justify-between.mb-4,
+            #tab-content .glass > .flex.items-center.justify-between {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            #tab-score #score-display {
+                font-size: 2.25rem;
+            }
+            #tab-score .grid.grid-cols-4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        
+        /* Advanced Mobile Responsive Styles */
+        @media screen and (max-width: 768px) {
+            /* Typography scaling */
+            html {
+                font-size: 14px;
+            }
+            
+            /* Login screen mobile */
+            #login-screen .glass {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            /* Dashboard mobile layout */
+            #admin-dashboard {
+                padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+            }
+            
+            /* Tab navigation mobile */
+            #admin-tabs {
+                padding: 0.5rem 0;
+                gap: 0.5rem;
+            }
+            
+            .tab-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Cards mobile */
+            .glass, .control-hero {
+                margin: 0.5rem 0;
+                padding: 1rem;
+            }
+            
+            /* Form elements mobile */
+            input, select, textarea {
+                font-size: 16px; /* Prevents iOS zoom */
+                min-height: 44px;
+            }
+            
+            /* Button mobile */
+            button {
+                min-height: 44px;
+                padding: 0.75rem 1rem;
+            }
+            
+            /* Touch optimization */
+            * {
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            /* Safe area support */
+            .safe-area-inset {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
+        }
+        
+        /* Tablet responsive */
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
+            .grid-cols-2, .grid-cols-3, .grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        
+        /* Mobile bottom navigation */
+        .mobile-admin-nav {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-admin-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(2, 6, 23, 0.95);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(148, 163, 184, 0.16);
+                z-index: 1000;
+                padding: 0.5rem;
+                padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+                justify-content: space-around;
+            }
+            
+            .mobile-admin-nav button {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.25rem;
+                min-height: 3rem;
+                padding: 0.5rem;
+                border-radius: 0.75rem;
+                font-size: 0.625rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #94a3b8;
+                transition: all 0.2s;
+                background: transparent;
+                border: none;
+            }
+            
+            .mobile-admin-nav button.active {
+                color: #fff;
+                background: linear-gradient(135deg, rgba(127, 29, 29, 0.9), rgba(220, 38, 38, 0.9));
+            }
+            
+            .mobile-admin-nav button span:first-child {
+                font-size: 1.25rem;
+            }
+        }
+        
+        /* Horizontal scroll for tabs on mobile */
+        @media (max-width: 768px) {
+            #admin-tabs {
+                overflow-x: auto;
+                scroll-snap-type: x proximity;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            #admin-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            
+            #admin-tabs .tab-btn {
+                scroll-snap-align: start;
+                flex: 0 0 auto;
+            }
+        }
+        
+        /* Mobile drawer for settings */
+        .mobile-drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(2, 6, 23, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 1.5rem 1.5rem 0 0;
+            z-index: 1001;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .mobile-drawer.active {
+            transform: translateY(0);
+        }
+        
+        .mobile-drawer-handle {
+            width: 40px;
+            height: 4px;
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 2px;
+            margin: 0.75rem auto;
+        }
+        
+        /* Responsive typography */
+        @media (max-width: 480px) {
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.25rem; }
+            h3 { font-size: 1.125rem; }
+            h4 { font-size: 1rem; }
+            p { font-size: 0.875rem; }
+        }
+        
+        /* Touch friendly tables */
+        @media (max-width: 768px) {
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            table {
+                min-width: 600px;
+            }
+        }
+        
+        /* Mobile card view for complex data */
+        @media (max-width: 768px) {
+            .card-mobile-stack {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+        
+        /* Pull to refresh indicator */
+        .pull-to-refresh {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pull-indicator {
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-slate-800);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .pulling .pull-indicator {
+            transform: translateY(50px);
+        }
+        
+        /* Accessibility */
+        .skip-link {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            background: #ef4444;
+            color: white;
+            z-index: 10000;
+            transition: top 0.3s;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .skip-link:focus {
+            top: 1rem;
+        }
+        
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        /* Performance optimizations */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
+            .glass, .control-hero {
+                border: 2px solid white;
+            }
+            
+            button, input, select {
+                border: 2px solid white;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .mobile-admin-nav, .no-print {
+                display: none !important;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            
+            .glass, .control-hero {
+                background: white !important;
+                border: 1px solid #000 !important;
+                box-shadow: none !important;
+            }
+        }
     </style>
 </head>
 <body class="text-white">
@@ -168,15 +541,15 @@
     <div id="admin-dashboard" class="hidden">
         <!-- Header -->
         <header class="glass border-b border-slate-700 sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-4">
+            <div class="max-w-7xl mx-auto w-full px-3 sm:px-4 py-3 sm:py-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+                <div class="w-full min-w-0 flex items-center gap-3 sm:gap-4">
                     <span class="text-3xl">🏏</span>
                     <div>
                         <h1 class="text-xl font-bold">CricketLive Pro <span class="text-red-500">Admin</span></h1>
                         <p class="text-xs text-slate-400">Broadcast Command Center</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="w-full sm:w-auto flex items-center gap-3 sm:gap-4 justify-between sm:justify-end flex-wrap">
                     <div class="flex items-center gap-2 text-green-400">
                         <span class="w-2 h-2 bg-green-400 rounded-full pulse-live"></span>
                         <span class="text-sm">Connected</span>
@@ -188,10 +561,11 @@
 
         <!-- Navigation Tabs -->
         <nav class="glass border-b border-slate-700">
-            <div class="max-w-7xl mx-auto px-4">
+            <div class="max-w-7xl mx-auto w-full px-3 sm:px-4">
                 <div class="flex gap-2 overflow-x-auto py-2" id="admin-tabs">
                     <button onclick="switchTab('dashboard')" class="tab-btn active px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="dashboard">📊 Control Room</button>
                     <button onclick="switchTab('ai')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="ai">🤖 AI Desk</button>
+                    <button onclick="switchTab('pressure')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="pressure">🎛️ Pressure Desk</button>
                     <button onclick="switchTab('stream')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="stream">📡 Broadcast</button>
                     <button onclick="switchTab('match')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="match">🏏 Match Ops</button>
                     <button onclick="switchTab('score')" class="tab-btn px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all" data-tab="score">⚡ Live Score</button>
@@ -203,17 +577,17 @@
         </nav>
 
         <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 py-8">
+        <main class="max-w-7xl mx-auto w-full px-3 sm:px-4 py-6 sm:py-8">
             <!-- Dashboard Tab -->
             <div id="tab-dashboard" class="tab-content space-y-6">
                 <!-- Connection Status -->
                 <div class="glass rounded-xl p-4">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div class="flex items-center gap-3">
                             <span id="connection-indicator" class="status-dot is-live"></span>
                             <span class="font-semibold">Connection Status</span>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex flex-wrap gap-2">
                             <button onclick="syncToUser()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
                                 🔄 Sync to User
                             </button>
@@ -421,6 +795,114 @@
                         <button onclick="publishAiBulletin('both')" class="accent-gradient px-4 py-2 rounded-lg font-semibold">📢 Push Both</button>
                     </div>
                     <p id="admin-ai-status" class="text-sm text-slate-400 mt-3"></p>
+                </div>
+            </div>
+
+            <!-- Pressure Tab -->
+            <div id="tab-pressure" class="tab-content hidden space-y-6">
+                <div class="glass rounded-xl p-6">
+                    <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="font-bold text-xl">🎛️ Live Pressure Desk</h3>
+                            <p class="text-sm text-slate-400 mt-1">Burst targets, swing lanes, and publish-ready match pressure alerts built from live score, fan split, and recent ball context.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="refreshPressureDesk()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm font-semibold">🔄 Refresh Desk</button>
+                            <button onclick="publishPressureBulletin('notification')" class="bg-blue-600/20 border border-blue-600 text-blue-300 px-4 py-2 rounded-lg text-sm font-semibold">📱 Push Alert</button>
+                            <button onclick="publishPressureBulletin('timeline')" class="bg-amber-600/20 border border-amber-600 text-amber-300 px-4 py-2 rounded-lg text-sm font-semibold">🕒 Add Timeline Event</button>
+                            <button onclick="publishPressureBulletin('both')" class="accent-gradient px-4 py-2 rounded-lg text-sm font-semibold">📢 Push Both</button>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-900 rounded-lg border border-slate-700">
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span id="admin-pressure-mode" class="broadcast-chip">SYNCING</span>
+                            <span id="admin-pressure-phase" class="broadcast-chip">Awaiting live state</span>
+                            <span id="admin-pressure-window" class="broadcast-chip">Loading windows</span>
+                        </div>
+                        <p id="admin-pressure-summary" class="text-slate-200 leading-7">Pressure desk is syncing with the match state.</p>
+                        <p id="admin-pressure-status" class="text-sm text-slate-500 mt-3">Waiting for pressure data.</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-4 gap-4">
+                    <div class="glass rounded-xl p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500 mb-2">Pressure Index</div>
+                        <div id="admin-pressure-index" class="text-3xl font-bold text-white">--</div>
+                        <div id="admin-pressure-index-note" class="text-sm text-slate-400 mt-2">Pressure score will appear here</div>
+                    </div>
+                    <div class="glass rounded-xl p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500 mb-2">Win Swing</div>
+                        <div id="admin-pressure-swing" class="text-2xl font-bold text-white">--</div>
+                        <div id="admin-pressure-swing-note" class="text-sm text-slate-400 mt-2">Live swing model</div>
+                    </div>
+                    <div class="glass rounded-xl p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500 mb-2">Benchmark Pace</div>
+                        <div id="admin-pressure-pace" class="text-2xl font-bold text-white">--</div>
+                        <div id="admin-pressure-pace-note" class="text-sm text-slate-400 mt-2">Current pace vs benchmark</div>
+                    </div>
+                    <div class="glass rounded-xl p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500 mb-2">Wickets In Hand</div>
+                        <div id="admin-pressure-wickets" class="text-3xl font-bold text-white">--</div>
+                        <div id="admin-pressure-wickets-note" class="text-sm text-slate-400 mt-2">Overs remaining</div>
+                    </div>
+                </div>
+
+                <div class="grid xl:grid-cols-[1.05fr_0.95fr] gap-6">
+                    <div class="glass rounded-xl p-6">
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <div>
+                                <h4 class="font-bold text-lg">Pressure Lanes</h4>
+                                <p class="text-sm text-slate-400 mt-1">The safest, balanced, and upside bursts the innings can support right now.</p>
+                            </div>
+                        </div>
+                        <div id="admin-pressure-lanes" class="space-y-4"></div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="glass rounded-xl p-6">
+                            <div class="flex items-center justify-between gap-3 mb-4">
+                                <div>
+                                    <h4 class="font-bold text-lg">Pressure Windows</h4>
+                                    <p class="text-sm text-slate-400 mt-1">Which phase of the finish can swing the match fastest.</p>
+                                </div>
+                            </div>
+                            <div id="admin-pressure-windows" class="space-y-4"></div>
+                        </div>
+
+                        <div class="glass rounded-xl p-6">
+                            <div class="flex items-center justify-between gap-3 mb-4">
+                                <div>
+                                    <h4 class="font-bold text-lg">Trigger Board</h4>
+                                    <p class="text-sm text-slate-400 mt-1">Broadcast-ready levers for pressure calls, overlays, and alerts.</p>
+                                </div>
+                            </div>
+                            <div id="admin-pressure-levers" class="grid sm:grid-cols-2 gap-4"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-xl p-6">
+                    <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
+                        <div>
+                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500 mb-2">Next Ball Focus</div>
+                            <p id="admin-pressure-focus" class="text-slate-200 leading-7">Waiting for the next-over plan.</p>
+                        </div>
+                        <div class="grid sm:grid-cols-3 gap-3">
+                            <div class="p-4 bg-slate-900 rounded-lg border border-slate-800">
+                                <div class="text-xs uppercase tracking-[0.18em] text-slate-500 mb-2">Trend</div>
+                                <div id="admin-pressure-trend" class="text-lg font-bold text-white">-</div>
+                            </div>
+                            <div class="p-4 bg-slate-900 rounded-lg border border-slate-800">
+                                <div class="text-xs uppercase tracking-[0.18em] text-slate-500 mb-2">Urgency</div>
+                                <div id="admin-pressure-urgency" class="text-lg font-bold text-white">-</div>
+                            </div>
+                            <div class="p-4 bg-slate-900 rounded-lg border border-slate-800">
+                                <div class="text-xs uppercase tracking-[0.18em] text-slate-500 mb-2">Recent Balls</div>
+                                <div id="admin-pressure-recent" class="text-sm font-semibold text-white leading-6">-</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1741,12 +2223,14 @@
     </div>
 
     <script src="/admin-sync.js"></script>
+    <script src="responsive.js"></script>
     <script>
         const API_BASE = '/api';
         let adminKey = '';
         let realtimeEvents = null;
         let viewerHistory = [];
         let currentAiBriefing = null;
+        let currentPressureDesk = null;
 
         // Login
         document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -1781,7 +2265,7 @@
 
         function getRequestedAdminTab() {
             const value = window.location.hash.replace('#', '').trim().toLowerCase();
-            const allowedTabs = new Set(['dashboard', 'ai', 'stream', 'match', 'score', 'poll', 'chat', 'content']);
+            const allowedTabs = new Set(['dashboard', 'ai', 'pressure', 'stream', 'match', 'score', 'poll', 'chat', 'content']);
             return allowedTabs.has(value) ? value : 'dashboard';
         }
 
@@ -1797,6 +2281,8 @@
             }
             if (tab === 'ai') {
                 void refreshAiBriefing();
+            } else if (tab === 'pressure') {
+                void refreshPressureDesk();
             }
         }
 
@@ -2428,6 +2914,7 @@
             // Store for realtime
             window.currentState = state;
             updateDashboard();
+            void refreshPressureDesk();
         }
 
         async function refreshAiBriefing() {
@@ -2473,6 +2960,199 @@
             } catch (error) {
                 console.error('Failed to publish AI bulletin:', error);
                 setText('admin-ai-status', 'Failed to publish AI bulletin.');
+            }
+        }
+
+        function getPressureDeskToneClass(tone) {
+            switch (String(tone || '').toLowerCase()) {
+                case 'green':
+                case 'emerald':
+                    return 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20';
+                case 'orange':
+                case 'amber':
+                    return 'bg-orange-500/15 text-orange-300 border border-orange-500/20';
+                case 'blue':
+                case 'sky':
+                    return 'bg-sky-500/15 text-sky-300 border border-sky-500/20';
+                case 'rose':
+                case 'red':
+                    return 'bg-rose-500/15 text-rose-300 border border-rose-500/20';
+                default:
+                    return 'bg-slate-700 text-slate-200 border border-slate-600';
+            }
+        }
+
+        function getPressureDeskLaneToneClass(id) {
+            switch (String(id || '').toLowerCase()) {
+                case 'stabilize':
+                    return getPressureDeskToneClass('emerald');
+                case 'launch':
+                    return getPressureDeskToneClass('sky');
+                default:
+                    return getPressureDeskToneClass('orange');
+            }
+        }
+
+        function renderPressureDesk(pressure = currentPressureDesk) {
+            const lanes = document.getElementById('admin-pressure-lanes');
+            const levers = document.getElementById('admin-pressure-levers');
+            const windows = document.getElementById('admin-pressure-windows');
+
+            if (!pressure) {
+                setText('admin-pressure-mode', 'SYNCING');
+                setText('admin-pressure-phase', 'Awaiting live state');
+                setText('admin-pressure-window', 'Loading windows');
+                setText('admin-pressure-summary', 'Pressure desk is syncing with the match state.');
+                setText('admin-pressure-status', 'Waiting for pressure data.');
+                setText('admin-pressure-index', '--');
+                setText('admin-pressure-index-note', 'Pressure score will appear here');
+                setText('admin-pressure-swing', '--');
+                setText('admin-pressure-swing-note', 'Live swing model');
+                setText('admin-pressure-pace', '--');
+                setText('admin-pressure-pace-note', 'Current pace vs benchmark');
+                setText('admin-pressure-wickets', '--');
+                setText('admin-pressure-wickets-note', 'Overs remaining');
+                setText('admin-pressure-focus', 'Waiting for the next-over plan.');
+                setText('admin-pressure-trend', '-');
+                setText('admin-pressure-urgency', '-');
+                setText('admin-pressure-recent', '-');
+                if (lanes) lanes.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">Pressure lanes will appear once live match data is available.</div>';
+                if (levers) levers.innerHTML = '';
+                if (windows) windows.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">Pressure windows are loading.</div>';
+                return;
+            }
+
+            const paceMargin = Number(pressure.pace && pressure.pace.margin);
+            const paceMarginLabel = Number.isFinite(paceMargin)
+                ? `${paceMargin > 0 ? '+' : ''}${paceMargin.toFixed(2)} RR`
+                : '--';
+            const recentBalls = pressure.assistant && Array.isArray(pressure.assistant.recentBalls) && pressure.assistant.recentBalls.length
+                ? pressure.assistant.recentBalls.join(' ')
+                : 'No recent balls logged';
+
+            setText('admin-pressure-mode', String(pressure.pressureLabel || 'Live').toUpperCase());
+            setText('admin-pressure-phase', pressure.phase || 'Live');
+            setText('admin-pressure-window', pressure.controlSpanLabel || 'Live window');
+            setText('admin-pressure-summary', pressure.summary || 'Pressure summary unavailable.');
+            setText('admin-pressure-index', String(pressure.pressureIndex || 0));
+            setText('admin-pressure-index-note', pressure.scoreline || 'Live score');
+            setText('admin-pressure-swing', pressure.winSwing && pressure.winSwing.label ? pressure.winSwing.label : 'Match balanced');
+            setText('admin-pressure-swing-note', pressure.winSwing ? `${pressure.winSwing.team1Percent}% vs ${pressure.winSwing.team2Percent}%` : 'Win swing unavailable');
+            setText('admin-pressure-pace', `${Number(pressure.pace?.currentRate || 0).toFixed(2)} vs ${Number(pressure.pace?.benchmarkRate || 0).toFixed(2)}`);
+            setText('admin-pressure-pace-note', `${pressure.pace?.benchmarkLabel || 'Benchmark'} · ${paceMarginLabel}`);
+            setText('admin-pressure-wickets', String(pressure.wicketsInHand || 0));
+            setText('admin-pressure-wickets-note', `${pressure.oversRemaining || '0.0'} overs left`);
+            setText('admin-pressure-focus', pressure.focusLine || 'Pressure focus unavailable.');
+            setText('admin-pressure-trend', pressure.assistant?.trendLabel || 'Live');
+            setText('admin-pressure-urgency', pressure.assistant?.urgency || 'Steady');
+            setText('admin-pressure-recent', recentBalls);
+            setText('admin-pressure-status', `Updated ${new Date().toLocaleTimeString()}`);
+
+            if (lanes) {
+                lanes.innerHTML = (pressure.lanes || []).map((lane) => `
+                    <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.2em] ${getPressureDeskLaneToneClass(lane.id)}">${escapeHtml((lane.title || 'Lane').toUpperCase())}</span>
+                                    <span class="text-xs text-slate-400">${escapeHtml((lane.risk || 'Managed') + ' risk')}</span>
+                                </div>
+                                <p class="text-sm text-slate-300 mt-3 leading-6">${escapeHtml(lane.note || 'Pressure lane note.')}</p>
+                                <p class="text-xs text-slate-500 mt-2">${escapeHtml((lane.finishLabel || '') + ' · ' + (lane.swingLabel || ''))}</p>
+                            </div>
+                            <div class="grid grid-cols-3 gap-3 lg:w-[320px]">
+                                <div class="rounded-lg bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Burst</div><div class="text-lg font-bold text-white mt-1">${escapeHtml(String(lane.overTarget || 0))}</div></div>
+                                <div class="rounded-lg bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Projection</div><div class="text-lg font-bold text-white mt-1">${escapeHtml(String(lane.projected || 0))}</div></div>
+                                <div class="rounded-lg bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Win</div><div class="text-lg font-bold text-white mt-1">${escapeHtml(String(lane.winChance || 0))}%</div></div>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            ${(lane.sequence || []).map((ball) => `<span class="inline-flex min-w-[2.25rem] justify-center rounded-full border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-semibold text-white">${escapeHtml(ball)}</span>`).join('') || '<span class="text-sm text-slate-500">No lane sequence needed right now.</span>'}
+                        </div>
+                    </div>
+                `).join('') || '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">No live pressure lanes are available yet.</div>';
+            }
+
+            if (levers) {
+                levers.innerHTML = (pressure.levers || []).map((item) => `
+                    <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <span class="text-xs uppercase tracking-[0.18em] text-slate-400">${escapeHtml(item.label || 'Lever')}</span>
+                            <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${getPressureDeskToneClass(item.tone)}">${escapeHtml(item.value || '-')}</span>
+                        </div>
+                        <p class="text-sm text-slate-300 leading-6">${escapeHtml(item.note || 'Pressure lever note.')}</p>
+                    </div>
+                `).join('');
+            }
+
+            if (windows) {
+                windows.innerHTML = (pressure.windows || []).map((windowItem) => `
+                    <div class="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <div>
+                                <h5 class="font-semibold text-white">${escapeHtml(windowItem.title || 'Window')}</h5>
+                                <p class="text-xs text-slate-500 mt-1">${escapeHtml(windowItem.subtitle || '')}</p>
+                            </div>
+                            <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${getPressureDeskToneClass(windowItem.risk === 'High' ? 'rose' : windowItem.risk === 'Medium' ? 'orange' : 'emerald')}">${escapeHtml(windowItem.risk || 'Managed')}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div class="rounded-lg bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Target</div><div class="text-base font-bold text-white mt-1">${escapeHtml(windowItem.target || '-')}</div></div>
+                            <div class="rounded-lg bg-slate-950/60 border border-slate-800 p-3"><div class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Swing</div><div class="text-base font-bold text-white mt-1">${escapeHtml(windowItem.swingLabel || '-')}</div></div>
+                        </div>
+                        <p class="text-sm text-slate-300 leading-6">${escapeHtml(windowItem.note || 'Pressure window note.')}</p>
+                    </div>
+                `).join('') || '<div class="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-400">No pressure windows available.</div>';
+            }
+        }
+
+        async function refreshPressureDesk() {
+            try {
+                setText('admin-pressure-status', 'Refreshing pressure desk...');
+                const payload = await apiCall('/match/pressure-center');
+                if (!payload || payload.error || !payload.pressureCenter) {
+                    throw new Error(payload?.error || 'Pressure desk unavailable');
+                }
+                currentPressureDesk = payload.pressureCenter;
+                renderPressureDesk(currentPressureDesk);
+            } catch (error) {
+                console.error('Failed to load pressure desk:', error);
+                setText('admin-pressure-status', 'Could not load pressure desk right now.');
+            }
+        }
+
+        async function publishPressureBulletin(channel = 'notification') {
+            try {
+                setText('admin-pressure-status', 'Publishing pressure bulletin...');
+                const payload = await apiCall('/admin/pressure-bulletin', {
+                    method: 'POST',
+                    body: JSON.stringify({ channel })
+                });
+                if (!payload || payload.error) {
+                    throw new Error(payload?.error || 'Unable to publish pressure bulletin');
+                }
+
+                if (payload.pressureCenter) {
+                    currentPressureDesk = payload.pressureCenter;
+                    renderPressureDesk(currentPressureDesk);
+                }
+
+                if (channel === 'timeline' || channel === 'both') {
+                    await loadState();
+                }
+
+                const statusLabel = channel === 'both'
+                    ? 'Pressure alert pushed to notifications and timeline.'
+                    : channel === 'timeline'
+                        ? 'Pressure swing added to the timeline.'
+                        : 'Pressure alert pushed as a notification.';
+
+                setText('admin-pressure-status', statusLabel);
+                logActivity(statusLabel, 'success');
+                showToast(statusLabel, 'success');
+            } catch (error) {
+                console.error('Failed to publish pressure bulletin:', error);
+                setText('admin-pressure-status', 'Failed to publish pressure bulletin.');
+                showToast('Pressure alert failed', 'error');
             }
         }
 
