@@ -155,7 +155,8 @@ function updateConnectionIndicator(status) {
   const indicator = document.getElementById('connection-indicator');
   if (!indicator) return;
   
-  indicator.className = `w-3 h-3 rounded-full ${status === 'connected' ? 'bg-green-500' : 'bg-red-500'}`;
+  const tone = status === 'connected' ? 'is-live' : status === 'connecting' ? 'is-warn' : 'is-offline';
+  indicator.className = `status-dot ${tone}`;
 }
 
 // Enhanced activity logging

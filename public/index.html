@@ -544,6 +544,60 @@
 
         <!-- Match Centre – Featured Game (dynamic from currentScore) -->
         <div class="max-w-7xl mx-auto px-3 sm:px-4 -mt-6 sm:-mt-8 relative z-20">
+            <section class="broadcast-panel p-4 sm:p-6 mb-4 sm:mb-6">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+                    <div>
+                        <p class="section-kicker">Broadcast Desk</p>
+                        <h3 class="font-display text-xl sm:text-2xl font-bold mt-2">Match Intel</h3>
+                    </div>
+                    <span id="home-broadcast-status" class="broadcast-chip">LIVE BROADCAST</span>
+                </div>
+                <div class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+                    <div class="match-intel-grid">
+                        <div class="metric-tile">
+                            <span>Venue</span>
+                            <strong id="home-venue">Broadcast desk</strong>
+                            <small id="home-venue-note">Match context pending</small>
+                        </div>
+                        <div class="metric-tile">
+                            <span>Match Phase</span>
+                            <strong id="home-match-phase">Build-up</strong>
+                            <small id="home-last-ball">Last ball: --</small>
+                        </div>
+                        <div class="metric-tile">
+                            <span>Pressure</span>
+                            <strong id="home-required-rr">--</strong>
+                            <small id="home-momentum">Momentum pending</small>
+                        </div>
+                        <div class="metric-tile">
+                            <span>Crowd</span>
+                            <strong id="home-crowd">0 watching</strong>
+                            <small id="home-projected-range">Projected total --</small>
+                        </div>
+                    </div>
+                    <div class="card-gradient rounded-2xl p-4 sm:p-5 border border-slate-700">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <div>
+                                <p class="section-kicker">Storyline</p>
+                                <h3 id="home-story-title" class="font-display text-xl sm:text-2xl font-bold mt-2">Opening Night Pulse</h3>
+                            </div>
+                            <span class="broadcast-chip">AI BRIEF</span>
+                        </div>
+                        <p id="home-story-body" class="text-sm sm:text-base text-slate-300 leading-7">Live coverage is warming up for the opening fixture.</p>
+                        <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="rounded-2xl bg-slate-900/70 border border-slate-700 p-3">
+                                <div class="text-[10px] uppercase tracking-[0.3em] text-slate-500">Powerplay</div>
+                                <div id="home-powerplay" class="mt-2 font-semibold text-orange-300">6 overs</div>
+                            </div>
+                            <div class="rounded-2xl bg-slate-900/70 border border-slate-700 p-3">
+                                <div class="text-[10px] uppercase tracking-[0.3em] text-slate-500">Projection</div>
+                                <div id="home-projected-range-alt" class="mt-2 font-semibold text-emerald-300">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <div class="card-gradient rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-700 shadow-2xl shadow-black/50 backdrop-blur-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
                     <div class="flex items-center gap-2 sm:gap-3"><span class="w-2.5 sm:w-3 h-2.5 sm:h-3 bg-red-500 rounded-full live-pulse"></span><span id="home-match-title" class="font-display text-lg sm:text-xl font-bold">MATCH CENTRE · OPENING NIGHT</span></div>
@@ -748,7 +802,39 @@
                     <button onclick="toggleFullscreen()" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-xs" title="Fullscreen">⛶</button>
                 </div>
             </div>
-            
+
+            <section class="broadcast-panel p-4 sm:p-5 mb-6">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <div>
+                        <p class="section-kicker">Live Desk</p>
+                        <h3 class="font-display text-xl sm:text-2xl font-bold mt-2">Match Snapshot</h3>
+                    </div>
+                    <span id="live-broadcast-status" class="broadcast-chip">LIVE NOW</span>
+                </div>
+                <div class="match-intel-grid">
+                    <div class="metric-tile">
+                        <span>Venue</span>
+                        <strong id="live-venue">Broadcast venue</strong>
+                        <small id="live-crowd">0 watching</small>
+                    </div>
+                    <div class="metric-tile">
+                        <span>Match Phase</span>
+                        <strong id="live-phase">Build-up</strong>
+                        <small id="live-last-ball">Last ball: --</small>
+                    </div>
+                    <div class="metric-tile">
+                        <span>Chase Pressure</span>
+                        <strong id="live-required-rr">--</strong>
+                        <small id="live-partnership">Partnership pending</small>
+                    </div>
+                    <div class="metric-tile">
+                        <span>Projection</span>
+                        <strong id="live-projected-range">--</strong>
+                        <small>Ball-by-ball live context</small>
+                    </div>
+                </div>
+            </section>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                 <!-- Video Player Section -->
                 <div class="lg:col-span-2 space-y-4 sm:space-y-6">

@@ -335,7 +335,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ==================== GRADIENTS & BACKGROUNDS ==================== */
 .gradient-bg {
-    background: linear-gradient(135deg, var(--color-slate-900) 0%, var(--color-slate-800) 50%, var(--color-slate-900) 100%);
+    background:
+        radial-gradient(circle at top, rgba(239, 68, 68, 0.18), transparent 26%),
+        radial-gradient(circle at 80% 0%, rgba(249, 115, 22, 0.14), transparent 22%),
+        linear-gradient(180deg, #020617 0%, #0f172a 46%, #111827 100%);
     background-attachment: fixed;
 }
 
@@ -356,6 +359,135 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* ==================== BROADCAST UI ==================== */
+.card-gradient {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.88) 100%);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    box-shadow: 0 24px 60px rgba(2, 6, 23, 0.32);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.72), rgba(249, 115, 22, 0.72), transparent);
+    pointer-events: none;
+}
+
+.card-gradient::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 42%;
+    background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.18) 100%);
+    pointer-events: none;
+}
+
+.card-gradient > * {
+    position: relative;
+    z-index: 1;
+}
+
+.card-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 28px 70px rgba(2, 6, 23, 0.42);
+}
+
+.broadcast-panel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    box-shadow: 0 20px 50px rgba(2, 6, 23, 0.3);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.section-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #fca5a5;
+}
+
+.broadcast-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(248, 113, 113, 0.28);
+    color: #fecaca;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.match-intel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+}
+
+.match-intel-card,
+.metric-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    min-height: 120px;
+    padding: 1rem 1.05rem;
+    border-radius: 1.15rem;
+    background: rgba(2, 6, 23, 0.42);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.match-intel-card span,
+.metric-tile span {
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+.match-intel-card strong,
+.metric-tile strong {
+    font-size: 1.08rem;
+    line-height: 1.3;
+    color: #ffffff;
+}
+
+.match-intel-card small,
+.metric-tile small {
+    color: #cbd5e1;
+    font-size: 0.86rem;
+    line-height: 1.5;
+}
+
+.glass-effect {
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.accent-gradient {
+    background: linear-gradient(120deg, #b91c1c 0%, #dc2626 38%, #f97316 100%);
 }
 
 .bg-grid {
@@ -879,7 +1011,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ==================== ACCENT GRADIENT ==================== */
 .accent-gradient {
-    background: linear-gradient(90deg, #dc2626 0%, #f97316 100%);
+    background: linear-gradient(120deg, #b91c1c 0%, #dc2626 38%, #f97316 100%);
 }
 
 /* ==================== TEAM BRANDING ==================== */
@@ -991,9 +1123,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ==================== GLASS EFFECT ==================== */
 .glass-effect {
-    background: rgba(30, 41, 59, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 /* ==================== NAVIGATION ==================== */

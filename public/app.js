@@ -765,6 +765,7 @@
     renderMatchTicker();
     renderPromo();
     renderMatchCentre();
+    renderBroadcastIntel();
     renderMatchCards();
     renderPerformers();
     renderPoll();
@@ -877,7 +878,7 @@
     setText("home-team2-name", score.team2 || matchCenter.team2 || FALLBACK_STATE.score.team2);
     setHtml("home-team2-flag", renderTeamBadge(score.team2 || matchCenter.team2, score.team2Flag || matchCenter.team2Flag || FALLBACK_STATE.score.team2Flag, "team-badge--xl"));
     setText("home-team2-score", score.team2Score || matchCenter.team2Score || "Yet to bat");
-    setText("home-target", score.target || matchCenter.target || "Target updates live");
+    setText("home-target", score.target || matchCenter.target || buildTossSummary(score) || "Target updates live");
     setText("home-batsman", score.batsman || "Waiting for batter data");
     setText("home-bowler", score.bowler || "Waiting for bowler data");
     setText("home-runrate", score.runRate || "0.00");
@@ -895,6 +896,77 @@
     setText("quick-action-scorecard", appState.content.quickActions.scorecard || FALLBACK_STATE.content.quickActions.scorecard);
     setText("quick-action-analytics", appState.content.quickActions.analytics || FALLBACK_STATE.content.quickActions.analytics);
     setText("quick-action-highlights", appState.content.quickActions.highlights || FALLBACK_STATE.content.quickActions.highlights);
+  }
+
+  function renderBroadcastIntel() {
+    const score = appState.score || {};
+    const intel = buildBroadcastIntel();
+
+    setText("home-broadcast-status", intel.status);
+    setText("home-venue", intel.venue);
+    setText("home-venue-note", intel.venueNote);
+    setText("home-match-phase", intel.phase);
+    setText("home-last-ball", intel.lastBall);
+    setText("home-required-rr", intel.requiredRate);
+    setText("home-momentum", intel.momentum);
+    setText("home-crowd", intel.crowd);
+    setText("home-story-title", intel.storyTitle);
+    setText("home-story-body", intel.storyBody);
+    setText("home-powerplay", intel.powerplay);
+    setText("home-projected-range", intel.projectedRange);
+    setText("home-projected-range-alt", intel.projectedRange);
+
+    setText("live-broadcast-status", intel.status);
+    setText("live-venue", intel.venue);
+    setText("live-crowd", intel.crowd);
+    setText("live-phase", intel.phase);
+    setText("live-last-ball", intel.lastBall);
+    setText("live-required-rr", intel.requiredRate);
+    setText("live-partnership", score.partnership || "Partnership building");
+    setText("live-projected-range", intel.projectedRange);
+  }
+
+  function buildBroadcastIntel() {
+    const score = appState.score || {};
+    const stream = appState.stream || {};
+    const feed = Array.isArray(appState.ballFeed) ? appState.ballFeed : [];
+    const matchTime = Date.parse(score.matchDateTime || "");
+    const hasLiveFeed = feed.length > 0 || (parseScore(score.team1Score).runs || 0) > 0;
+    const phase = getMatchPhaseLabel(score, matchTime, hasLiveFeed);
+    const status = getBroadcastStatusLabel(stream.status, matchTime, hasLiveFeed);
+    const lastBall = getLastBallSummary(feed);
+    const projectedRange = getProjectedRangeLabel();
+    const momentum = getMomentumLabel();
+    const crowd = getCrowdLabel(stream.viewerCount, stream.status);
+    const venue = score.venue || "Venue pending";
+    const tossSummary = buildTossSummary(score);
+    const venueNote = tossSummary !== "Toss pending" ? tossSummary : (score.matchTitle || "Match context pending");
+    const powerplay = getPowerplayLabel(score);
+    const requiredRate = score.reqRR ? "Req RR " + score.reqRR : (score.target ? "Target " + score.target : "--");
+    const venueText = venue === "Venue pending" ? "the broadcast desk" : venue;
+    const storyTitle = aiInsights && aiInsights.briefing && aiInsights.briefing.phase
+      ? String(aiInsights.briefing.phase) + " Brief"
+      : (status.indexOf("LIVE") >= 0 ? "Live Pulse" : "Opening Night Pulse");
+    const storyBody = aiInsights && aiInsights.summary
+      ? aiInsights.summary
+      : (score.team1 || score.team2
+        ? "The desk is tracking " + (score.team1 || "the batting side") + " against " + (score.team2 || "the chasing side") + " at " + venueText + "."
+        : "The desk is tracking the fixture in real time.");
+
+    return {
+      status: status,
+      venue: venue,
+      venueNote: venueNote,
+      phase: phase,
+      lastBall: lastBall,
+      requiredRate: requiredRate,
+      momentum: momentum,
+      crowd: crowd,
+      storyTitle: storyTitle,
+      storyBody: storyBody,
+      powerplay: powerplay,
+      projectedRange: projectedRange
+    };
   }
 
   function renderMatchCards() {
@@ -2105,6 +2177,102 @@
       team1: primary && primary.team1 ? primary.team1 : (appState.score.team1 || "Team 1"),
       team2: primary && primary.team2 ? primary.team2 : (appState.score.team2 || "Team 2")
     };
+  }
+
+  function getBroadcastStatusLabel(streamStatus, matchTime, hasLiveFeed) {
+    const status = String(streamStatus || "").toLowerCase();
+    if (status === "live") return "LIVE BROADCAST";
+    if (status === "paused") return "PAUSED";
+    if (Number.isFinite(matchTime) && matchTime > Date.now()) return "BUILD-UP LIVE";
+    if (hasLiveFeed) return "LIVE SCORE";
+    return status === "offline" ? "MATCH DESK" : "LIVE DESK";
+  }
+
+  function getMatchPhaseLabel(score, matchTime, hasLiveFeed) {
+    if (Number.isFinite(matchTime) && matchTime > Date.now()) return "Pre-match";
+
+    const overs = Number.parseFloat(String(score && score.overs || "0")) || 0;
+    const inningsLength = inferInningsLength(score ? score.matchTitle : "", score ? score.overs : "");
+
+    if (!hasLiveFeed && overs <= 0) return "Build-up";
+    if (inningsLength >= 50) {
+      if (overs < 10) return "Powerplay";
+      if (overs < 40) return "Middle overs";
+      return "Death overs";
+    }
+    if (inningsLength >= 20) {
+      if (overs < 6) return "Powerplay";
+      if (overs < 15) return "Middle overs";
+      return "Death overs";
+    }
+    if (overs < 3) return "Powerplay";
+    if (overs < 6) return "Middle overs";
+    return "Pressure overs";
+  }
+
+  function getLastBallSummary(feed) {
+    if (!Array.isArray(feed) || !feed.length) return "Last ball: awaiting update";
+
+    const last = feed[feed.length - 1] || {};
+    const label = typeof last === "string"
+      ? last
+      : (last.label !== undefined && last.label !== null
+        ? String(last.label)
+        : (last.runs !== undefined && last.runs !== null
+          ? String(last.runs)
+          : String(last.type || ".")));
+    const over = typeof last === "object" && last.over ? "Over " + last.over + " · " : "";
+
+    return "Last ball: " + over + label;
+  }
+
+  function getProjectedRangeLabel() {
+    const prediction = aiInsights && aiInsights.prediction ? aiInsights.prediction : null;
+    const low = firstFinite([prediction ? prediction.projectedLow : null], null);
+    const high = firstFinite([prediction ? prediction.projectedHigh : null], null);
+    if (low !== null && high !== null) {
+      return low === high ? String(low) : low + "-" + high;
+    }
+
+    const projected = firstFinite([
+      prediction ? prediction.projectedTotal : null,
+      appState.content && appState.content.matchCenter ? appState.content.matchCenter.projectedTotal : null
+    ], null);
+
+    return projected === null ? "--" : String(projected);
+  }
+
+  function getMomentumLabel() {
+    const briefing = aiInsights && aiInsights.briefing ? aiInsights.briefing : null;
+    if (briefing && briefing.momentum) return String(briefing.momentum);
+
+    const statsMomentum = appState.content && appState.content.stats ? appState.content.stats.momentum : null;
+    if (statsMomentum && statsMomentum.label) return String(statsMomentum.label);
+
+    const runRate = Number.parseFloat(String(appState.score && appState.score.runRate || "0")) || 0;
+    if (runRate >= 10) return "Batting surge";
+    if (runRate >= 8) return "Balanced tempo";
+    if (runRate > 0) return "Pressure building";
+    return "Momentum pending";
+  }
+
+  function getCrowdLabel(viewerCount, streamStatus) {
+    const viewers = Number(viewerCount) || 0;
+    if (viewers > 0) return compactNumber(viewers) + " watching";
+    return String(streamStatus || "").toLowerCase() === "live" ? "Fans joining now" : "Crowd warming up";
+  }
+
+  function getPowerplayLabel(score) {
+    if (score && score.powerplayOvers) {
+      const label = String(score.powerplayOvers).trim();
+      return /overs?/i.test(label) ? label : label + " overs";
+    }
+
+    const inningsLength = inferInningsLength(score ? score.matchTitle : "", score ? score.overs : "");
+    if (inningsLength >= 50) return "10 overs";
+    if (inningsLength >= 20) return "6 overs";
+    if (inningsLength >= 10) return "3 overs";
+    return "Powerplay";
   }
 
   function parseScore(scoreText) {
